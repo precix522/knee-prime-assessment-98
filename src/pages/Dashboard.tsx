@@ -1,6 +1,5 @@
-
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Button } from "../components/Button";
 import { Navbar } from "../components/Navbar";
 import { Footer } from "../components/Footer";
@@ -343,10 +342,10 @@ export default function Dashboard() {
             <div className="mt-8 text-center">
               <Button 
                 variant="ghost" 
-                onClick={handleLogout}
+                onClick={() => navigate("/logout")}
                 disabled={isLoading}
               >
-                {isLoading ? "Logging out..." : "Sign Out"}
+                Sign Out
               </Button>
             </div>
           </div>
