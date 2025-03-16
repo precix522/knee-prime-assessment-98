@@ -144,9 +144,9 @@ export default function Login() {
         // Twilio verifyOTP requires both phone and code
         await verifyOTP(formattedPhone || phoneNumber, otpCode);
         
-        // After successful verification, navigate to dashboard
+        // After successful verification, navigate to patient ID page
         toast.success("Verification successful!");
-        navigate('/dashboard');
+        navigate('/patient-id');
       } else {
         useTwilioAuthStore.setState({
           error: "Phone number is missing. Please restart the verification process."
