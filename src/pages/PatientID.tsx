@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "../components/Button";
-import { useTwilioAuthStore } from "../utils/twilio-auth-store";
+import { useAuthStore } from "../utils/auth-store";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,7 +14,7 @@ export default function PatientID() {
   const navigate = useNavigate();
   
   // Get auth state from store
-  const { user, validateSession } = useTwilioAuthStore();
+  const { user, validateSession } = useAuthStore();
   
   // Redirect to login if not authenticated
   useEffect(() => {

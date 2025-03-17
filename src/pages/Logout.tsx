@@ -1,12 +1,12 @@
 
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useTwilioAuthStore } from "../utils/twilio-auth-store";
+import { useAuthStore } from "../utils/auth-store";
 import { toast } from "sonner";
 
 export default function Logout() {
   const navigate = useNavigate();
-  const { logout } = useTwilioAuthStore();
+  const { logout } = useAuthStore();
   
   useEffect(() => {
     const performLogout = async () => {

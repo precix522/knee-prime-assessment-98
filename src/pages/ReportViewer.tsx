@@ -1,7 +1,6 @@
-
 import React, { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { useTwilioAuthStore } from "../utils/twilio-auth-store";
+import { useAuthStore } from "../utils/auth-store";
 import { Button } from "../components/Button";
 
 export default function ReportViewer() {
@@ -11,7 +10,7 @@ export default function ReportViewer() {
   const [isLoading, setIsLoading] = useState(true);
   
   // Get auth state from store
-  const { validateSession } = useTwilioAuthStore();
+  const { validateSession } = useAuthStore();
   
   // Redirect to login if not authenticated
   useEffect(() => {
