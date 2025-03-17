@@ -11,6 +11,7 @@ import Logout from "./pages/Logout";
 import PatientID from "./pages/PatientID";
 import ReportViewer from "./pages/ReportViewer";
 import NotFound from "./pages/NotFound";
+import { AuthInitializer } from "./components/AuthInitializer";
 
 const queryClient = new QueryClient();
 
@@ -19,6 +20,7 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
+      <AuthInitializer />
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
