@@ -1,10 +1,10 @@
 
 import { useEffect } from "react";
-import { useAuthStore } from "../utils/auth-store";
+import { useTwilioAuthStore } from "../utils/twilio-auth-store";
 
 // This component initializes the auth state by checking for an existing session
 export function AuthInitializer() {
-  const { validateSession } = useAuthStore();
+  const { validateSession } = useTwilioAuthStore();
 
   useEffect(() => {
     // Check for an existing session on component mount
