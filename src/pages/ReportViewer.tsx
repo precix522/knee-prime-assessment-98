@@ -1,20 +1,26 @@
+
 import React, { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useTwilioAuthStore } from "../utils/twilio-auth-store";
 import { Button } from "../components/Button";
+import { getPatientReport } from "../utils/supabase";
+import { toast } from "sonner";
 
 export default function ReportViewer() {
   const [searchParams] = useSearchParams();
   const patientId = searchParams.get("patientId");
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
+  const [reportUrl, setReportUrl] = useState<string | null>(null);
+  const [reportName, setReportName] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   
   // Get auth state from store
   const { validateSession } = useTwilioAuthStore();
   
-  // Redirect to login if not authenticated
+  // Fetch patient report from Supabase
   useEffect(() => {
-    const checkAuth = async () => {
+    const fetchPatientReport = async () => {
       try {
         const isValid = await validateSession();
         if (!isValid) {
@@ -27,18 +33,20 @@ export default function ReportViewer() {
           return;
         }
         
-        // Simulate loading the report
-        setTimeout(() => {
-          setIsLoading(false);
-        }, 1500);
-        
-      } catch (err) {
-        console.error("Session validation error:", err);
-        navigate("/login");
+        // Fetch the report from Supabase
+        const { fileUrl, fileName } = await getPatientReport(patientId);
+        setReportUrl(fileUrl);
+        setReportName(fileName);
+        setIsLoading(false);
+      } catch (err: any) {
+        console.error("Error fetching patient report:", err);
+        setError(err.message || "Failed to load the report");
+        toast.error("Failed to load the report");
+        setIsLoading(false);
       }
     };
     
-    checkAuth();
+    fetchPatientReport();
   }, [navigate, validateSession, patientId]);
   
   if (isLoading) {
@@ -63,17 +71,40 @@ export default function ReportViewer() {
           <h1 className="text-2xl font-bold text-gray-900">Patient Report</h1>
           <p className="text-gray-600 mt-2">
             Patient ID: {patientId}
+            {reportName && <span> - {reportName}</span>}
           </p>
         </div>
         
-        <div className="border border-gray-200 rounded-md p-8 mb-6 bg-gray-50">
-          <p className="text-center text-lg">
-            This is a placeholder for the report PDF viewer.
-          </p>
-          <p className="text-center text-gray-600 mt-2">
-            In a real implementation, this would display the PDF report for patient {patientId}.
-          </p>
-        </div>
+        {error && (
+          <div className="border border-red-200 rounded-md p-4 mb-6 bg-red-50 text-red-600">
+            <p className="text-center">{error}</p>
+            <p className="text-center text-sm mt-2">
+              Please check if the patient ID is correct or contact support.
+            </p>
+          </div>
+        )}
+        
+        {!error && reportUrl ? (
+          <div className="border border-gray-200 rounded-md mb-6 overflow-hidden bg-gray-50 h-[600px]">
+            <iframe 
+              src={reportUrl}
+              className="w-full h-full"
+              title="Patient Report PDF"
+              frameBorder="0"
+            ></iframe>
+          </div>
+        ) : (
+          !error && (
+            <div className="border border-gray-200 rounded-md p-8 mb-6 bg-gray-50">
+              <p className="text-center text-lg">
+                No report found for this patient ID.
+              </p>
+              <p className="text-center text-gray-600 mt-2">
+                Please check if the patient ID is correct or contact support.
+              </p>
+            </div>
+          )
+        )}
         
         <div className="flex justify-between">
           <Button 
