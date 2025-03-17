@@ -6,6 +6,7 @@ import { useTwilioAuthStore } from "../utils/twilio-auth-store";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { supabase } from "../utils/supabase";
 
 export default function PatientID() {
   const [patientId, setPatientId] = useState("");
@@ -45,15 +46,24 @@ export default function PatientID() {
     setError(null);
     
     try {
-      // Simulate checking the patient ID (mock implementation)
-      // In a real app, you would call an API to verify the patient ID
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Check if the patient ID exists in the database
+      const { data, error: patientError } = await supabase
+        .from('patient')
+        .select('Patient ID')
+        .eq('Patient ID', patientId)
+        .single();
       
-      // For demo purposes, accept any non-empty patient ID
-      // Navigate to the PDF viewer with the patient ID
+      if (patientError || !data) {
+        setError("Patient ID not found. Please check and try again.");
+        toast.error("Patient ID not found");
+        setIsLoading(false);
+        return;
+      }
+      
+      // Patient ID exists, navigate to the report viewer
       navigate(`/report-viewer?patientId=${encodeURIComponent(patientId)}`);
       
-    } catch (err) {
+    } catch (err: any) {
       console.error("Error checking patient ID:", err);
       setError("An error occurred. Please try again later.");
       toast.error("Failed to verify patient ID");

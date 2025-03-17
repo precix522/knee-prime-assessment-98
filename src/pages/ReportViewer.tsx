@@ -33,6 +33,8 @@ export default function ReportViewer() {
           return;
         }
         
+        console.log("Fetching report for patient ID:", patientId);
+        
         // Fetch the report from Supabase
         const { fileUrl, fileName } = await getPatientReport(patientId);
         setReportUrl(fileUrl);
