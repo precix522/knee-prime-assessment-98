@@ -61,6 +61,7 @@ export default function Login() {
 		</div>
 							</div>
 		</section>      
+	  </div>
       <Footer />
     </div>
   );
