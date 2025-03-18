@@ -28,37 +28,72 @@ export const getPatientReport = async (patientId: string) => {
   try {
     const supabaseClient = await getSupabase();
     
+    console.log('Fetching patient data for ID:', patientId);
+    
+    // First, check if the patient exists to provide better error messages
+    const { data: patientExists, error: checkError } = await supabaseClient
+      .from('patient')
+      .select('Patient ID')
+      .eq('Patient ID', patientId);
+      
+    console.log('Patient exists check result:', patientExists);
+    
+    if (checkError) {
+      console.error('Error checking patient existence:', checkError);
+      throw new Error(`Database error: ${checkError.message}`);
+    }
+    
+    if (!patientExists || patientExists.length === 0) {
+      throw new Error(`Patient ID "${patientId}" not found in the database`);
+    }
+    
     // Fetch the report URL from the 'patient' table
-    // Based on your actual table structure
     const { data: patientData, error: patientError } = await supabaseClient
       .from('patient')
       .select('report URL')
       .eq('Patient ID', patientId)
       .single();
     
-    if (patientError) throw patientError;
-    if (!patientData) throw new Error('No report found for this patient ID');
+    console.log('Patient data result:', patientData);
+    
+    if (patientError) {
+      console.error('Error fetching patient data:', patientError);
+      throw patientError;
+    }
+    
+    if (!patientData) {
+      throw new Error('No report URL found for this patient ID');
+    }
     
     // Get the report URL from the patient data
     const reportUrl = patientData['report URL'];
+    console.log('Report URL:', reportUrl);
     
     if (!reportUrl || typeof reportUrl !== 'string') {
       throw new Error('Invalid report URL format');
     }
     
     // Now get the actual file from storage
+    console.log('Fetching file from storage:', reportUrl);
     const { data: fileData, error: fileError } = await supabaseClient
       .storage
       .from('Patient-report') // Your bucket name
       .download(reportUrl);
     
-    if (fileError) throw fileError;
-    if (!fileData) throw new Error('Could not retrieve the report file');
+    if (fileError) {
+      console.error('Error downloading file:', fileError);
+      throw fileError;
+    }
+    
+    if (!fileData) {
+      throw new Error('Could not retrieve the report file');
+    }
     
     // Convert the blob to a URL that can be used in an iframe or object tag
     const fileUrl = URL.createObjectURL(fileData);
     const fileName = reportUrl.split('/').pop() || 'patient-report.pdf';
     
+    console.log('File retrieved successfully:', fileName);
     return { fileUrl, fileName };
     
   } catch (error) {

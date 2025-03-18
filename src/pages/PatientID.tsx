@@ -44,16 +44,24 @@ export default function PatientID() {
     
     setIsLoading(true);
     setError(null);
+    toast.info("Checking patient ID...");
     
     try {
+      console.log("Checking patient ID:", patientId);
+      
       // Check if the patient ID exists in the database
       const { data, error: patientError } = await supabase
         .from('patient')
-        .select('Patient ID')
-        .eq('Patient ID', patientId)
-        .single();
+        .select('*')  // Select all columns for debugging
+        .eq('Patient ID', patientId);
       
-      if (patientError || !data) {
+      console.log("Query response:", data, patientError);
+      
+      if (patientError) {
+        throw patientError;
+      }
+      
+      if (!data || data.length === 0) {
         setError("Patient ID not found. Please check and try again.");
         toast.error("Patient ID not found");
         setIsLoading(false);
@@ -61,11 +69,12 @@ export default function PatientID() {
       }
       
       // Patient ID exists, navigate to the report viewer
+      toast.success("Patient ID verified!");
       navigate(`/report-viewer?patientId=${encodeURIComponent(patientId)}`);
       
     } catch (err: any) {
       console.error("Error checking patient ID:", err);
-      setError("An error occurred. Please try again later.");
+      setError(err.message || "An error occurred. Please try again later.");
       toast.error("Failed to verify patient ID");
     } finally {
       setIsLoading(false);
