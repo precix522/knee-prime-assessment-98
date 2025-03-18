@@ -30,155 +30,37 @@ export default function Login() {
     clearError,
     validateSession
   } = useTwilioAuthStore();
-  
-  // Initialize auth session and redirect if already logged in
-  useEffect(() => {
-    setPageLoading(true);
-    
-    // Check for existing session using Twilio auth
-    const checkSession = async () => {
-      try {
-        // Check if we have a valid session
-        const isValid = await validateSession();
-        
-        if (isValid) {
-          // User is logged in, redirect to dashboard
-          navigate("/dashboard");
-        } else {
-          // No active session
-          setPageLoading(false);
-        }
-      } catch (error) {
-        console.error('Error checking session:', error);
-        setPageLoading(false);
-      }
-    };
-   
-  
-  return (
-    <div className="flex flex-col min-h-screen">
-      <Navbar />
-      
-      <main className="flex-grow py-12 bg-gray-50">
-        <div className="container mx-auto px-4">
-          <div className="max-w-md mx-auto bg-white rounded-lg shadow-md overflow-hidden">
-            <div className="p-6 sm:p-8">
-              <div className="text-center mb-8">
-                <h1 className="text-2xl font-bold text-gray-900">Access Your PRIME Report</h1>
-                <p className="mt-2 text-gray-600">
-                  {isVerifying 
-                    ? "Enter the verification code sent to your phone" 
-                    : "Enter your phone number to access your personalized knee health report"}
-                </p>
-              </div>
-              
-              {error && (
-                <div className="mb-6 p-3 bg-red-50 border border-red-200 text-red-600 rounded-md text-sm">
-                  {error}
-                </div>
-              )}
-              
-              {isVerifying ? (
-                <form onSubmit={handleVerifyOTP}>
-                  <div className="mb-6">
-                    <Label htmlFor="otp" className="block text-sm font-medium text-gray-700 mb-1">
-                      Verification Code
-                    </Label>
-                    <Input
-                      id="otp"
-                      type="text"
-                      placeholder="Enter 6-digit code"
-                      value={otpCode}
-                      onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ""))}
-                      className="w-full"
-                      maxLength={6}
-                      autoComplete="one-time-code"
-                      disabled={isLoading}
-                      required
-                    />
-                    <p className="mt-2 text-sm text-gray-500">
-                      For demo purposes, enter any 6 digits
-                    </p>
-                  </div>
-                  
-                  <div className="flex flex-col space-y-3">
-                    <Button
-                      type="submit"
-                      variant="health"
-                      size="lg"
-                      className="w-full"
-                      disabled={isLoading}
-                    >
-                      {isLoading ? "Verifying..." : "Verify Code"}
-                    </Button>
-                    
-                    <div className="text-center">
-                      {countdown > 0 ? (
-                        <p className="text-sm text-gray-600">
-                          Resend code in {countdown} seconds
-                        </p>
-                      ) : (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            sendOTP(formattedPhone || phoneNumber);
-                            setCountdown(60);
-                          }}
-                          className="text-sm text-orange-600 hover:text-orange-700"
-                          disabled={isLoading}
-                        >
-                          Didn't receive the code? Send again
-                        </button>
-                      )}
-                    </div>
-                    
-                    <button
-                      type="button"
-                      className="text-sm text-orange-600 hover:text-orange-700"
-                      onClick={() => {
-                        clearError();
-                        useTwilioAuthStore.setState({ isVerifying: false });
-                      }}
-                      disabled={isLoading}
-                    >
-                      Back to Phone Entry
-                    </button>
-                  </div>
-                </form>
-              ) : (
-                <form onSubmit={handleSendOTP}>
-                  <div className="mb-6">
-                    <Label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
-                      Phone Number
-                    </Label>
-                    <Input
-                      type="tel"
-                      id="phone"
-                      className="w-full"
-                      placeholder="(123) 456-7890"
-                      value={phoneInput}
-                      onChange={(e) => setPhoneInput(e.target.value)}
-                      disabled={isLoading}
-                      required
-                    />
-                  </div>
-                  
-                  <Button
-                    type="submit"
-                    variant="health"
-                    size="lg"
-                    className="w-full"
-                    disabled={isLoading}
-                  >
-                    {isLoading ? "Sending..." : "Send Verification Code"}
-                  </Button>
-                </form>
-              )}
-            </div>
-          </div>
-        </div>
-      </main>
-      
+
+  <div>
+  <section class="elementor-section elementor-inner-section elementor-element elementor-element-3e0fc571 elementor-section-full_width elementor-section-height-default elementor-section-height-default" data-id="3e0fc571" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-no">
+					<div class="elementor-column elementor-col-50 elementor-inner-column elementor-element elementor-element-3f5aada6" data-id="3f5aada6" data-element_type="column">
+			<div class="elementor-widget-wrap elementor-element-populated">
+								<div class="elementor-element elementor-element-5b10b4b3 elementor-widget elementor-widget-heading" data-id="5b10b4b3" data-element_type="widget" data-widget_type="heading.default">
+				<div class="elementor-widget-container">
+			<h3 class="elementor-heading-title elementor-size-default">Address</h3>		</div>
+				</div>
+				<div class="elementor-element elementor-element-2f1ac57d elementor-widget elementor-widget-text-editor" data-id="2f1ac57d" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+			<style>/*! elementor - v3.14.0 - 18-06-2023 */
+.elementor-widget-text-editor.elementor-drop-cap-view-stacked .elementor-drop-cap{background-color:#69727d;color:#fff}.elementor-widget-text-editor.elementor-drop-cap-view-framed .elementor-drop-cap{color:#69727d;border:3px solid;background-color:transparent}.elementor-widget-text-editor:not(.elementor-drop-cap-view-default) .elementor-drop-cap{margin-top:8px}.elementor-widget-text-editor:not(.elementor-drop-cap-view-default) .elementor-drop-cap-letter{width:1em;height:1em}.elementor-widget-text-editor .elementor-drop-cap{float:left;text-align:center;line-height:1;font-size:50px}.elementor-widget-text-editor .elementor-drop-cap-letter{display:inline-block}</style>				<p>2 College Road #02-00,<br>Singapore 169850</p>						</div>
+				</div>
+					</div>
+		</div>
+				<div class="elementor-column elementor-col-50 elementor-inner-column elementor-element elementor-element-1050f1a3" data-id="1050f1a3" data-element_type="column">
+			<div class="elementor-widget-wrap elementor-element-populated">
+								<div class="elementor-element elementor-element-39e2bc28 elementor-widget elementor-widget-heading" data-id="39e2bc28" data-element_type="widget" data-widget_type="heading.default">
+				<div class="elementor-widget-container">
+			<h3 class="elementor-heading-title elementor-size-default">Email</h3>		</div>
+				</div>
+				<div class="elementor-element elementor-element-68ce1298 textDecorationNone elementor-widget elementor-widget-text-editor" data-id="68ce1298" data-element_type="widget" data-widget_type="text-editor.default">
+				<div class="elementor-widget-container">
+							<p><a href="mailto:info@precix.io">info@precix.io</a></p>						</div>
+				</div>
+					</div>
+		</div>
+							</div>
+		</section>      
       <Footer />
     </div>
   );
