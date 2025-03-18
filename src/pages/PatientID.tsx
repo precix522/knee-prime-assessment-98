@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "../components/Button";
@@ -50,10 +49,11 @@ export default function PatientID() {
       console.log("Checking patient ID:", patientId);
       
       // Check if the patient ID exists in the database
+      // Using "Patient_ID" instead of "Patient ID" to match column name format in SQL
       const { data, error: patientError } = await supabase
         .from('patient')
-        .select('*')  // Select all columns for debugging
-        .eq('Patient ID', patientId);
+        .select('*')
+        .eq('Patient_ID', patientId);
       
       console.log("Query response:", data, patientError);
       
