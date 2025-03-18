@@ -95,7 +95,7 @@ export const Footer = () => {
             <ul className="space-y-2">
               <li>
                 <a 
-                  href="#" 
+                  href="/ContactUS" 
                   className={cn(
                     "text-gray-600 hover:text-health-600 transition-colors duration-300 text-sm",
                     "flex items-center"
