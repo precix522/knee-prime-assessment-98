@@ -1,4 +1,5 @@
 
+import { Link } from "react-router-dom";
 import { cn } from "../lib/utils";
 
 export const Footer = () => {
@@ -94,8 +95,8 @@ export const Footer = () => {
             <h4 className="font-semibold text-gray-900 mb-4">Support</h4>
             <ul className="space-y-2">
               <li>
-                <a 
-                  href="#ContactUS" 
+                <Link 
+                  to="/contact-us" 
                   className={cn(
                     "text-gray-600 hover:text-health-600 transition-colors duration-300 text-sm",
                     "flex items-center"
@@ -114,7 +115,7 @@ export const Footer = () => {
                     />
                   </svg>
                   Contact Us
-                </a>
+                </Link>
               </li>
               <li>
                 <a 
