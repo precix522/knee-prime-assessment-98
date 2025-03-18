@@ -50,7 +50,7 @@ export const getPatientReport = async (patientId: string) => {
     // Fetch the report URL from the 'patient' table
     const { data: patientData, error: patientError } = await supabaseClient
       .from('patient')
-      .select('report URL')
+      .select('report_url')
       .eq('Patient ID', patientId)
       .single();
     
@@ -66,7 +66,7 @@ export const getPatientReport = async (patientId: string) => {
     }
     
     // Get the report URL from the patient data
-    const reportUrl = patientData['report URL'];
+    const reportUrl = patientData['report_url'];
     console.log('Report URL:', reportUrl);
     
     if (!reportUrl || typeof reportUrl !== 'string') {
