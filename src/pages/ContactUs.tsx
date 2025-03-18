@@ -112,7 +112,7 @@ const ContactUs = () => {
                   </div>
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900">Email</h3>
-                    <p className="text-gray-600">support@gatorprime.com</p>
+                    <p className="text-gray-600">info@precix.io</p>
                     <p className="text-gray-500 text-sm mt-1">We'll respond within 24 hours</p>
                   </div>
                 </div>
@@ -134,8 +134,8 @@ const ContactUs = () => {
                   </div>
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900">Office</h3>
-                    <p className="text-gray-600">123 Health Avenue, Suite 456</p>
-                    <p className="text-gray-600">Boston, MA 02108</p>
+                    <p className="text-gray-600">2 College Road #02-00,</p>
+                    <p className="text-gray-600">Singapore 169850</p>
                   </div>
                 </div>
                 
@@ -160,7 +160,7 @@ const ContactUs = () => {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Saturday:</span>
-                    <span className="text-gray-900 font-medium">10:00 AM - 2:00 PM</span>
+                    <span className="text-gray-900 font-medium">Closed</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Sunday:</span>
@@ -290,7 +290,7 @@ const ContactUs = () => {
               <div className="text-center p-8">
                 <MapPin className="h-12 w-12 text-health-600 mx-auto mb-4" />
                 <h3 className="text-xl font-semibold mb-2">GATOR PRIME Health Center</h3>
-                <p className="text-gray-600">123 Health Avenue, Suite 456, Boston, MA 02108</p>
+                <p className="text-gray-600">2 College Road #02-00, Singapore 169850</p>
                 <Button variant="outline" className="mt-4" onClick={() => window.open('https://maps.google.com', '_blank')}>
                   Open in Google Maps
                 </Button>
