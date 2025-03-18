@@ -33,8 +33,8 @@ export const getPatientReport = async (patientId: string) => {
     // First, check if the patient exists to provide better error messages
     const { data: patientExists, error: checkError } = await supabaseClient
       .from('patient')
-      .select('Patient ID')
-      .eq('Patient ID', patientId);
+      .select('Patient_ID')
+      .eq('Patient_ID', patientId);
       
     console.log('Patient exists check result:', patientExists);
     
@@ -51,7 +51,7 @@ export const getPatientReport = async (patientId: string) => {
     const { data: patientData, error: patientError } = await supabaseClient
       .from('patient')
       .select('report_url')
-      .eq('Patient ID', patientId)
+      .eq('Patient_ID', patientId)
       .single();
     
     console.log('Patient data result:', patientData);
