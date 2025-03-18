@@ -11,6 +11,7 @@ import Logout from "./pages/Logout";
 import PatientID from "./pages/PatientID";
 import ReportViewer from "./pages/ReportViewer";
 import NotFound from "./pages/NotFound";
+import ContactUS from "./pages/ContactUs"
 import { AuthInitializer } from "./components/AuthInitializer";
 
 const queryClient = new QueryClient();
