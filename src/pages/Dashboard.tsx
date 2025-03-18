@@ -104,61 +104,6 @@ export default function Dashboard() {
     }
   };
 
-  // Mock data generator function
-  const getMockData = (type) => {
-    const data = {
-      office_worker: {
-        overall_score: 68,
-        risk_level: "Good",
-        categories: [
-          { name: "Joint Stability", score: 18, max_score: 25 },
-          { name: "Mobility", score: 16, max_score: 25 },
-          { name: "Strength", score: 17, max_score: 25 },
-          { name: "Pain Level", score: 17, max_score: 25 }
-        ],
-        recommendations: [
-          "Take regular standing breaks during work hours",
-          "Adjust your office chair to promote proper posture",
-          "Consider using an ergonomic keyboard and mouse",
-          "Perform daily stretching exercises for your knees"
-        ]
-      },
-      elderly: {
-        overall_score: 52,
-        risk_level: "Moderate",
-        categories: [
-          { name: "Joint Stability", score: 12, max_score: 25 },
-          { name: "Mobility", score: 11, max_score: 25 },
-          { name: "Strength", score: 14, max_score: 25 },
-          { name: "Pain Level", score: 15, max_score: 25 }
-        ],
-        recommendations: [
-          "Practice balance exercises 3 times per week",
-          "Use supportive footwear when walking",
-          "Consider water-based exercises for lower impact",
-          "Maintain regular check-ups with your physician"
-        ]
-      },
-      athlete: {
-        overall_score: 81,
-        risk_level: "Excellent",
-        categories: [
-          { name: "Joint Stability", score: 22, max_score: 25 },
-          { name: "Mobility", score: 18, max_score: 25 },
-          { name: "Strength", score: 23, max_score: 25 },
-          { name: "Pain Level", score: 18, max_score: 25 }
-        ],
-        recommendations: [
-          "Implement proper warm-up and cool-down routines",
-          "Monitor training load to prevent overtraining",
-          "Focus on recovery nutrition post-workout",
-          "Consider cross-training to avoid repetitive stress"
-        ]
-      }
-    };
-    
-    return data[type];
-  };
 
   // Show loading spinner while checking auth
   if (pageLoading) {
