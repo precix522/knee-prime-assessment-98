@@ -1,6 +1,6 @@
 
 import { create } from 'zustand';
-import { supabase, getSupabase } from './supabase';
+import { supabase } from './supabase';
 
 interface User {
   id: string;
@@ -33,10 +33,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   
   validateSession: async () => {
     try {
-      // Make sure Supabase is initialized
-      const supabaseClient = await getSupabase();
-      
-      const { data, error } = await supabaseClient.auth.getSession();
+      const { data, error } = await supabase.auth.getSession();
       
       if (error) throw error;
       
@@ -76,15 +73,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       
       console.log('Attempting to send OTP to:', phone);
       
-      // Make sure Supabase is initialized
-      const supabaseClient = await getSupabase();
-      
-      if (!supabaseClient) {
-        throw new Error('Authentication system is not available. Please try again later.');
-      }
-      
       // Send OTP to the provided phone number
-      const { error } = await supabaseClient.auth.signInWithOtp({
+      const { error } = await supabase.auth.signInWithOtp({
         phone,
         options: {
           shouldCreateUser: true, // Create a new user if they don't exist
@@ -110,15 +100,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   verifyOTP: async (phone, code) => {
     set({ isLoading: true, error: null });
     try {
-      // Make sure Supabase is initialized
-      const supabaseClient = await getSupabase();
-      
-      if (!supabaseClient) {
-        throw new Error('Authentication system is not available. Please try again later.');
-      }
-      
       // Verify the OTP code
-      const { data, error } = await supabaseClient.auth.verifyOtp({
+      const { data, error } = await supabase.auth.verifyOtp({
         phone,
         token: code,
         type: 'sms'
@@ -147,16 +130,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   logout: async () => {
     set({ isLoading: true, error: null });
     try {
-      // Make sure Supabase is initialized
-      const supabaseClient = await getSupabase();
-      
-      if (!supabaseClient) {
-        // If Supabase isn't available, just clear local user state
-        set({ user: null });
-        return;
-      }
-      
-      const { error } = await supabaseClient.auth.signOut();
+      const { error } = await supabase.auth.signOut();
       if (error) throw error;
       set({ user: null });
     } catch (error: any) {
