@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { useAuthStore } from "../utils/auth-store";
+import { useTwilioAuthStore } from "../utils/twilio-auth-store";
 import { Button } from "../components/Button";
 import { getPatientReport } from "../utils/supabase";
 import { toast } from "sonner";
@@ -16,7 +16,7 @@ export default function ReportViewer() {
   const [error, setError] = useState<string | null>(null);
   
   // Get auth state from store
-  const { validateSession } = useAuthStore();
+  const { validateSession } = useTwilioAuthStore();
   
   // Fetch patient report from Supabase
   useEffect(() => {
