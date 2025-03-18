@@ -5,33 +5,16 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://btfinmlyszedyeadqgvl.supabase.co';
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ0ZmlubWx5c3plZHllYWRxZ3ZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDE1MTgxMDgsImV4cCI6MjA1NzA5NDEwOH0.3jIu8RS9c7AEBCVu41Ti3aW6B0ogFoEnFWeU_PINfoM';
 
-// Lazy initialization pattern for Supabase client
-let supabaseInstance: ReturnType<typeof createClient> | null = null;
-
-export const getSupabase = async () => {
-  if (!supabaseInstance) {
-    try {
-      supabaseInstance = createClient(supabaseUrl, supabaseAnonKey);
-    } catch (error) {
-      console.error('Error initializing Supabase client:', error);
-      throw error;
-    }
-  }
-  return supabaseInstance;
-};
-
-// Export a default instance for convenience
+// Create a single Supabase client instance to avoid multiple instances warning
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 // Function to fetch patient report PDF by patient ID
 export const getPatientReport = async (patientId: string) => {
   try {
-    const supabaseClient = await getSupabase();
-    
     console.log('Fetching patient data for ID:', patientId);
     
     // First, check if the patient exists to provide better error messages
-    const { data: patientExists, error: checkError } = await supabaseClient
+    const { data: patientExists, error: checkError } = await supabase
       .from('patient')
       .select('Patient_ID')
       .eq('Patient_ID', patientId);
@@ -48,7 +31,7 @@ export const getPatientReport = async (patientId: string) => {
     }
     
     // Fetch the report URL from the 'patient' table
-    const { data: patientData, error: patientError } = await supabaseClient
+    const { data: patientData, error: patientError } = await supabase
       .from('patient')
       .select('report_url')
       .eq('Patient_ID', patientId)
@@ -66,36 +49,22 @@ export const getPatientReport = async (patientId: string) => {
     }
     
     // Get the report URL from the patient data
-    const reportUrl = patientData['report_url'];
+    const reportUrl = patientData.report_url;
     console.log('Report URL:', reportUrl);
     
     if (!reportUrl || typeof reportUrl !== 'string') {
       throw new Error('Invalid report URL format');
     }
     
-    // Now get the actual file from storage
-    console.log('Fetching file from storage:', reportUrl);
-    const { data: fileData, error: fileError } = await supabaseClient
-      .storage
-      .from('Patient-report') // Your bucket name
-      .download(reportUrl);
-    
-    if (fileError) {
-      console.error('Error downloading file:', fileError);
-      throw fileError;
-    }
-    
-    if (!fileData) {
-      throw new Error('Could not retrieve the report file');
-    }
-    
-    // Convert the blob to a URL that can be used in an iframe or object tag
-    const fileUrl = URL.createObjectURL(fileData);
+    // Instead of downloading the file, we'll use the public URL directly
+    // Extract file name for display purposes
     const fileName = reportUrl.split('/').pop() || 'patient-report.pdf';
     
-    console.log('File retrieved successfully:', fileName);
-    return { fileUrl, fileName };
-    
+    // Return the public URL directly
+    return { 
+      fileUrl: reportUrl, 
+      fileName 
+    };
   } catch (error) {
     console.error('Error fetching patient report:', error);
     throw error;

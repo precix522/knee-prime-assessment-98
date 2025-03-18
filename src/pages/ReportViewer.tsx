@@ -29,6 +29,7 @@ export default function ReportViewer() {
         }
         
         if (!patientId) {
+          toast.error("No patient ID provided");
           navigate("/patient-id");
           return;
         }
@@ -40,6 +41,7 @@ export default function ReportViewer() {
         setReportUrl(fileUrl);
         setReportName(fileName);
         setIsLoading(false);
+        toast.success("Report loaded successfully");
       } catch (err: any) {
         console.error("Error fetching patient report:", err);
         setError(err.message || "Failed to load the report");
@@ -50,6 +52,19 @@ export default function ReportViewer() {
     
     fetchPatientReport();
   }, [navigate, validateSession, patientId]);
+  
+  // Download report function
+  const handleDownload = () => {
+    if (reportUrl) {
+      const link = document.createElement('a');
+      link.href = reportUrl;
+      link.download = reportName || 'patient-report.pdf';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      toast.success("Download started");
+    }
+  };
   
   if (isLoading) {
     return (
@@ -87,13 +102,29 @@ export default function ReportViewer() {
         )}
         
         {!error && reportUrl ? (
-          <div className="border border-gray-200 rounded-md mb-6 overflow-hidden bg-gray-50 h-[600px]">
-            <iframe 
-              src={reportUrl}
-              className="w-full h-full"
-              title="Patient Report PDF"
-              frameBorder="0"
-            ></iframe>
+          <div className="flex flex-col">
+            <div className="border border-gray-200 rounded-md mb-6 overflow-hidden bg-gray-50 h-[600px]">
+              <iframe 
+                src={reportUrl}
+                className="w-full h-full"
+                title="Patient Report PDF"
+                frameBorder="0"
+              ></iframe>
+            </div>
+            <div className="self-end mb-4">
+              <Button 
+                variant="health" 
+                onClick={handleDownload}
+                className="flex items-center gap-2"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="7 10 12 15 17 10"></polyline>
+                  <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                Download Report
+              </Button>
+            </div>
           </div>
         ) : (
           !error && (
