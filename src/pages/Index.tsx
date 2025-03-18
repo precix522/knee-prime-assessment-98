@@ -72,10 +72,10 @@ const Index = () => {
             </p>
             
             <div className="flex flex-col sm:flex-row justify-center gap-4">
-              <Button variant="health" size="lg" onClick={() => window.location.href = '#about'}>
+              <Button variant="outline" size="lg" onClick={() => window.location.href = '#about'}>
                 Learn More
               </Button>
-              <Button variant="outline" size="lg" onClick={() => window.location.href = '/login'}>
+              <Button variant="health" size="lg" onClick={() => window.location.href = '/login'}>
                 Access Your Report
               </Button>
             </div>
