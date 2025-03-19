@@ -9,7 +9,7 @@ export const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="space-y-4">
             <h3 className="text-health-600 font-bold text-xl flex items-center">
-              <span className="mr-1">GATOR</span>
+              <span className="mr-1">GATOR</span> 
               PRIME
             </h3>
             <p className="text-gray-600 text-sm">
