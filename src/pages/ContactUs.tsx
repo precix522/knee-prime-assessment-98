@@ -112,7 +112,7 @@ const ContactUs = () => {
                   </div>
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900">Email</h3>
-                    <p className="text-gray-600">info@precix.io</p>
+                    <p className="text-gray-600">cs@precix.io</p>
                     
                   </div>
                 </div>
@@ -123,7 +123,7 @@ const ContactUs = () => {
                   </div>
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900">Phone</h3>
-                    <p className="text-gray-600">+1 (800) 555-0123</p>
+                    <p className="text-gray-600"> (882) 780-00</p>
                     <p className="text-gray-500 text-sm mt-1">Monday-Friday, 9AM-5PM EST</p>
                   </div>
                 </div>
@@ -279,9 +279,6 @@ const ContactUs = () => {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">Find Us</h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Located in the heart of Boston's medical district, our facility is easily accessible by public transportation.
-            </p>
           </div>
           
           <div className="aspect-w-16 aspect-h-9 max-w-5xl mx-auto rounded-xl overflow-hidden border border-gray-200">
