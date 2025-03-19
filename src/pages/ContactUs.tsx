@@ -113,7 +113,7 @@ const ContactUs = () => {
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900">Email</h3>
                     <p className="text-gray-600">info@precix.io</p>
-                    <p className="text-gray-500 text-sm mt-1">We'll respond within 24 hours</p>
+                    
                   </div>
                 </div>
                 
