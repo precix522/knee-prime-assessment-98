@@ -16,7 +16,6 @@ export const Footer = () => {
               Advanced knee health assessment and monitoring to help you maintain mobility and prevent injuries.
             </p>
           </div>
-
           <div>
             <h4 className="font-semibold text-gray-900 mb-4">Support</h4>
             <ul className="space-y-2">
