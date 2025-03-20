@@ -113,7 +113,6 @@ const ContactUs = () => {
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900">Email</h3>
                     <p className="text-gray-600">cs@precix.io</p>
-                    
                   </div>
                 </div>
                 
@@ -138,8 +137,7 @@ const ContactUs = () => {
                     <p className="text-gray-600">Singapore 169850</p>
                   </div>
                 </div>
-                
-                
+              </div>
               
               <div className="pt-6">
                 <h3 className="text-xl font-semibold text-gray-900 mb-4">Working Hours</h3>
