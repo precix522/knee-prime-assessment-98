@@ -44,6 +44,7 @@ These cookies record your visit to our website, the pages you have visited and t
 Please note that third parties (including for example advertising networks and providers of external services like web traffic analysis services) may also use cookies, over which we have no control.
 We do not sell the information collected by cookies, nor do we disclose the information to unrelated third parties, except where required by law (for example to government bodies and law enforcement agencies).
 You have the ability to accept or decline cookies. Most web browsers automatically accept cookies but you can usually modify your browser setting to decline cookies if you prefer. If you use your browser settings to block all cookies, you may not be able to access all or parts of our website. Unless you have adjusted your browser setting so that it will refuse cookies, once you have opted in to accept our cookies, our system will issue cookies as soon as you visit our website. </p>
+               
                 <ul className="list-disc ml-6 mb-4 space-y-2">
                   <li>Contact information (name, email address, phone number)</li>
                   <li>Demographic information (age, gender)</li>
@@ -57,8 +58,9 @@ You have the ability to accept or decline cookies. Most web browsers automatical
               </section>
               
               <section className="mb-8">
-                <h2 className="text-2xl font-semibold text-gray-900 mb-4">How We Use Your Information</h2>
-                <p className="mb-4">We use the information we collect to:</p>
+                <h2 className="text-2xl font-semibold text-gray-900 mb-4">Changes to this statement</h2>
+                <p className="mb-4">PreciX will occasionally update this privacy notice to reflect company and customer feedback. We will not proactively notify you of any such changes and encourage you to periodically review this notice.
+This statement was last updated on 17 November 2020.</p>
                 <ul className="list-disc ml-6 mb-4 space-y-2">
                   <li>Provide, maintain, and improve our services</li>
                   <li>Process and complete transactions</li>
@@ -70,16 +72,13 @@ You have the ability to accept or decline cookies. Most web browsers automatical
               </section>
               
               <section className="mb-8">
-                <h2 className="text-2xl font-semibold text-gray-900 mb-4">Information Sharing</h2>
+                <h2 className="text-2xl font-semibold text-gray-900 mb-4">Contact Us</h2>
                 <p className="mb-4">
                   We may share information as follows:
                 </p>
                 <ul className="list-disc ml-6 mb-4 space-y-2">
-                  <li>With vendors, consultants, and other service providers who need access to such information to carry out work on our behalf</li>
-                  <li>In response to a request for information if we believe disclosure is in accordance with any applicable law, regulation, or legal process</li>
-                  <li>If we believe your actions are inconsistent with our user agreements or policies, or to protect the rights, property, and safety of GATOR PRIME or others</li>
-                  <li>In connection with, or during negotiations of, any merger, sale of company assets, financing, or acquisition of all or a portion of our business to another company</li>
-                  <li>With your consent or at your direction</li>
+                  <p If you have questions or requests, please feel free to contact us at cs@precix.io </p>
+                  <p Because email communications are not always secure, please do not include sensitive information in your emails to us.</p>
                 </ul>
               </section>
               
