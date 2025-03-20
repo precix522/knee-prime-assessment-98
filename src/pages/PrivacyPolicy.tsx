@@ -59,6 +59,7 @@ const PrivacyPolicy = () => {
                   We do not sell the information collected by cookies, nor do we disclose the information to unrelated third parties, except where required by law (for example to government bodies and law enforcement agencies).
                 </p>
                 <p className="mb-4">
+                 <p style="margin-bottom: 0px; padding-bottom: 1.5em; font-style: normal; font-variant-numeric: inherit; font-variant-east-asian: inherit; font-weight: 400; font-stretch: inherit; font-size: 16px; line-height: inherit; font-family: 'Open Sans'; -webkit-font-smoothing: antialiased; color: #676767;"></p>
                   You have the ability to accept or decline cookies. Most web browsers automatically accept cookies but you can usually modify your browser setting to decline cookies if you prefer. If you use your browser settings to block all cookies, you may not be able to access all or parts of our website. Unless you have adjusted your browser setting so that it will refuse cookies, once you have opted in to accept our cookies, our system will issue cookies as soon as you visit our website.
                 </p>
               </section>
