@@ -73,7 +73,7 @@ const PrivacyPolicy = () => {
                 <p>
                   If you have questions or requests, please feel free to contact us at cs@precix.io 
                 </p>
-                <p>Because email communications are not always secure, please do not include sensitive information in your emails to us.</p>
+                <p className="mb-4">Because email communications are not always secure, please do not include sensitive information in your emails to us.</p>
               </section>
             </div>
           </div>
