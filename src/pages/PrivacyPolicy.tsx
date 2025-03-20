@@ -70,8 +70,7 @@ const PrivacyPolicy = () => {
               </section>
               <section>
                 <h2 className="text-2xl font-semibold text-gray-900 mb-4">Contact Us</h2>
-                <p className="mb-4">
-                  If you have questions or requests, please feel free to contact us at cs@precix.io </p> </br>
+                <p className="mb-4">If you have questions or requests, please feel free to contact us at cs@precix.io </p>
                 <p className="mb-5">Because email communications are not always secure, please do not include sensitive information in your emails to us.</p>
               </section>
             </div>
