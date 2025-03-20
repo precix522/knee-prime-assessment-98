@@ -311,7 +311,7 @@ const ContactUs = () => {
                 <p className="text-gray-600">
                   After logging in to your patient portal, you can view and download your assessment reports from the "Reports" section. If you're having trouble, our support team can assist you.
                 </p>
-              </div>
+              </div> 
               
               <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">Can I schedule a follow-up appointment through this form?</h3>
