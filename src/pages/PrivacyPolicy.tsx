@@ -39,8 +39,10 @@ const PrivacyPolicy = () => {
                   Our website uses cookies to distinguish you from other users of our website. This helps us to provide you with a good experience when you browse our website and allows us to improve our website.
                 </p>
                 <p className="mb-4">
-                  A cookie is a small file of letters and numbers that we store on your browser or the hard drive of your computer if you agree. Cookies contain information that is transferred to your computer's hard drive.</p>
-                <p className="mb-4">  We use the following types of cookies on precix.io:
+                  A cookie is a small file of letters and numbers that we store on your browser or the hard drive of your computer if you agree. Cookies contain information that is transferred to your computer's hard drive.
+                </p>
+                <p className="mb-4">
+                  We use the following types of cookies on precix.io:
                 </p>
                 <p className="mb-4">
                   <strong>Strictly necessary cookies.</strong><br />
@@ -74,8 +76,6 @@ const PrivacyPolicy = () => {
                 <p className="mb-4">If you have questions or requests, please feel free to contact us at <b>cs@precix.io</b> </p>
                 <p className="mb-4">Because email communications are not always secure, please do not include sensitive information in your emails to us.</p>
               </section>
-            </div>
-              
             </div>
           </div>
         </div>
