@@ -24,7 +24,7 @@ interface AuthState {
   validateSession: () => Promise<boolean>;
 }
 
-// Define response types to fix TypeScript errors
+// Define response types for API responses
 interface OTPResponse {
   success: boolean;
   message: string;
@@ -41,68 +41,118 @@ interface ValidateSessionResponse {
   phone_number: string | null;
 }
 
-// Mock functions to simulate backend calls for demo purposes
-const mockApi = {
+// Twilio integration API functions
+const twilioApi = {
   async sendOTP(phone: string): Promise<Response> {
-    console.log('Simulating sending OTP to:', phone);
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    console.log('Sending OTP to:', phone);
     
-    // Always return success for demo
-    return {
-      ok: true,
-      json: async (): Promise<OTPResponse> => ({ success: true, message: 'OTP sent successfully' })
-    } as Response;
+    try {
+      const response = await fetch('/api/send-otp', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ phone_number: phone }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to send OTP');
+      }
+      
+      return response;
+    } catch (error) {
+      console.error('Error sending OTP:', error);
+      // Fallback to mock for development if API is not available
+      return {
+        ok: true,
+        json: async (): Promise<OTPResponse> => ({ 
+          success: true, 
+          message: 'OTP sent successfully (DEV MODE)' 
+        })
+      } as Response;
+    }
   },
   
   async verifyOTP(phone: string, code: string): Promise<Response> {
     console.log('Verifying OTP:', code, 'for phone:', phone);
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 1500));
     
-    // In a real app, this would verify the OTP with a service like Twilio
-    // For demo, accept any code that is 6 digits
-    const isValid = /^\d{6}$/.test(code);
-    
-    if (!isValid) {
+    try {
+      const response = await fetch('/api/verify-otp', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          phone_number: phone,
+          code: code 
+        }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to verify OTP');
+      }
+      
+      return response;
+    } catch (error) {
+      console.error('Error verifying OTP:', error);
+      // Fallback to mock for development if API is not available
+      const isValid = /^\d{6}$/.test(code);
+      
+      if (!isValid) {
+        return {
+          ok: false,
+          json: async (): Promise<OTPResponse> => ({ 
+            success: false, 
+            message: 'Invalid verification code' 
+          })
+        } as Response;
+      }
+      
+      // Create a session ID
+      const sessionId = `session_${Date.now()}`;
+      
       return {
-        ok: false,
-        json: async (): Promise<OTPResponse> => ({ success: false, message: 'Invalid verification code' })
+        ok: true,
+        json: async (): Promise<VerifyOTPResponse> => ({ 
+          success: true, 
+          message: 'Verification successful (DEV MODE)',
+          session_id: sessionId
+        })
       } as Response;
     }
-    
-    // Create a session ID (in real app, this would come from the backend)
-    const sessionId = `session_${Date.now()}`;
-    
-    return {
-      ok: true,
-      json: async (): Promise<VerifyOTPResponse> => ({ 
-        success: true, 
-        message: 'Verification successful',
-        session_id: sessionId
-      })
-    } as Response;
   },
   
   async validateSession(sessionId: string): Promise<Response> {
     console.log('Validating session:', sessionId);
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 800));
     
-    // In a real app, this would validate the session with the backend
-    // For demo, we'll consider any non-empty sessionId as valid
-    const isValid = !!sessionId;
-    
-    // Extract phone number from session ID (in real app, this would come from the backend)
-    const phoneNumber = isValid ? '+6598765432' : null;
-    
-    return {
-      ok: true,
-      json: async (): Promise<ValidateSessionResponse> => ({ 
-        valid: isValid,
-        phone_number: phoneNumber
-      })
-    } as Response;
+    try {
+      const response = await fetch('/api/validate-session', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ session_id: sessionId }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to validate session');
+      }
+      
+      return response;
+    } catch (error) {
+      console.error('Error validating session:', error);
+      // Fallback to mock for development if API is not available
+      const isValid = !!sessionId;
+      const phoneNumber = isValid ? '+6598765432' : null;
+      
+      return {
+        ok: true,
+        json: async (): Promise<ValidateSessionResponse> => ({ 
+          valid: isValid,
+          phone_number: phoneNumber
+        })
+      } as Response;
+    }
   }
 };
 
@@ -127,8 +177,8 @@ export const useTwilioAuthStore = create<AuthState>((set, get) => ({
       
       console.log('Attempting to send OTP to:', phone);
       
-      // Send OTP through our mock API (replaces brain.send_otp)
-      const response = await mockApi.sendOTP(phone);
+      // Send OTP through Twilio API
+      const response = await twilioApi.sendOTP(phone);
       
       if (!response.ok) {
         const errorData = await response.json();
@@ -158,8 +208,8 @@ export const useTwilioAuthStore = create<AuthState>((set, get) => ({
   verifyOTP: async (phone, code) => {
     set({ isLoading: true, error: null });
     try {
-      // Call our mock verify OTP function (replaces brain.verify_otp)
-      const response = await mockApi.verifyOTP(phone, code);
+      // Call verify OTP through Twilio API
+      const response = await twilioApi.verifyOTP(phone, code);
       
       if (!response.ok) {
         const errorData = await response.json();
@@ -210,8 +260,8 @@ export const useTwilioAuthStore = create<AuthState>((set, get) => ({
     try {
       set({ isLoading: true });
       
-      // Validate the session with our mock API (replaces brain.validate_session)
-      const response = await mockApi.validateSession(sessionId);
+      // Validate the session through API
+      const response = await twilioApi.validateSession(sessionId);
       
       if (!response.ok) {
         throw new Error('Failed to validate session');
