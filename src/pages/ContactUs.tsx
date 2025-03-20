@@ -139,17 +139,7 @@ const ContactUs = () => {
                   </div>
                 </div>
                 
-                <div className="flex items-start space-x-4">
-                  <div className="bg-health-100 p-3 rounded-full text-health-600">
-                    <MessageSquare className="w-6 h-6" />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900">Live Chat</h3>
-                    <p className="text-gray-600">Available on our patient portal</p>
-                    <p className="text-gray-500 text-sm mt-1">For registered users</p>
-                  </div>
-                </div>
-              </div>
+                
               
               <div className="pt-6">
                 <h3 className="text-xl font-semibold text-gray-900 mb-4">Working Hours</h3>
