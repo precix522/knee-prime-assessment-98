@@ -68,11 +68,14 @@ const PrivacyPolicy = () => {
                 <p className="mb-4">PreciX will occasionally update this privacy notice to reflect company and customer feedback. We will not proactively notify you of any such changes and encourage you to periodically review this notice.</p>
                 <p className="mb-4">This statement was last updated on 17 November 2020.</p>
               </section>
+              
               <section>
                 <h2 className="text-2xl font-semibold text-gray-900 mb-4">Contact Us</h2>
-                <p className="mb-4">If you have questions or requests, please feel free to contact us at cs@precix.io </p>
-                <p className="mb-5">Because email communications are not always secure, please do not include sensitive information in your emails to us.</p>
+                <p className="mb-4">If you have questions or requests, please feel free to contact us at <b>cs@precix.io</b> </p>
+                <p className="mb-4">Because email communications are not always secure, please do not include sensitive information in your emails to us.</p>
               </section>
+            </div>
+              
             </div>
           </div>
         </div>
