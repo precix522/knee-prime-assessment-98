@@ -66,8 +66,8 @@ export const Footer = () => {
                 </a>
               </li>
               <li>
-                <a 
-                  href="#" 
+                <Link 
+                  to="/privacy-policy" 
                   className={cn(
                     "text-gray-600 hover:text-health-600 transition-colors duration-300 text-sm",
                     "flex items-center"
@@ -86,7 +86,7 @@ export const Footer = () => {
                     />
                   </svg>
                   Privacy Policy
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
