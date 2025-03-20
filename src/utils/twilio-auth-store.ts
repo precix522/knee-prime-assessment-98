@@ -1,6 +1,7 @@
 
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { toast } from 'sonner';
 
 // Define the User interface
 interface User {
@@ -71,19 +72,31 @@ export const useTwilioAuthStore = create<TwilioAuthState>()(
       sendOTP: async (phone: string) => {
         set({ isLoading: true, error: null });
         try {
-          // In a real app, this would call a Twilio API to send OTP
-          // For demo purposes, we'll just simulate the API delay
+          // Make a request to your backend API that will interact with Twilio
+          const response = await fetch('/api/send-verification', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ phone }),
+          });
           
-          // Simulate API delay
-          await new Promise(resolve => setTimeout(resolve, 1500));
+          const data = await response.json();
           
-          // In a real implementation, this would be successful response from Twilio
-          console.log(`OTP code would be sent to ${phone} in a real implementation`);
+          if (!response.ok) {
+            throw new Error(data.message || 'Failed to send verification code');
+          }
+          
+          console.log(`OTP code sent to ${phone}`);
+          toast.success('Verification code sent to your phone');
           
           // Update state to reflect OTP was sent
           set({ isVerifying: true, phoneNumber: phone });
         } catch (error) {
-          set({ error: error instanceof Error ? error.message : "Failed to send verification code" });
+          console.error('Error sending OTP:', error);
+          const errorMessage = error instanceof Error ? error.message : "Failed to send verification code";
+          set({ error: errorMessage });
+          toast.error(errorMessage);
         } finally {
           set({ isLoading: false });
         }
@@ -92,30 +105,41 @@ export const useTwilioAuthStore = create<TwilioAuthState>()(
       verifyOTP: async (phone: string, code: string) => {
         set({ isLoading: true, error: null });
         try {
-          // In a real app, this would call a Twilio API to verify OTP
-          // For demo purposes, we'll just simulate the API delay and successful verification
+          // Make a request to your backend API that will interact with Twilio to verify the code
+          const response = await fetch('/api/verify-code', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ phone, code }),
+          });
           
-          // Simulate API delay
-          await new Promise(resolve => setTimeout(resolve, 1500));
+          const data = await response.json();
           
-          // Simple validation - in a real app this would check with Twilio
-          if (code === "123456" || code.length === 6) { // Accept any 6-digit code for demo
-            // Mock successful login after verification
+          if (!response.ok) {
+            throw new Error(data.message || 'Verification failed');
+          }
+          
+          if (data.valid) {
+            // Create user after successful verification
             const user: User = {
-              id: "user_" + Date.now(),
+              id: data.userId || "user_" + Date.now(),
               phone: phone,
-              name: "Test User"
+              name: data.name || "User"
             };
             
             // Log the user in
             set({ user, isVerifying: false });
+            toast.success('Phone verified successfully');
             return;
+          } else {
+            throw new Error('Invalid verification code. Please try again.');
           }
-          
-          // If code doesn't match, throw error
-          throw new Error("Invalid verification code. Please try again.");
         } catch (error) {
-          set({ error: error instanceof Error ? error.message : "Verification failed" });
+          console.error('Error verifying OTP:', error);
+          const errorMessage = error instanceof Error ? error.message : "Verification failed";
+          set({ error: errorMessage });
+          toast.error(errorMessage);
         } finally {
           set({ isLoading: false });
         }

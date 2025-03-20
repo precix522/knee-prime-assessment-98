@@ -8,6 +8,17 @@ import { useTwilioAuthStore } from "../utils/twilio-auth-store";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { 
+  InputOTP, 
+  InputOTPGroup, 
+  InputOTPSlot 
+} from "@/components/ui/input-otp";
+import { 
+  Alert,
+  AlertTitle,
+  AlertDescription
+} from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 
 export default function Login() {
   // Page loading state - shows while checking auth status
@@ -187,31 +198,38 @@ export default function Login() {
               </div>
               
               {error && (
-                <div className="mb-6 p-3 bg-red-50 border border-red-200 text-red-600 rounded-md text-sm">
-                  {error}
-                </div>
+                <Alert variant="destructive" className="mb-6">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertTitle>Error</AlertTitle>
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
               )}
               
               {isVerifying ? (
                 <form onSubmit={handleVerifyOTP}>
                   <div className="mb-6">
-                    <Label htmlFor="otp" className="block text-sm font-medium text-gray-700 mb-1">
+                    <Label htmlFor="otp" className="block text-sm font-medium text-gray-700 mb-3">
                       Verification Code
                     </Label>
-                    <Input
-                      id="otp"
-                      type="text"
-                      placeholder="Enter 6-digit code"
-                      value={otpCode}
-                      onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ""))}
-                      className="w-full"
-                      maxLength={6}
-                      autoComplete="one-time-code"
-                      disabled={isLoading}
-                      required
-                    />
-                    <p className="mt-2 text-sm text-gray-500">
-                      For demo purposes, enter any 6 digits
+                    <div className="flex justify-center mb-4">
+                      <InputOTP 
+                        maxLength={6}
+                        value={otpCode}
+                        onChange={setOtpCode}
+                        disabled={isLoading}
+                      >
+                        <InputOTPGroup>
+                          <InputOTPSlot index={0} />
+                          <InputOTPSlot index={1} />
+                          <InputOTPSlot index={2} />
+                          <InputOTPSlot index={3} />
+                          <InputOTPSlot index={4} />
+                          <InputOTPSlot index={5} />
+                        </InputOTPGroup>
+                      </InputOTP>
+                    </div>
+                    <p className="mt-2 text-sm text-center text-gray-500">
+                      The code was sent to {formattedPhone || phoneNumber}
                     </p>
                   </div>
                   
@@ -269,12 +287,15 @@ export default function Login() {
                       type="tel"
                       id="phone"
                       className="w-full"
-                      placeholder="(123) 456-7890"
+                      placeholder="+1 (123) 456-7890"
                       value={phoneInput}
                       onChange={(e) => setPhoneInput(e.target.value)}
                       disabled={isLoading}
                       required
                     />
+                    <p className="mt-2 text-xs text-gray-500">
+                      Enter your full number with country code (e.g., +65xxxxxxxx for Singapore)
+                    </p>
                   </div>
                   
                   <Button
