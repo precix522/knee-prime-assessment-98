@@ -18,7 +18,7 @@ const PrivacyPolicy = () => {
 By using this website, you consent to the data practices described in this statement.</p>
               
               <section className="mb-8">
-                <h2 className="text-2xl font-semibold text-gray-900 mb-4">Introduction</h2>
+                <h2 className="text-2xl font-semibold text-gray-900 mb-4">Collection of your personal information</h2>
                 <p>
                   At GATOR PRIME, we take your privacy seriously. This Privacy Policy describes how we collect, use, 
                   and share information when you use our services, including our website and knee health assessment platform.
