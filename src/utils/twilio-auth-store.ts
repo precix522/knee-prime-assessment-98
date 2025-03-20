@@ -24,9 +24,26 @@ interface AuthState {
   validateSession: () => Promise<boolean>;
 }
 
+// Define response types to fix TypeScript errors
+interface OTPResponse {
+  success: boolean;
+  message: string;
+}
+
+interface VerifyOTPResponse {
+  success: boolean;
+  message: string;
+  session_id: string;
+}
+
+interface ValidateSessionResponse {
+  valid: boolean;
+  phone_number: string | null;
+}
+
 // Mock functions to simulate backend calls for demo purposes
 const mockApi = {
-  async sendOTP(phone: string) {
+  async sendOTP(phone: string): Promise<Response> {
     console.log('Simulating sending OTP to:', phone);
     // Simulate API delay
     await new Promise(resolve => setTimeout(resolve, 1000));
@@ -34,11 +51,11 @@ const mockApi = {
     // Always return success for demo
     return {
       ok: true,
-      json: async () => ({ success: true, message: 'OTP sent successfully' })
-    };
+      json: async (): Promise<OTPResponse> => ({ success: true, message: 'OTP sent successfully' })
+    } as Response;
   },
   
-  async verifyOTP(phone: string, code: string) {
+  async verifyOTP(phone: string, code: string): Promise<Response> {
     console.log('Verifying OTP:', code, 'for phone:', phone);
     // Simulate API delay
     await new Promise(resolve => setTimeout(resolve, 1500));
@@ -50,8 +67,8 @@ const mockApi = {
     if (!isValid) {
       return {
         ok: false,
-        json: async () => ({ success: false, message: 'Invalid verification code' })
-      };
+        json: async (): Promise<OTPResponse> => ({ success: false, message: 'Invalid verification code' })
+      } as Response;
     }
     
     // Create a session ID (in real app, this would come from the backend)
@@ -59,15 +76,15 @@ const mockApi = {
     
     return {
       ok: true,
-      json: async () => ({ 
+      json: async (): Promise<VerifyOTPResponse> => ({ 
         success: true, 
         message: 'Verification successful',
         session_id: sessionId
       })
-    };
+    } as Response;
   },
   
-  async validateSession(sessionId: string) {
+  async validateSession(sessionId: string): Promise<Response> {
     console.log('Validating session:', sessionId);
     // Simulate API delay
     await new Promise(resolve => setTimeout(resolve, 800));
@@ -81,11 +98,11 @@ const mockApi = {
     
     return {
       ok: true,
-      json: async () => ({ 
+      json: async (): Promise<ValidateSessionResponse> => ({ 
         valid: isValid,
         phone_number: phoneNumber
       })
-    };
+    } as Response;
   }
 };
 
@@ -118,7 +135,7 @@ export const useTwilioAuthStore = create<AuthState>((set, get) => ({
         throw new Error(errorData.message || 'Failed to send verification code');
       }
       
-      const data = await response.json();
+      const data = await response.json() as OTPResponse;
       
       if (!data.success) {
         throw new Error(data.message || 'Failed to send verification code');
@@ -149,7 +166,7 @@ export const useTwilioAuthStore = create<AuthState>((set, get) => ({
         throw new Error(errorData.message || 'Failed to verify code');
       }
       
-      const data = await response.json();
+      const data = await response.json() as VerifyOTPResponse;
       
       if (!data.success) {
         throw new Error(data.message || 'Failed to verify code');
@@ -200,7 +217,7 @@ export const useTwilioAuthStore = create<AuthState>((set, get) => ({
         throw new Error('Failed to validate session');
       }
       
-      const data = await response.json();
+      const data = await response.json() as ValidateSessionResponse;
       
       if (data.valid && data.phone_number) {
         // Session is valid
