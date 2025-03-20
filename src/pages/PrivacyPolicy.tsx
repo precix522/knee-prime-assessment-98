@@ -28,10 +28,9 @@ By using this website, you consent to the data practices described in this state
               </section>
               
               <section className="mb-8">
-                <h2 className="text-2xl font-semibold text-gray-900 mb-4">Information We Collect</h2>
+                <h2 className="text-2xl font-semibold text-gray-900 mb-4">Our use of cookies</h2>
                 <p className="mb-4">
-                  We collect information you provide directly to us, such as when you create an account, 
-                  fill out a form, or communicate with us. This may include:
+                  Our website uses cookies to distinguish you from other users of our website. This helps us to provide you with a good experience when you browse our website and allows us to improve our website.
                 </p>
                 <ul className="list-disc ml-6 mb-4 space-y-2">
                   <li>Contact information (name, email address, phone number)</li>
