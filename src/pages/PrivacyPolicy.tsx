@@ -32,6 +32,18 @@ By using this website, you consent to the data practices described in this state
                 <p className="mb-4">
                   Our website uses cookies to distinguish you from other users of our website. This helps us to provide you with a good experience when you browse our website and allows us to improve our website.
                 </p>
+               <p className="mb-4">
+                 A cookie is a small file of letters and numbers that we store on your browser or the hard drive of your computer if you agree. Cookies contain information that is transferred to your computer’s hard drive.
+We use the following types of cookies on precix.io:
+Strictly necessary cookies.
+These are cookies that are required for the operation of our website. They include, for example, cookies that enable you to log into secure areas of our website (e.g. the use of any learning resources) and anti-forgery token cookies.
+Performance cookies.
+They allow us to recognise and count the number of visitors and to see how visitors move around our website, for instance which pages visitors go to most often and if they receive an error message. This helps us to improve the way our website works, for example, by ensuring that users are finding what they are looking for easily. These cookies are deleted when the browser is closed.
+Targeting cookies.
+These cookies record your visit to our website, the pages you have visited and the links you have followed. We use this information to make our website and advertising more relevant to your interests.
+Please note that third parties (including for example advertising networks and providers of external services like web traffic analysis services) may also use cookies, over which we have no control.
+We do not sell the information collected by cookies, nor do we disclose the information to unrelated third parties, except where required by law (for example to government bodies and law enforcement agencies).
+You have the ability to accept or decline cookies. Most web browsers automatically accept cookies but you can usually modify your browser setting to decline cookies if you prefer. If you use your browser settings to block all cookies, you may not be able to access all or parts of our website. Unless you have adjusted your browser setting so that it will refuse cookies, once you have opted in to accept our cookies, our system will issue cookies as soon as you visit our website. </p>
                 <ul className="list-disc ml-6 mb-4 space-y-2">
                   <li>Contact information (name, email address, phone number)</li>
                   <li>Demographic information (age, gender)</li>
