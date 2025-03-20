@@ -20,10 +20,10 @@ By using this website, you consent to the data practices described in this state
               <section className="mb-8">
                 <h2 className="text-2xl font-semibold text-gray-900 mb-4">Collection of your personal information</h2>
                 <p>
-                  When you apply for or request specific PreciX services (such as subscriptions to email and newsletters), we will collect personal identifiable information related to the purpose and use of that service, which we will use to provide the services you have requested.
-                  We will never disclose your personal identifiable information to third parties for the purposes of allowing them to market to you.
-                  PreciX operates beyond Singapore and this means that we will transfer your personal identifiable information to other countries. If you do not want your personal information transferred in this way, please do not provide it to us on the website.
-                  As you navigate through this website, we will automatically collect anonymous information about you and your activities during your visit. This information includes navigational data and web server logs, and may include (but is not limited to) information such as your IP address, the version of both your browser and operating system, and the URL of the website you just came from.
+                  When you apply for or request specific PreciX services (such as subscriptions to email and newsletters), we will collect personal identifiable information related to the purpose and use of that service, which we will use to provide the services you have requested.</p>
+                  <p> We will never disclose your personal identifiable information to third parties for the purposes of allowing them to market to you.</p>
+                 <p> PreciX operates beyond Singapore and this means that we will transfer your personal identifiable information to other countries. If you do not want your personal information transferred in this way, please do not provide it to us on the website.</p>
+                  <p>As you navigate through this website, we will automatically collect anonymous information about you and your activities during your visit. This information includes navigational data and web server logs, and may include (but is not limited to) information such as your IP address, the version of both your browser and operating system, and the URL of the website you just came from.
                 </p>
               </section>
               
