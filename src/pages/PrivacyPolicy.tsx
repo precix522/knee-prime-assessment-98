@@ -14,8 +14,8 @@ const PrivacyPolicy = () => {
             <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">Privacy Policy</h1>
             
             <div className="prose prose-lg max-w-none">
-              <p className="text-gray-600 mb-6">PreciX is committed to protecting your privacy. This privacy notice applies to the PreciX websites and governs the way that we collect and use the data you give us.
-By using this website, you consent to the data practices described in this statement.</p>
+              <p className="text-gray-600 mb-6">PreciX is committed to protecting your privacy. This privacy notice applies to the PreciX websites and governs the way that we collect and use the data you give us. </p>
+              <p className="text-gray-600 mb-6">By using this website, you consent to the data practices described in this statement.</p>
               
               <section className="mb-8">
                 <h2 className="text-2xl font-semibold text-gray-900 mb-4">Collection of your personal information</h2>
