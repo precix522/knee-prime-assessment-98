@@ -68,15 +68,6 @@ const PrivacyPolicy = () => {
                 <p className="mb-4">PreciX will occasionally update this privacy notice to reflect company and customer feedback. We will not proactively notify you of any such changes and encourage you to periodically review this notice.</p>
                 <p className="mb-4">This statement was last updated on 17 November 2020.</p>
               </section>
-              
-              <section className="mb-8">
-                <h2 className="text-2xl font-semibold text-gray-900 mb-4">Data Security</h2>
-                <p>
-                  We take reasonable measures to help protect information about you from loss, theft, misuse, 
-                  unauthorized access, disclosure, alteration, and destruction. However, no security system is impenetrable, 
-                  and we cannot guarantee the security of our systems.
-                </p>
-              </section> 
               <section>
                 <h2 className="text-2xl font-semibold text-gray-900 mb-4">Contact Us</h2>
                 <p>
