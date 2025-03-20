@@ -1,5 +1,6 @@
+
 import { create } from 'zustand';
-import brain from 'brain';
+import { toast } from 'sonner';
 
 interface User {
   id: string;
@@ -23,6 +24,71 @@ interface AuthState {
   validateSession: () => Promise<boolean>;
 }
 
+// Mock functions to simulate backend calls for demo purposes
+const mockApi = {
+  async sendOTP(phone: string) {
+    console.log('Simulating sending OTP to:', phone);
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    // Always return success for demo
+    return {
+      ok: true,
+      json: async () => ({ success: true, message: 'OTP sent successfully' })
+    };
+  },
+  
+  async verifyOTP(phone: string, code: string) {
+    console.log('Verifying OTP:', code, 'for phone:', phone);
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    // In a real app, this would verify the OTP with a service like Twilio
+    // For demo, accept any code that is 6 digits
+    const isValid = /^\d{6}$/.test(code);
+    
+    if (!isValid) {
+      return {
+        ok: false,
+        json: async () => ({ success: false, message: 'Invalid verification code' })
+      };
+    }
+    
+    // Create a session ID (in real app, this would come from the backend)
+    const sessionId = `session_${Date.now()}`;
+    
+    return {
+      ok: true,
+      json: async () => ({ 
+        success: true, 
+        message: 'Verification successful',
+        session_id: sessionId
+      })
+    };
+  },
+  
+  async validateSession(sessionId: string) {
+    console.log('Validating session:', sessionId);
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 800));
+    
+    // In a real app, this would validate the session with the backend
+    // For demo, we'll consider any non-empty sessionId as valid
+    const isValid = !!sessionId;
+    
+    // Extract phone number from session ID (in real app, this would come from the backend)
+    const phoneNumber = isValid ? '+6598765432' : null;
+    
+    return {
+      ok: true,
+      json: async () => ({ 
+        valid: isValid,
+        phone_number: phoneNumber
+      })
+    };
+  }
+};
+
 export const useTwilioAuthStore = create<AuthState>((set, get) => ({
   user: null,
   isLoading: true,
@@ -44,14 +110,12 @@ export const useTwilioAuthStore = create<AuthState>((set, get) => ({
       
       console.log('Attempting to send OTP to:', phone);
       
-      // Send OTP through our Twilio API
-      const response = await brain.send_otp({
-        phone_number: phone
-      });
+      // Send OTP through our mock API (replaces brain.send_otp)
+      const response = await mockApi.sendOTP(phone);
       
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.detail || 'Failed to send verification code');
+        throw new Error(errorData.message || 'Failed to send verification code');
       }
       
       const data = await response.json();
@@ -60,11 +124,15 @@ export const useTwilioAuthStore = create<AuthState>((set, get) => ({
         throw new Error(data.message || 'Failed to send verification code');
       }
       
+      // Show success toast
+      toast.success('Verification code sent to your phone');
+      
       // If successful, set isVerifying to true to show OTP input
       set({ isVerifying: true, phoneNumber: phone });
     } catch (error: any) {
       console.error('Send OTP error:', error);
       set({ error: error.message || 'Failed to send verification code' });
+      toast.error(error.message || 'Failed to send verification code');
     } finally {
       set({ isLoading: false });
     }
@@ -73,15 +141,12 @@ export const useTwilioAuthStore = create<AuthState>((set, get) => ({
   verifyOTP: async (phone, code) => {
     set({ isLoading: true, error: null });
     try {
-      // Call our custom verify OTP endpoint
-      const response = await brain.verify_otp({
-        phone_number: phone,
-        otp_code: code
-      });
+      // Call our mock verify OTP function (replaces brain.verify_otp)
+      const response = await mockApi.verifyOTP(phone, code);
       
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.detail || 'Failed to verify code');
+        throw new Error(errorData.message || 'Failed to verify code');
       }
       
       const data = await response.json();
@@ -103,11 +168,15 @@ export const useTwilioAuthStore = create<AuthState>((set, get) => ({
           sessionId: data.session_id,
           isVerifying: false
         });
+        
+        // Show success toast
+        toast.success('Verification successful!');
       } else {
         throw new Error('No session ID received after verification');
       }
     } catch (error: any) {
       set({ error: error.message || 'Failed to verify code' });
+      toast.error(error.message || 'Failed to verify code');
     } finally {
       set({ isLoading: false });
     }
@@ -124,10 +193,8 @@ export const useTwilioAuthStore = create<AuthState>((set, get) => ({
     try {
       set({ isLoading: true });
       
-      // Validate the session with our backend
-      const response = await brain.validate_session({
-        session_id: sessionId
-      });
+      // Validate the session with our mock API (replaces brain.validate_session)
+      const response = await mockApi.validateSession(sessionId);
       
       if (!response.ok) {
         throw new Error('Failed to validate session');
@@ -162,174 +229,8 @@ export const useTwilioAuthStore = create<AuthState>((set, get) => ({
   logout: () => {
     localStorage.removeItem('gator_prime_session_id');
     set({ user: null, sessionId: null, isVerifying: false });
+    toast.success('Logged out successfully');
   },
   
   clearError: () => set({ error: null })
 }));
-// import { create } from 'zustand';
-// import { persist } from 'zustand/middleware';
-// import { toast } from 'sonner';
-
-// // Define the User interface
-// interface User {
-//   id: string;
-//   phone: string;
-//   name?: string;
-// }
-
-// // Define the auth store interface
-// interface TwilioAuthState {
-//   user: User | null;
-//   isLoading: boolean;
-//   isVerifying: boolean;
-//   error: string | null;
-//   phoneNumber: string;
-  
-//   // Auth methods
-//   login: (user: User) => Promise<void>;
-//   logout: () => Promise<void>;
-//   sendOTP: (phone: string) => Promise<void>;
-//   verifyOTP: (phone: string, code: string) => Promise<void>;
-//   validateSession: () => Promise<boolean>;
-//   clearError: () => void;
-// }
-
-// // Create the auth store with persistence
-// export const useTwilioAuthStore = create<TwilioAuthState>()(
-//   persist(
-//     (set, get) => ({
-//       user: null,
-//       isLoading: false,
-//       isVerifying: false,
-//       error: null,
-//       phoneNumber: "",
-      
-//       login: async (user: User) => {
-//         set({ isLoading: true, error: null });
-//         try {
-//           // In a real app, this would call an API to verify login
-//           // For demo purposes, we'll just set the user directly
-          
-//           // Simulate API delay
-//           await new Promise(resolve => setTimeout(resolve, 1000));
-          
-//           set({ user });
-//         } catch (error) {
-//           set({ error: error instanceof Error ? error.message : "Login failed" });
-//         } finally {
-//           set({ isLoading: false });
-//         }
-//       },
-      
-//       logout: async () => {
-//         set({ isLoading: true, error: null });
-//         try {
-//           // In a real app, this would call an API to logout
-//           // Simulate API delay
-//           await new Promise(resolve => setTimeout(resolve, 1000));
-          
-//           set({ user: null, isVerifying: false, phoneNumber: "" });
-//         } catch (error) {
-//           set({ error: error instanceof Error ? error.message : "Logout failed" });
-//         } finally {
-//           set({ isLoading: false });
-//         }
-//       },
-      
-//       sendOTP: async (phone: string) => {
-//         set({ isLoading: true, error: null });
-//         try {
-//           // Make a request to your backend API that will interact with Twilio
-//           const response = await fetch('/api/send-verification', {
-//             method: 'POST',
-//             headers: {
-//               'Content-Type': 'application/json',
-//             },
-//             body: JSON.stringify({ phone }),
-//           });
-          
-//           const data = await response.json();
-          
-//           if (!response.ok) {
-//             throw new Error(data.message || 'Failed to send verification code');
-//           }
-          
-//           console.log(`OTP code sent to ${phone}`);
-//           toast.success('Verification code sent to your phone');
-          
-//           // Update state to reflect OTP was sent
-//           set({ isVerifying: true, phoneNumber: phone });
-//         } catch (error) {
-//           console.error('Error sending OTP:', error);
-//           const errorMessage = error instanceof Error ? error.message : "Failed to send verification code";
-//           set({ error: errorMessage });
-//           toast.error(errorMessage);
-//         } finally {
-//           set({ isLoading: false });
-//         }
-//       },
-      
-//       verifyOTP: async (phone: string, code: string) => {
-//         set({ isLoading: true, error: null });
-//         try {
-//           // Make a request to your backend API that will interact with Twilio to verify the code
-//           const response = await fetch('/api/verify-code', {
-//             method: 'POST',
-//             headers: {
-//               'Content-Type': 'application/json',
-//             },
-//             body: JSON.stringify({ phone, code }),
-//           });
-          
-//           const data = await response.json();
-          
-//           if (!response.ok) {
-//             throw new Error(data.message || 'Verification failed');
-//           }
-          
-//           if (data.valid) {
-//             // Create user after successful verification
-//             const user: User = {
-//               id: data.userId || "user_" + Date.now(),
-//               phone: phone,
-//               name: data.name || "User"
-//             };
-            
-//             // Log the user in
-//             set({ user, isVerifying: false });
-//             toast.success('Phone verified successfully');
-//             return;
-//           } else {
-//             throw new Error('Invalid verification code. Please try again.');
-//           }
-//         } catch (error) {
-//           console.error('Error verifying OTP:', error);
-//           const errorMessage = error instanceof Error ? error.message : "Verification failed";
-//           set({ error: errorMessage });
-//           toast.error(errorMessage);
-//         } finally {
-//           set({ isLoading: false });
-//         }
-//       },
-      
-//       validateSession: async () => {
-//         const { user } = get();
-        
-//         // In a real app, this would validate the session with server
-//         // For demo, we'll just check if we have a user in the store
-        
-//         // Simulate short delay
-//         await new Promise(resolve => setTimeout(resolve, 300));
-        
-//         return !!user;
-//       },
-      
-//       clearError: () => {
-//         set({ error: null });
-//       }
-//     }),
-//     {
-//       name: 'twilio-auth-storage',
-//     }
-//   )
-// );
