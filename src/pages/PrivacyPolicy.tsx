@@ -112,9 +112,9 @@ This statement was last updated on 17 November 2020.</p>
               <section>
                 <h2 className="text-2xl font-semibold text-gray-900 mb-4">Contact Us</h2>
                 <p>
-                  If you have any questions about this Privacy Policy, please contact us at: privacy@gatorprime.com or 
-                  write to us at: GATOR PRIME, 2 College Road #02-00, Singapore 169850
+                  If you have questions or requests, please feel free to contact us at cs@precix.io 
                 </p>
+                <P>Because email communications are not always secure, please do not include sensitive information in your emails to us.</P>
               </section>
             </div>
           </div>
