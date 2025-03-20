@@ -39,8 +39,8 @@ const PrivacyPolicy = () => {
                   Our website uses cookies to distinguish you from other users of our website. This helps us to provide you with a good experience when you browse our website and allows us to improve our website.
                 </p>
                 <p className="mb-4">
-                  A cookie is a small file of letters and numbers that we store on your browser or the hard drive of your computer if you agree. Cookies contain information that is transferred to your computer's hard drive.
-                  We use the following types of cookies on precix.io:
+                  A cookie is a small file of letters and numbers that we store on your browser or the hard drive of your computer if you agree. Cookies contain information that is transferred to your computer's hard drive.</p>
+                <p className="mb-4">  We use the following types of cookies on precix.io:
                 </p>
                 <p className="mb-4">
                   <strong>Strictly necessary cookies.</strong><br />
@@ -61,42 +61,12 @@ const PrivacyPolicy = () => {
                 <p className="mb-4">
                   You have the ability to accept or decline cookies. Most web browsers automatically accept cookies but you can usually modify your browser setting to decline cookies if you prefer. If you use your browser settings to block all cookies, you may not be able to access all or parts of our website. Unless you have adjusted your browser setting so that it will refuse cookies, once you have opted in to accept our cookies, our system will issue cookies as soon as you visit our website.
                 </p>
-               
-                <ul className="list-disc ml-6 mb-4 space-y-2">
-                  <li>Contact information (name, email address, phone number)</li>
-                  <li>Demographic information (age, gender)</li>
-                  <li>Health information related to knee assessments</li>
-                  <li>Account credentials</li>
-                </ul>
-                <p>
-                  We also automatically collect certain information when you visit our website, including your 
-                  IP address, browser type, and information about how you interact with our website.
-                </p>
               </section>
               
               <section className="mb-8">
                 <h2 className="text-2xl font-semibold text-gray-900 mb-4">Changes to this statement</h2>
-                <p className="mb-4">PreciX will occasionally update this privacy notice to reflect company and customer feedback. We will not proactively notify you of any such changes and encourage you to periodically review this notice.
-                This statement was last updated on 17 November 2020.</p>
-                <ul className="list-disc ml-6 mb-4 space-y-2">
-                  <li>Provide, maintain, and improve our services</li>
-                  <li>Process and complete transactions</li>
-                  <li>Send you technical notices, updates, security alerts, and support messages</li>
-                  <li>Respond to your comments, questions, and requests</li>
-                  <li>Develop new products and services</li>
-                  <li>Monitor and analyze trends, usage, and activities in connection with our services</li>
-                </ul>
-              </section>
-              
-              <section className="mb-8">
-                <h2 className="text-2xl font-semibold text-gray-900 mb-4">Contact Us</h2>
-                <p className="mb-4">
-                  We may share information as follows:
-                </p>
-                <ul className="list-disc ml-6 mb-4 space-y-2">
-                  <li>If you have questions or requests, please feel free to contact us at cs@precix.io</li>
-                  <li>Because email communications are not always secure, please do not include sensitive information in your emails to us.</li>
-                </ul>
+                <p className="mb-4">PreciX will occasionally update this privacy notice to reflect company and customer feedback. We will not proactively notify you of any such changes and encourage you to periodically review this notice.</p>
+                <p className="mb-4">This statement was last updated on 17 November 2020.</p>
               </section>
               
               <section className="mb-8">
@@ -106,26 +76,7 @@ const PrivacyPolicy = () => {
                   unauthorized access, disclosure, alteration, and destruction. However, no security system is impenetrable, 
                   and we cannot guarantee the security of our systems.
                 </p>
-              </section>
-              
-              <section className="mb-8">
-                <h2 className="text-2xl font-semibold text-gray-900 mb-4">Your Choices</h2>
-                <p className="mb-4">
-                  You may update, correct, or delete information about you at any time by logging into your account or 
-                  emailing us at privacy@gatorprime.com. You may also opt out of receiving promotional communications 
-                  from us by following the instructions in those communications.
-                </p>
-              </section>
-              
-              <section className="mb-8">
-                <h2 className="text-2xl font-semibold text-gray-900 mb-4">Changes to this Policy</h2>
-                <p>
-                  We may change this Privacy Policy from time to time. If we make changes, we will notify you by 
-                  revising the date at the top of the policy and, in some cases, we may provide you with additional 
-                  notice (such as adding a statement to our website or sending you a notification).
-                </p>
-              </section>
-              
+              </section> 
               <section>
                 <h2 className="text-2xl font-semibold text-gray-900 mb-4">Contact Us</h2>
                 <p>
