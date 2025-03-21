@@ -368,7 +368,11 @@ const Index = () => {
           >
             <span className="relative z-10">Access Your Report Now</span>
             <span className="absolute inset-0 w-0 bg-gray-100 transition-all duration-300 ease-out group-hover:w-full"></span>
-          </Button>  
+          </Button>
+          
+          <div className="mt-8 text-sm text-white/70">
+            No login required. Your data remains private and secure.
+          </div>
         </div>
         
         {/* Decorative elements */}

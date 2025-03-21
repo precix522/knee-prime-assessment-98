@@ -112,7 +112,8 @@ const ContactUs = () => {
                   </div>
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900">Email</h3>
-                    <p className="text-gray-600">cs@precix.io</p>
+                    <p className="text-gray-600">info@precix.io</p>
+                    
                   </div>
                 </div>
                 
@@ -122,7 +123,7 @@ const ContactUs = () => {
                   </div>
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900">Phone</h3>
-                    <p className="text-gray-600"> +65 88278000</p>
+                    <p className="text-gray-600">+1 (800) 555-0123</p>
                     <p className="text-gray-500 text-sm mt-1">Monday-Friday, 9AM-5PM EST</p>
                   </div>
                 </div>
@@ -135,6 +136,17 @@ const ContactUs = () => {
                     <h3 className="text-lg font-semibold text-gray-900">Office</h3>
                     <p className="text-gray-600">2 College Road #02-00,</p>
                     <p className="text-gray-600">Singapore 169850</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start space-x-4">
+                  <div className="bg-health-100 p-3 rounded-full text-health-600">
+                    <MessageSquare className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900">Live Chat</h3>
+                    <p className="text-gray-600">Available on our patient portal</p>
+                    <p className="text-gray-500 text-sm mt-1">For registered users</p>
                   </div>
                 </div>
               </div>
@@ -267,6 +279,9 @@ const ContactUs = () => {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">Find Us</h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              Located in the heart of Boston's medical district, our facility is easily accessible by public transportation.
+            </p>
           </div>
           
           <div className="aspect-w-16 aspect-h-9 max-w-5xl mx-auto rounded-xl overflow-hidden border border-gray-200">
@@ -309,7 +324,7 @@ const ContactUs = () => {
                 <p className="text-gray-600">
                   After logging in to your patient portal, you can view and download your assessment reports from the "Reports" section. If you're having trouble, our support team can assist you.
                 </p>
-              </div> 
+              </div>
               
               <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">Can I schedule a follow-up appointment through this form?</h3>

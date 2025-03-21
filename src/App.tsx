@@ -11,8 +11,7 @@ import Logout from "./pages/Logout";
 import PatientID from "./pages/PatientID";
 import ReportViewer from "./pages/ReportViewer";
 import NotFound from "./pages/NotFound";
-import ContactUS from "./pages/ContactUs";
-import PrivacyPolicy from "./pages/PrivacyPolicy";
+import ContactUS from "./pages/ContactUs"
 import { AuthInitializer } from "./components/AuthInitializer";
 
 const queryClient = new QueryClient();
@@ -31,8 +30,7 @@ const App = () => (
           <Route path="/logout" element={<Logout />} />
           <Route path="/patient-id" element={<PatientID />} />
           <Route path="/report-viewer" element={<ReportViewer />} />
-          <Route path="/contactus" element={<ContactUS />} />
-          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          <Route path="/contactus" element={<ContactUS /> } />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

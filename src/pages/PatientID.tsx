@@ -138,7 +138,7 @@ export default function PatientID() {
         <div className="mt-6 pt-4 border-t border-gray-200 text-center">
           <p className="text-sm text-gray-600">
             Don't have a Patient ID?{" "}
-            <a href="mailto:cs@precix.io" className="text-orange-600 hover:text-orange-800">
+            <a href="mailto:support@precix.health" className="text-orange-600 hover:text-orange-800">
               Contact Support
             </a>
           </p>
