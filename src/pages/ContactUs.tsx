@@ -40,7 +40,6 @@ const ContactUs = () => {
   const onSubmit = async (data: FormValues) => {
     setIsSubmitting(true);
     
-    // Send the email to the specific mail ID
     try {
       console.log("Form data submitted:", data);
       
@@ -60,20 +59,23 @@ const ContactUs = () => {
         `,
       };
       
-      // In a real application, you would make an API call to a backend endpoint
-      // that handles sending emails. For this example, we'll simulate it.
+      // Make an API call to the email sending endpoint
+      const response = await fetch('/api/send-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(emailData),
+      });
       
-      // Simulate network delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to send message');
+      }
       
-      // You would use a real API call like this in production:
-      // const response = await fetch('/api/send-email', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify(emailData),
-      // });
-      // const result = await response.json();
-      // if (!result.success) throw new Error(result.message);
+      const result = await response.json();
+      
+      if (!result.success) {
+        throw new Error(result.message || 'Failed to send message');
+      }
       
       toast({
         title: "Message Sent Successfully",
@@ -81,12 +83,12 @@ const ContactUs = () => {
       });
       
       form.reset();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error submitting form:", error);
       toast({
         variant: "destructive",
         title: "An error occurred",
-        description: "Your message could not be sent. Please try again.",
+        description: error.message || "Your message could not be sent. Please try again.",
       });
     } finally {
       setIsSubmitting(false);
