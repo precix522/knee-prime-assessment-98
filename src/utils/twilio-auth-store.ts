@@ -1,4 +1,3 @@
-
 import { create } from 'zustand';
 import { toast } from 'sonner';
 
@@ -43,7 +42,7 @@ interface ValidateSessionResponse {
 
 // Twilio integration API functions
 const twilioApi = {
-  async sendOTP(phone: string): Promise<Response> {
+  async sendOTP(phone: string): Promise<OTPResponse> {
     console.log('Sending OTP to:', phone);
     
     try {
@@ -56,24 +55,24 @@ const twilioApi = {
       });
       
       if (!response.ok) {
-        throw new Error('Failed to send OTP');
+        const errorText = await response.text();
+        console.error('API response not OK:', response.status, errorText);
+        throw new Error(`Failed to send OTP: ${response.status}`);
       }
       
-      return response;
+      const data = await response.json();
+      return data;
     } catch (error) {
       console.error('Error sending OTP:', error);
       // Fallback to mock for development if API is not available
-      return {
-        ok: true,
-        json: async (): Promise<OTPResponse> => ({ 
-          success: true, 
-          message: 'OTP sent successfully (DEV MODE)' 
-        })
-      } as Response;
+      return { 
+        success: true, 
+        message: 'OTP sent successfully (DEV MODE)' 
+      };
     }
   },
   
-  async verifyOTP(phone: string, code: string): Promise<Response> {
+  async verifyOTP(phone: string, code: string): Promise<VerifyOTPResponse> {
     console.log('Verifying OTP:', code, 'for phone:', phone);
     
     try {
@@ -89,40 +88,38 @@ const twilioApi = {
       });
       
       if (!response.ok) {
-        throw new Error('Failed to verify OTP');
+        const errorText = await response.text();
+        console.error('API response not OK:', response.status, errorText);
+        throw new Error(`Failed to verify OTP: ${response.status}`);
       }
       
-      return response;
+      const data = await response.json();
+      return data;
     } catch (error) {
       console.error('Error verifying OTP:', error);
       // Fallback to mock for development if API is not available
       const isValid = /^\d{6}$/.test(code);
       
       if (!isValid) {
-        return {
-          ok: false,
-          json: async (): Promise<OTPResponse> => ({ 
-            success: false, 
-            message: 'Invalid verification code' 
-          })
-        } as Response;
+        return { 
+          success: false, 
+          message: 'Invalid verification code',
+          session_id: ''
+        };
       }
       
       // Create a session ID
       const sessionId = `session_${Date.now()}`;
       
-      return {
-        ok: true,
-        json: async (): Promise<VerifyOTPResponse> => ({ 
-          success: true, 
-          message: 'Verification successful (DEV MODE)',
-          session_id: sessionId
-        })
-      } as Response;
+      return { 
+        success: true, 
+        message: 'Verification successful (DEV MODE)',
+        session_id: sessionId
+      };
     }
   },
   
-  async validateSession(sessionId: string): Promise<Response> {
+  async validateSession(sessionId: string): Promise<ValidateSessionResponse> {
     console.log('Validating session:', sessionId);
     
     try {
@@ -135,23 +132,23 @@ const twilioApi = {
       });
       
       if (!response.ok) {
-        throw new Error('Failed to validate session');
+        const errorText = await response.text();
+        console.error('API response not OK:', response.status, errorText);
+        throw new Error(`Failed to validate session: ${response.status}`);
       }
       
-      return response;
+      const data = await response.json();
+      return data;
     } catch (error) {
       console.error('Error validating session:', error);
       // Fallback to mock for development if API is not available
       const isValid = !!sessionId;
       const phoneNumber = isValid ? '+6598765432' : null;
       
-      return {
-        ok: true,
-        json: async (): Promise<ValidateSessionResponse> => ({ 
-          valid: isValid,
-          phone_number: phoneNumber
-        })
-      } as Response;
+      return { 
+        valid: isValid,
+        phone_number: phoneNumber
+      };
     }
   }
 };
@@ -180,15 +177,8 @@ export const useTwilioAuthStore = create<AuthState>((set, get) => ({
       // Send OTP through Twilio API
       const response = await twilioApi.sendOTP(phone);
       
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to send verification code');
-      }
-      
-      const data = await response.json() as OTPResponse;
-      
-      if (!data.success) {
-        throw new Error(data.message || 'Failed to send verification code');
+      if (!response.success) {
+        throw new Error(response.message || 'Failed to send verification code');
       }
       
       // Show success toast
@@ -211,28 +201,21 @@ export const useTwilioAuthStore = create<AuthState>((set, get) => ({
       // Call verify OTP through Twilio API
       const response = await twilioApi.verifyOTP(phone, code);
       
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to verify code');
-      }
-      
-      const data = await response.json() as VerifyOTPResponse;
-      
-      if (!data.success) {
-        throw new Error(data.message || 'Failed to verify code');
+      if (!response.success) {
+        throw new Error(response.message || 'Failed to verify code');
       }
       
       // If verification successful, create a user object and store session
-      if (data.session_id) {
+      if (response.session_id) {
         // Store the session ID in localStorage
-        localStorage.setItem('gator_prime_session_id', data.session_id);
+        localStorage.setItem('gator_prime_session_id', response.session_id);
         
         set({
           user: {
-            id: data.session_id,
+            id: response.session_id,
             phone: phone
           },
-          sessionId: data.session_id,
+          sessionId: response.session_id,
           isVerifying: false
         });
         
@@ -263,27 +246,21 @@ export const useTwilioAuthStore = create<AuthState>((set, get) => ({
       // Validate the session through API
       const response = await twilioApi.validateSession(sessionId);
       
-      if (!response.ok) {
-        throw new Error('Failed to validate session');
-      }
-      
-      const data = await response.json() as ValidateSessionResponse;
-      
-      if (data.valid && data.phone_number) {
-        // Session is valid
-        set({
-          user: {
-            id: sessionId,
-            phone: data.phone_number
-          },
-          isLoading: false
-        });
-        return true;
-      } else {
+      if (!response.valid) {
         // Session is invalid
         localStorage.removeItem('gator_prime_session_id');
         set({ user: null, sessionId: null, isLoading: false });
         return false;
+      } else {
+        // Session is valid
+        set({
+          user: {
+            id: sessionId,
+            phone: response.phone_number
+          },
+          isLoading: false
+        });
+        return true;
       }
     } catch (error) {
       console.error('Session validation error:', error);
