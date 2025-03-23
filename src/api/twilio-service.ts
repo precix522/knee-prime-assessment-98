@@ -1,10 +1,10 @@
 
 // This file contains the Twilio service functions that interact with the Twilio API
 
-// Replace these with your actual Twilio credentials from your account
-const TWILIO_ACCOUNT_SID = "YOUR_TWILIO_ACCOUNT_SID";
-const TWILIO_AUTH_TOKEN = "YOUR_TWILIO_AUTH_TOKEN";
-const TWILIO_SERVICE_SID = "YOUR_TWILIO_VERIFY_SERVICE_SID";
+// Twilio credentials
+const TWILIO_ACCOUNT_SID = "ACcbbc17f108e418e864e4f76f20fbef73";
+const TWILIO_AUTH_TOKEN = "6942e316dc6ced823475d26512178cac";
+const TWILIO_SERVICE_SID = "VA3c04abf5a6865c4706ef361f59f7215c";
 
 // Function to send OTP via Twilio Verify
 export const sendOTP = async (phoneNumber: string): Promise<{ success: boolean; message: string }> => {
