@@ -84,11 +84,15 @@ export default function Login() {
       return;
     }
     
-    // Send OTP to the phone number
-    await sendOTP(formattedNumber);
-    
-    // Start countdown for resend (60 seconds)
-    setCountdown(60);
+    try {
+      // Send OTP to the phone number
+      await sendOTP(formattedNumber);
+      
+      // Start countdown for resend (60 seconds)
+      setCountdown(60);
+    } catch (err) {
+      console.error("Error in handleSendOTP:", err);
+    }
   };
   
   // Handle OTP verification
