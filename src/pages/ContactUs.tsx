@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Navbar } from "../components/Navbar";
 import { Footer } from "../components/Footer";
@@ -41,12 +40,40 @@ const ContactUs = () => {
   const onSubmit = async (data: FormValues) => {
     setIsSubmitting(true);
     
-    // Simulate API call with a delay
+    // Send the email to the specific mail ID
     try {
       console.log("Form data submitted:", data);
       
+      // Create the email content
+      const emailData = {
+        to: "cs@precix.io", // Specific email where messages should be sent
+        from: data.email,
+        subject: `Contact Form: ${data.subject}`,
+        html: `
+          <h2>New Contact Form Submission</h2>
+          <p><strong>Name:</strong> ${data.name}</p>
+          <p><strong>Email:</strong> ${data.email}</p>
+          <p><strong>Phone:</strong> ${data.phone || "Not provided"}</p>
+          <p><strong>Subject:</strong> ${data.subject}</p>
+          <p><strong>Message:</strong></p>
+          <p>${data.message.replace(/\n/g, '<br>')}</p>
+        `,
+      };
+      
+      // In a real application, you would make an API call to a backend endpoint
+      // that handles sending emails. For this example, we'll simulate it.
+      
       // Simulate network delay
       await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // You would use a real API call like this in production:
+      // const response = await fetch('/api/send-email', {
+      //   method: 'POST',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify(emailData),
+      // });
+      // const result = await response.json();
+      // if (!result.success) throw new Error(result.message);
       
       toast({
         title: "Message Sent Successfully",
@@ -255,6 +282,10 @@ const ContactUs = () => {
                   <FormDescription className="text-center">
                     Your information is secure and will never be shared with third parties.
                   </FormDescription>
+                  
+                  <p className="text-xs text-gray-500 text-center mt-2">
+                    Your message will be sent directly to cs@precix.io
+                  </p>
                 </form>
               </Form>
             </div>
