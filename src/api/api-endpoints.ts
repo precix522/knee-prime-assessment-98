@@ -3,6 +3,7 @@
 
 import { sendOTP, verifyOTP, validateSession } from './twilio-service';
 import { sendEmail } from './email-service';
+import { NextResponse } from 'next/server';
 
 // API route for sending OTP
 export async function handleSendOTP(request: Request): Promise<Response> {
@@ -12,22 +13,14 @@ export async function handleSendOTP(request: Request): Promise<Response> {
     // Call the Twilio service to send OTP
     const result = await sendOTP(phone_number);
     
-    return new Response(JSON.stringify(result), {
+    return NextResponse.json(result, {
       status: result.success ? 200 : 400,
-      headers: {
-        'Content-Type': 'application/json',
-      },
     });
   } catch (error: any) {
     console.error('API Error - Send OTP:', error);
-    return new Response(
-      JSON.stringify({ success: false, message: error.message || 'Server error' }),
-      {
-        status: 500,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      }
+    return NextResponse.json(
+      { success: false, message: error.message || 'Server error' },
+      { status: 500 }
     );
   }
 }
@@ -40,22 +33,14 @@ export async function handleVerifyOTP(request: Request): Promise<Response> {
     // Call the Twilio service to verify OTP
     const result = await verifyOTP(phone_number, code);
     
-    return new Response(JSON.stringify(result), {
+    return NextResponse.json(result, {
       status: result.success ? 200 : 400,
-      headers: {
-        'Content-Type': 'application/json',
-      },
     });
   } catch (error: any) {
     console.error('API Error - Verify OTP:', error);
-    return new Response(
-      JSON.stringify({ success: false, message: error.message || 'Server error' }),
-      {
-        status: 500,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      }
+    return NextResponse.json(
+      { success: false, message: error.message || 'Server error' },
+      { status: 500 }
     );
   }
 }
@@ -68,22 +53,14 @@ export async function handleValidateSession(request: Request): Promise<Response>
     // Call the Twilio service to validate session
     const result = await validateSession(session_id);
     
-    return new Response(JSON.stringify(result), {
+    return NextResponse.json(result, {
       status: 200,
-      headers: {
-        'Content-Type': 'application/json',
-      },
     });
   } catch (error: any) {
     console.error('API Error - Validate Session:', error);
-    return new Response(
-      JSON.stringify({ valid: false, phone_number: null }),
-      {
-        status: 500,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      }
+    return NextResponse.json(
+      { valid: false, phone_number: null },
+      { status: 500 }
     );
   }
 }
@@ -95,45 +72,28 @@ export async function handleSendEmail(request: Request): Promise<Response> {
     
     // Validate the email data
     if (!emailData.to || !emailData.from || !emailData.subject || !emailData.html) {
-      return new Response(
-        JSON.stringify({ 
-          success: false, 
-          message: 'Missing required email fields' 
-        }),
-        {
-          status: 400,
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
-      );
+      return NextResponse.json({ 
+        success: false, 
+        message: 'Missing required email fields' 
+      }, { status: 400 });
     }
+    
+    console.log('Processing email request:', emailData);
     
     // Call the email service to send the email
     const result = await sendEmail(emailData);
     
-    return new Response(
-      JSON.stringify(result),
-      {
-        status: result.success ? 200 : 400,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      }
-    );
+    console.log('Email service result:', result);
+    
+    // Return a JSON response with the result
+    return NextResponse.json(result, {
+      status: result.success ? 200 : 400,
+    });
   } catch (error: any) {
     console.error('API Error - Send Email:', error);
-    return new Response(
-      JSON.stringify({ success: false, message: error.message || 'Server error' }),
-      {
-        status: 500,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      }
+    return NextResponse.json(
+      { success: false, message: error.message || 'Server error' },
+      { status: 500 }
     );
   }
 }
-
-// You would need to add additional code to register these handlers with a proper API router
-// For a simple implementation, you could use a service worker or a lightweight server
