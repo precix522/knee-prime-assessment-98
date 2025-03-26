@@ -4,6 +4,7 @@ import { useSearchParams, useNavigate } from "react-router-dom";
 import { useTwilioAuthStore } from "../utils/twilio-auth-store";
 import { Button } from "../components/Button";
 import { getPatientReport } from "../utils/supabase";
+import { getAnnexReport } from "../utils/supabase";
 import { toast } from "sonner";
 
 export default function ReportViewer() {
@@ -12,7 +13,9 @@ export default function ReportViewer() {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
   const [reportUrl, setReportUrl] = useState<string | null>(null);
+  const [annexreportUrl, setAnnexReportUrl] = useState<string | null>(null);
   const [reportName, setReportName] = useState<string | null>(null);
+  const [AnnexreportName, setAnnexReportName] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   
   // Get auth state from store
@@ -51,6 +54,20 @@ export default function ReportViewer() {
     };
     
     fetchPatientReport();
+
+       // Fetch the report from Supabase
+        const { fileUrl, fileName } = await getAnnexReport(patientId);
+        setAnnexReportUrl(fileUrl);
+        setAnnexReportName(fileName);
+        setIsLoading(false);
+        toast.success("Report loaded successfully");
+      } catch (err: any) {
+        console.error("Error fetching annex report:", err);
+        setError(err.message || "Failed to load the report");
+        toast.error("Failed to load the report");
+        setIsLoading(false);
+      }
+    };
   }, [navigate, validateSession, patientId]);
   
   // Download report function
@@ -65,7 +82,18 @@ export default function ReportViewer() {
       toast.success("Download started");
     }
   };
-  
+  // Download report function
+  const handleAnnexDownload = () => {
+    if (reportUrl) {
+      const link = document.createElement('a');
+      link.href = reportUrl;
+      link.download = AnnexreportName || 'Annex-report.pdf';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      toast.success("Download started");
+    }
+  };
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -111,6 +139,21 @@ export default function ReportViewer() {
                 frameBorder="0"
               ></iframe>
             </div>
+            <div className="self-end mb-4">
+              <Button 
+                variant="health" 
+                onClick={handleAnnexDownload}
+                className="flex items-center gap-2"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="7 10 12 15 17 10"></polyline>
+                  <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                Download Annex
+              </Button>
+            </div>
+          </div>
             <div className="self-end mb-4">
               <Button 
                 variant="health" 
