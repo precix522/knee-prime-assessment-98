@@ -139,17 +139,6 @@ export default function ReportViewer() {
                 frameBorder="0"
               ></iframe>
             </div>
-              <div className="flex justify-between">
-            <Button 
-                variant="health" 
-                onClick={handleAnnexDownload}
-                className="flex"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                </svg>
-                Download Annex
-              </Button>
-          </div>
             <div className="self- mb-4">
               <Button 
                 variant="health" 
@@ -177,7 +166,18 @@ export default function ReportViewer() {
             </div>
           )
         )}
-        
+        <div className="flex justify-between">
+                <div className="flex justify-between">
+              <Button 
+                variant="outline"
+                onClick={handleAnnexDownload}
+                className="flex"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                </svg>
+                Download Annex
+              </Button>
+          </div>
         <div className="flex justify-between">
           <Button 
             variant="outline" 
