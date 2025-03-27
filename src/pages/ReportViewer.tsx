@@ -185,7 +185,13 @@ export default function ReportViewer() {
           >
             Back to Patient ID
           </Button>
-          
+
+          <Button 
+            variant="health" 
+            onClick={() => navigate('/dashboard')}
+          >
+            Annex
+          </Button>
           <Button 
             variant="health" 
             onClick={() => navigate('/dashboard')}
