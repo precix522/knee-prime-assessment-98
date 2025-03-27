@@ -139,19 +139,18 @@ export default function ReportViewer() {
                 frameBorder="0"
               ></iframe>
             </div>
-            <div className="self-end mb-4">
-              <Button 
+              <div className="flex justify-between">
+            <Button 
                 variant="health" 
                 onClick={handleAnnexDownload}
-                className="flex items-center gap-2"
+                className="flex"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 </svg>
                 Download Annex
               </Button>
-            </div>
           </div>
-            <div className="self-end mb-4">
+            <div className="self- mb-4">
               <Button 
                 variant="health" 
                 onClick={handleDownload}
