@@ -70,3 +70,48 @@ export const getPatientReport = async (patientId: string) => {
     throw error;
   }
 };
+
+// Function to fetch annex report PDF by patient ID
+export const getAnnexReport = async (patientId: string) => {
+  try {
+    console.log('Fetching annex report for patient ID:', patientId);
+    
+    // Fetch the annex report URL from the 'patient' table
+    const { data: patientData, error: patientError } = await supabase
+      .from('patient')
+      .select('annex_report_url')
+      .eq('Patient_ID', patientId)
+      .single();
+    
+    console.log('Patient annex data result:', patientData);
+    
+    if (patientError) {
+      console.error('Error fetching patient annex data:', patientError);
+      throw patientError;
+    }
+    
+    if (!patientData || !patientData.annex_report_url) {
+      throw new Error('No annex report URL found for this patient ID');
+    }
+    
+    // Get the annex report URL from the patient data
+    const reportUrl = patientData.annex_report_url;
+    console.log('Annex Report URL:', reportUrl);
+    
+    if (!reportUrl || typeof reportUrl !== 'string') {
+      throw new Error('Invalid annex report URL format');
+    }
+    
+    // Extract file name for display purposes
+    const fileName = reportUrl.split('/').pop() || 'annex-report.pdf';
+    
+    // Return the public URL directly
+    return { 
+      fileUrl: reportUrl, 
+      fileName 
+    };
+  } catch (error) {
+    console.error('Error fetching annex report:', error);
+    throw error;
+  }
+};

@@ -3,8 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useTwilioAuthStore } from "../utils/twilio-auth-store";
 import { Button } from "../components/Button";
-import { getPatientReport } from "../utils/supabase";
-import { getAnnexReport } from "../utils/supabase";
+import { getPatientReport, getAnnexReport } from "../utils/supabase";
 import { toast } from "sonner";
 
 export default function ReportViewer() {
@@ -13,9 +12,9 @@ export default function ReportViewer() {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
   const [reportUrl, setReportUrl] = useState<string | null>(null);
-  const [annexreportUrl, setAnnexReportUrl] = useState<string | null>(null);
+  const [annexReportUrl, setAnnexReportUrl] = useState<string | null>(null);
   const [reportName, setReportName] = useState<string | null>(null);
-  const [AnnexreportName, setAnnexReportName] = useState<string | null>(null);
+  const [annexReportName, setAnnexReportName] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   
   // Get auth state from store
@@ -23,7 +22,7 @@ export default function ReportViewer() {
   
   // Fetch patient report from Supabase
   useEffect(() => {
-    const fetchPatientReport = async () => {
+    const fetchReports = async () => {
       try {
         const isValid = await validateSession();
         if (!isValid) {
@@ -37,14 +36,26 @@ export default function ReportViewer() {
           return;
         }
         
-        console.log("Fetching report for patient ID:", patientId);
+        console.log("Fetching reports for patient ID:", patientId);
         
-        // Fetch the report from Supabase
+        // Fetch the main report from Supabase
         const { fileUrl, fileName } = await getPatientReport(patientId);
         setReportUrl(fileUrl);
         setReportName(fileName);
+        
+        // Fetch the annex report from Supabase
+        try {
+          const annexData = await getAnnexReport(patientId);
+          setAnnexReportUrl(annexData.fileUrl);
+          setAnnexReportName(annexData.fileName);
+        } catch (annexErr: any) {
+          console.error("Error fetching annex report:", annexErr);
+          // We don't set the main error here to not block the main report display
+          toast.error("Failed to load the annex report");
+        }
+        
         setIsLoading(false);
-        toast.success("Report loaded successfully");
+        toast.success("Reports loaded successfully");
       } catch (err: any) {
         console.error("Error fetching patient report:", err);
         setError(err.message || "Failed to load the report");
@@ -53,21 +64,7 @@ export default function ReportViewer() {
       }
     };
     
-    fetchPatientReport();
-
-       // Fetch the report from Supabase
-        const { fileUrl, fileName } = await getAnnexReport(patientId);
-        setAnnexReportUrl(fileUrl);
-        setAnnexReportName(fileName);
-        setIsLoading(false);
-        toast.success("Report loaded successfully");
-      } catch (err: any) {
-        console.error("Error fetching annex report:", err);
-        setError(err.message || "Failed to load the report");
-        toast.error("Failed to load the report");
-        setIsLoading(false);
-      }
-    };
+    fetchReports();
   }, [navigate, validateSession, patientId]);
   
   // Download report function
@@ -82,18 +79,22 @@ export default function ReportViewer() {
       toast.success("Download started");
     }
   };
-  // Download report function
+  
+  // Download annex report function
   const handleAnnexDownload = () => {
-    if (reportUrl) {
+    if (annexReportUrl) {
       const link = document.createElement('a');
-      link.href = reportUrl;
-      link.download = AnnexreportName || 'Annex-report.pdf';
+      link.href = annexReportUrl;
+      link.download = annexReportName || 'annex-report.pdf';
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      toast.success("Download started");
+      toast.success("Annex download started");
+    } else {
+      toast.error("Annex report not available");
     }
   };
+  
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -139,7 +140,7 @@ export default function ReportViewer() {
                 frameBorder="0"
               ></iframe>
             </div>
-            <div className="self- mb-4">
+            <div className="mb-4">
               <Button 
                 variant="health" 
                 onClick={handleDownload}
@@ -150,7 +151,7 @@ export default function ReportViewer() {
                   <polyline points="7 10 12 15 17 10"></polyline>
                   <line x1="12" y1="15" x2="12" y2="3"></line>
                 </svg>
-                Download Report Test
+                Download Report
               </Button>
             </div>
           </div>
@@ -166,33 +167,30 @@ export default function ReportViewer() {
             </div>
           )
         )}
-        <div className="flex justify-between">
-                <div className="flex justify-between">
-              <Button 
-                variant="outline"
-                onClick={handleAnnexDownload}
-                className="flex"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                </svg>
-                Download Annex
-              </Button>
-          </div>
-          </div>
-        <div className="flex justify-between">
+        
+        <div className="flex justify-between mt-6">
           <Button 
             variant="outline" 
             onClick={() => navigate('/patient-id')}
           >
             Back to Patient ID
           </Button>
-
-          <Button 
-            variant="health" 
-            onClick={() => navigate('/dashboard')}
-          >
-            Annex
-          </Button>
+          
+          {annexReportUrl && (
+            <Button 
+              variant="outline"
+              onClick={handleAnnexDownload}
+              className="flex items-center gap-2"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+              Download Annex
+            </Button>
+          )}
+          
           <Button 
             variant="health" 
             onClick={() => navigate('/dashboard')}
