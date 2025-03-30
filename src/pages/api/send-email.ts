@@ -1,12 +1,11 @@
 
-import { NextResponse } from 'next/server';
 import { handleSendEmail } from '@/api/api-endpoints';
 
 // This is a simple API handler for sending emails
 export default async function handler(req: Request) {
   if (req.method !== 'POST') {
-    return NextResponse.json(
-      { success: false, message: 'Method not allowed' },
+    return new Response(
+      JSON.stringify({ success: false, message: 'Method not allowed' }),
       {
         status: 405,
         headers: {
@@ -27,11 +26,11 @@ export default async function handler(req: Request) {
     console.error('Send email API error:', error);
     
     // Return a formatted error response
-    return NextResponse.json(
-      { 
+    return new Response(
+      JSON.stringify({ 
         success: false, 
         message: error.message || 'Failed to send email'
-      },
+      }),
       {
         status: 500,
         headers: {
