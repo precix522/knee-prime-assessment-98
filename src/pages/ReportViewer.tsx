@@ -195,15 +195,15 @@ export default function ReportViewer() {
           )
         )}
         
-        {/* Supporting Document Section */}
+        {/* Annex Document Section (renamed from Supporting Document) */}
         {supportingDocUrl && (
           <div className="mt-8 pt-8 border-t border-gray-200">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">Supporting Document</h2>
+            <h2 className="text-xl font-bold text-gray-900 mb-4">Annex</h2>
             <div className="border border-gray-200 rounded-md mb-6 overflow-hidden bg-gray-50 h-[400px]">
               <iframe 
                 src={supportingDocUrl}
                 className="w-full h-full"
-                title="Supporting Document PDF"
+                title="Annex PDF"
                 frameBorder="0"
               ></iframe>
             </div>
@@ -218,7 +218,7 @@ export default function ReportViewer() {
                   <polyline points="7 10 12 15 17 10"></polyline>
                   <line x1="12" y1="15" x2="12" y2="3"></line>
                 </svg>
-                Download Supporting Document
+                Download Annex
               </Button>
             </div>
           </div>
