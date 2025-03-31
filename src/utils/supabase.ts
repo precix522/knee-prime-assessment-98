@@ -1,4 +1,3 @@
-
 import { createClient } from '@supabase/supabase-js';
 
 // Supabase configuration with your provided credentials
@@ -113,5 +112,63 @@ export const getAnnexReport = async (patientId: string) => {
   } catch (error) {
     console.error('Error fetching annex report:', error);
     throw error;
+  }
+};
+
+// Function to fetch supporting document link from Supabase
+export const getSupportingDocument = async () => {
+  try {
+    console.log('Fetching supporting document link');
+    
+    // Fetch the supporting document from the 'supporting_documents' table
+    const { data, error } = await supabase
+      .from('supporting_documents')
+      .select('document_url')
+      .single();
+    
+    console.log('Supporting document data result:', data);
+    
+    if (error) {
+      console.error('Error fetching supporting document:', error);
+      throw error;
+    }
+    
+    if (!data || !data.document_url) {
+      // If no document found in the table, return the hardcoded URL
+      const fallbackUrl = 'https://btfinmlyszedyeadqgvl.supabase.co/storage/v1/object/public/supporting-documents//Orange%20and%20Blue%20Minimal%20and%20Professional%20Company%20Annual%20Report.pdf';
+      console.log('No supporting document found in database, using fallback URL');
+      
+      // Extract file name for display purposes
+      const fileName = fallbackUrl.split('/').pop() || 'supporting-document.pdf';
+      
+      return { 
+        fileUrl: fallbackUrl, 
+        fileName 
+      };
+    }
+    
+    // Get the document URL from the data
+    const documentUrl = data.document_url;
+    console.log('Supporting document URL:', documentUrl);
+    
+    // Extract file name for display purposes
+    const fileName = documentUrl.split('/').pop() || 'supporting-document.pdf';
+    
+    // Return the document URL and file name
+    return { 
+      fileUrl: documentUrl, 
+      fileName 
+    };
+  } catch (error) {
+    console.error('Error fetching supporting document:', error);
+    
+    // If there's an error, return the hardcoded URL
+    const fallbackUrl = 'https://btfinmlyszedyeadqgvl.supabase.co/storage/v1/object/public/supporting-documents//Orange%20and%20Blue%20Minimal%20and%20Professional%20Company%20Annual%20Report.pdf';
+    const fileName = fallbackUrl.split('/').pop() || 'supporting-document.pdf';
+    
+    return { 
+      fileUrl: fallbackUrl, 
+      fileName 
+    };
   }
 };

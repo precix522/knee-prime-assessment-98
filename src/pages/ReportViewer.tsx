@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useTwilioAuthStore } from "../utils/twilio-auth-store";
 import { Button } from "../components/Button";
-import { getPatientReport, getAnnexReport } from "../utils/supabase";
+import { getPatientReport, getAnnexReport, getSupportingDocument } from "../utils/supabase";
 import { toast } from "sonner";
 
 export default function ReportViewer() {
@@ -13,8 +13,10 @@ export default function ReportViewer() {
   const [isLoading, setIsLoading] = useState(true);
   const [reportUrl, setReportUrl] = useState<string | null>(null);
   const [annexReportUrl, setAnnexReportUrl] = useState<string | null>(null);
+  const [supportingDocUrl, setSupportingDocUrl] = useState<string | null>(null);
   const [reportName, setReportName] = useState<string | null>(null);
   const [annexReportName, setAnnexReportName] = useState<string | null>(null);
+  const [supportingDocName, setSupportingDocName] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   
   // Get auth state from store
@@ -52,6 +54,16 @@ export default function ReportViewer() {
           console.error("Error fetching annex report:", annexErr);
           // We don't set the main error here to not block the main report display
           toast.error("Failed to load the annex report");
+        }
+        
+        // Fetch the supporting document
+        try {
+          const supportingDocData = await getSupportingDocument();
+          setSupportingDocUrl(supportingDocData.fileUrl);
+          setSupportingDocName(supportingDocData.fileName);
+        } catch (docErr: any) {
+          console.error("Error fetching supporting document:", docErr);
+          toast.error("Failed to load the supporting document");
         }
         
         setIsLoading(false);
@@ -92,6 +104,21 @@ export default function ReportViewer() {
       toast.success("Annex download started");
     } else {
       toast.error("Annex report not available");
+    }
+  };
+  
+  // Download supporting document function
+  const handleSupportingDocDownload = () => {
+    if (supportingDocUrl) {
+      const link = document.createElement('a');
+      link.href = supportingDocUrl;
+      link.download = supportingDocName || 'supporting-document.pdf';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      toast.success("Supporting document download started");
+    } else {
+      toast.error("Supporting document not available");
     }
   };
   
@@ -166,6 +193,35 @@ export default function ReportViewer() {
               </p>
             </div>
           )
+        )}
+        
+        {/* Supporting Document Section */}
+        {supportingDocUrl && (
+          <div className="mt-8 pt-8 border-t border-gray-200">
+            <h2 className="text-xl font-bold text-gray-900 mb-4">Supporting Document</h2>
+            <div className="border border-gray-200 rounded-md mb-6 overflow-hidden bg-gray-50 h-[400px]">
+              <iframe 
+                src={supportingDocUrl}
+                className="w-full h-full"
+                title="Supporting Document PDF"
+                frameBorder="0"
+              ></iframe>
+            </div>
+            <div className="mb-6">
+              <Button 
+                variant="outline" 
+                onClick={handleSupportingDocDownload}
+                className="flex items-center gap-2"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="7 10 12 15 17 10"></polyline>
+                  <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                Download Supporting Document
+              </Button>
+            </div>
+          </div>
         )}
         
         <div className="flex justify-between mt-6">
