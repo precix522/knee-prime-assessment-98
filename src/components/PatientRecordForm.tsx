@@ -86,8 +86,9 @@ export default function PatientRecordForm() {
         const fileName = `${i === 0 ? 'main-report' : 'annex-report'}-${Date.now()}.${fileExt}`;
         const filePath = `${folderPath}/${fileName}`;
         
+        // UPDATED BUCKET NAME from 'patient-documents' to 'Patient-report'
         const { data: uploadData, error: uploadError } = await supabase.storage
-          .from('patient-documents')
+          .from('Patient-report')
           .upload(filePath, file, {
             upsert: true,
           });
@@ -96,9 +97,9 @@ export default function PatientRecordForm() {
           throw new Error(`Error uploading file: ${uploadError.message}`);
         }
         
-        // Get public URL for the file
+        // Get public URL for the file - UPDATED BUCKET NAME
         const { data: { publicUrl } } = supabase.storage
-          .from('patient-documents')
+          .from('Patient-report')
           .getPublicUrl(filePath);
           
         if (i === 0) {

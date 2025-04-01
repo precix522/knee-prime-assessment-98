@@ -1,3 +1,4 @@
+
 import { createClient } from '@supabase/supabase-js';
 
 // Supabase configuration with your provided credentials
@@ -186,11 +187,11 @@ export const uploadPatientDocument = async (file: File, patientId: string, docum
     const fileName = `${documentType}-report-${Date.now()}.${fileExt}`;
     const filePath = `${folderPath}/${fileName}`;
     
-    console.log(`Uploading ${documentType} report for patient ${patientId}...`);
+    console.log(`Uploading ${documentType} report for patient ${patientId} to bucket 'Patient-report'...`);
     
-    // Upload the file
+    // Upload the file - UPDATED BUCKET NAME from 'patient-documents' to 'Patient-report'
     const { data: uploadData, error: uploadError } = await supabase.storage
-      .from('patient-documents')
+      .from('Patient-report')
       .upload(filePath, file, {
         upsert: true,
       });
@@ -200,9 +201,9 @@ export const uploadPatientDocument = async (file: File, patientId: string, docum
       throw uploadError;
     }
     
-    // Get public URL for the file
+    // Get public URL for the file - UPDATED BUCKET NAME
     const { data: { publicUrl } } = supabase.storage
-      .from('patient-documents')
+      .from('Patient-report')
       .getPublicUrl(filePath);
       
     console.log(`${documentType} report uploaded successfully, URL:`, publicUrl);
