@@ -154,7 +154,7 @@ export default function PatientRecordForm() {
           {
             Patient_ID: formData.patientId,
             patient_name: formData.patientName,
-            phone_number: formData.phoneNumber,
+            phone: formData.phoneNumber,
             report_url: reportUrl
           }
         ]);
