@@ -59,6 +59,12 @@ export const Navbar = () => {
             >
               Benefits
             </a>
+            <a 
+              href="/manage-patients"
+              className="text-gray-700 hover:text-health-600 transition-colors duration-300 text-sm font-medium"
+            >
+              Sign Up
+            </a>
             <Button 
               onClick={() => window.location.href = '/login'}
               variant="health"
@@ -124,6 +130,13 @@ export const Navbar = () => {
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Benefits
+              </a>
+              <a
+                href="/manage-patients"
+                className="text-gray-900 hover:text-health-600 transition-colors duration-300 px-3 py-2 rounded-md text-base font-medium"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Sign Up
               </a>
               <Button 
                 onClick={() => {
