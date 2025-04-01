@@ -172,3 +172,96 @@ export const getSupportingDocument = async () => {
     };
   }
 };
+
+// Function to upload patient document to Supabase storage
+export const uploadPatientDocument = async (file: File, patientId: string, documentType: 'main' | 'annex') => {
+  try {
+    if (!file) {
+      throw new Error('No file provided');
+    }
+    
+    // Create a folder path using patient ID
+    const folderPath = `patient-reports/${patientId}`;
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${documentType}-report-${Date.now()}.${fileExt}`;
+    const filePath = `${folderPath}/${fileName}`;
+    
+    console.log(`Uploading ${documentType} report for patient ${patientId}...`);
+    
+    // Upload the file
+    const { data: uploadData, error: uploadError } = await supabase.storage
+      .from('patient-documents')
+      .upload(filePath, file, {
+        upsert: true,
+      });
+      
+    if (uploadError) {
+      console.error('File upload error:', uploadError);
+      throw uploadError;
+    }
+    
+    // Get public URL for the file
+    const { data: { publicUrl } } = supabase.storage
+      .from('patient-documents')
+      .getPublicUrl(filePath);
+      
+    console.log(`${documentType} report uploaded successfully, URL:`, publicUrl);
+    
+    return publicUrl;
+    
+  } catch (error) {
+    console.error('Error in uploadPatientDocument:', error);
+    throw error;
+  }
+};
+
+// Function to check if patient ID already exists
+export const checkPatientIdExists = async (patientId: string): Promise<boolean> => {
+  try {
+    const { data, error } = await supabase
+      .from('patient')
+      .select('Patient_ID')
+      .eq('Patient_ID', patientId);
+      
+    if (error) {
+      throw error;
+    }
+    
+    return data && data.length > 0;
+  } catch (error) {
+    console.error('Error checking patient ID:', error);
+    throw error;
+  }
+};
+
+// Function to create a new patient record
+export const createPatientRecord = async (patientData: {
+  patientId: string;
+  patientName: string;
+  phoneNumber: string;
+  reportUrl: string | null;
+  annexReportUrl: string | null;
+}) => {
+  try {
+    const { error } = await supabase
+      .from('patient')
+      .insert([
+        {
+          Patient_ID: patientData.patientId,
+          patient_name: patientData.patientName,
+          phone_number: patientData.phoneNumber,
+          report_url: patientData.reportUrl,
+          annex_report_url: patientData.annexReportUrl
+        }
+      ]);
+      
+    if (error) {
+      throw error;
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('Error creating patient record:', error);
+    throw error;
+  }
+};

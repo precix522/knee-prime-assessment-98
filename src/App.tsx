@@ -13,6 +13,7 @@ import ReportViewer from "./pages/ReportViewer";
 import NotFound from "./pages/NotFound";
 import ContactUS from "./pages/ContactUs";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
+import ManagePatients from "./pages/ManagePatients";
 import { AuthInitializer } from "./components/AuthInitializer";
 
 const queryClient = new QueryClient();
@@ -33,6 +34,7 @@ const App = () => (
           <Route path="/report-viewer" element={<ReportViewer />} />
           <Route path="/contactus" element={<ContactUS />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          <Route path="/manage-patients" element={<ManagePatients />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
