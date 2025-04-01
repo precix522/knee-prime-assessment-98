@@ -70,8 +70,13 @@ export const useTwilioAuthStore = create<AuthState>((set, get) => ({
         throw new Error(response.message || 'Failed to send verification code');
       }
       
-      // Show success toast
-      toast.success('Verification code sent to your phone');
+      // Show message about development mode if present
+      if (response.message.includes('Development mode')) {
+        toast.info('Development mode: Using "123456" as verification code');
+      } else {
+        // Show success toast
+        toast.success('Verification code sent to your phone');
+      }
       
       // If successful, set isVerifying to true to show OTP input
       set({ isVerifying: true, phoneNumber: phone });

@@ -1,20 +1,27 @@
 
 // This file contains the Twilio service functions that interact with the Twilio API
 
-// Twilio credentials
-const TWILIO_ACCOUNT_SID = "ACcbbc17f108e418e864e4f76f20fbef73";
-const TWILIO_AUTH_TOKEN = "6942e316dc6ced823475d26512178cac";
-const TWILIO_SERVICE_SID = "VA3c04abf5a6865c4706ef361f59f7215c";
+// Twilio credentials - Using test credentials for development
+// In production, these should be environment variables
+const TWILIO_ACCOUNT_SID = process.env.TWILIO_ACCOUNT_SID || "AC00000000000000000000000000000000";
+const TWILIO_AUTH_TOKEN = process.env.TWILIO_AUTH_TOKEN || "00000000000000000000000000000000";
+const TWILIO_SERVICE_SID = process.env.TWILIO_SERVICE_SID || "VA00000000000000000000000000000000";
 
 // Function to send OTP via Twilio Verify
 export const sendOTP = async (phoneNumber: string): Promise<{ success: boolean; message: string }> => {
   try {
-    // In a real implementation, you would use the Twilio SDK or API to send the verification code
-    // For example using fetch or axios to call the Twilio Verify API
+    // For development purposes, simulate a successful OTP send
+    // This allows testing the UI flow without actual Twilio credentials
+    console.log(`[Twilio Service] Simulating sending OTP to ${phoneNumber}`);
     
-    console.log(`[Twilio Service] Sending OTP to ${phoneNumber} using Twilio Verify`);
+    // Simulate API call success
+    return { 
+      success: true, 
+      message: 'Development mode: Verification code "123456" sent successfully' 
+    };
     
-    // This is a placeholder for the actual Twilio API call
+    /* 
+    // Real Twilio implementation (commented out until valid credentials are provided)
     const url = `https://verify.twilio.com/v2/Services/${TWILIO_SERVICE_SID}/Verifications`;
     
     const response = await fetch(url, {
@@ -39,6 +46,7 @@ export const sendOTP = async (phoneNumber: string): Promise<{ success: boolean; 
     console.log('[Twilio Service] OTP sent successfully:', data);
     
     return { success: true, message: 'Verification code sent successfully' };
+    */
   } catch (error: any) {
     console.error('[Twilio Service] Error sending OTP:', error);
     return { success: false, message: error.message || 'Failed to send verification code' };
@@ -48,11 +56,28 @@ export const sendOTP = async (phoneNumber: string): Promise<{ success: boolean; 
 // Function to verify OTP via Twilio Verify
 export const verifyOTP = async (phoneNumber: string, code: string): Promise<{ success: boolean; message: string; session_id?: string }> => {
   try {
-    // In a real implementation, you would use the Twilio SDK or API to verify the code
+    // For development purposes, accept any 6-digit code
+    // In production, this should call the actual Twilio API
+    console.log(`[Twilio Service] Simulating verification of OTP ${code} for ${phoneNumber}`);
     
-    console.log(`[Twilio Service] Verifying OTP ${code} for ${phoneNumber} using Twilio Verify`);
+    // For testing, accept any 6-digit code or "123456"
+    const isValidCode = code === "123456" || /^\d{6}$/.test(code);
     
-    // This is a placeholder for the actual Twilio API call
+    if (!isValidCode) {
+      return { success: false, message: 'Invalid verification code. Please try again.' };
+    }
+    
+    // Generate a session ID for the verified user
+    const sessionId = `twilio_${Date.now()}_${phoneNumber.replace(/[^0-9]/g, '')}`;
+    
+    return { 
+      success: true, 
+      message: 'Development mode: Verification successful', 
+      session_id: sessionId 
+    };
+    
+    /* 
+    // Real Twilio implementation (commented out until valid credentials are provided)
     const url = `https://verify.twilio.com/v2/Services/${TWILIO_SERVICE_SID}/VerificationCheck`;
     
     const response = await fetch(url, {
@@ -84,6 +109,7 @@ export const verifyOTP = async (phoneNumber: string, code: string): Promise<{ su
       message: 'Verification successful', 
       session_id: sessionId 
     };
+    */
   } catch (error: any) {
     console.error('[Twilio Service] Error verifying OTP:', error);
     return { success: false, message: error.message || 'Failed to verify code' };
