@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useTwilioAuthStore } from "../utils/twilio-auth-store";
 import { Button } from "../components/Button";
-import { getPatientReport, getAnnexReport, getSupportingDocument } from "../utils/supabase";
+import { getPatientReport, getAnnexReport, getSupportingDocument, supabase } from "../utils/supabase";
 import { toast } from "sonner";
 
 export default function ReportViewer() {

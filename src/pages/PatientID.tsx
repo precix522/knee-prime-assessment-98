@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "../components/Button";
@@ -48,12 +49,20 @@ export default function PatientID() {
     try {
       console.log("Checking patient ID:", patientId);
       
-      // Check if the patient ID exists in the database
-      // Using "Patient_ID" instead of "Patient ID" to match column name format in SQL
+      // Get current authenticated user's phone number
+      if (!user || !user.phone) {
+        throw new Error("User not authenticated or phone number not available");
+      }
+      
+      const userPhoneNumber = user.phone;
+      console.log("User phone number:", userPhoneNumber);
+      
+      // Check if the patient ID exists AND is associated with the user's phone number
       const { data, error: patientError } = await supabase
         .from('patient')
         .select('*')
-        .eq('Patient_ID', patientId);
+        .eq('Patient_ID', patientId)
+        .eq('phone_number', userPhoneNumber);
       
       console.log("Query response:", data, patientError);
       
@@ -62,13 +71,25 @@ export default function PatientID() {
       }
       
       if (!data || data.length === 0) {
-        setError("Patient ID not found. Please check and try again.");
-        toast.error("Patient ID not found");
+        // Check if the patient ID exists but belongs to a different phone number
+        const { data: patientExists } = await supabase
+          .from('patient')
+          .select('Patient_ID')
+          .eq('Patient_ID', patientId);
+          
+        if (patientExists && patientExists.length > 0) {
+          setError("This Patient ID is not associated with your phone number. Please contact support.");
+          toast.error("Unauthorized access");
+        } else {
+          setError("Patient ID not found. Please check and try again.");
+          toast.error("Patient ID not found");
+        }
+        
         setIsLoading(false);
         return;
       }
       
-      // Patient ID exists, navigate to the report viewer
+      // Patient ID exists and is associated with the user's phone number
       toast.success("Patient ID verified!");
       navigate(`/report-viewer?patientId=${encodeURIComponent(patientId)}`);
       
