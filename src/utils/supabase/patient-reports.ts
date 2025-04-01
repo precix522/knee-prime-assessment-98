@@ -1,0 +1,167 @@
+
+import { supabase } from './client';
+
+// Function to fetch patient report PDF by patient ID
+export const getPatientReport = async (patientId: string) => {
+  try {
+    console.log('Fetching patient data for ID:', patientId);
+    
+    // First, check if the patient exists to provide better error messages
+    const { data: patientExists, error: checkError } = await supabase
+      .from('patient')
+      .select('Patient_ID')
+      .eq('Patient_ID', patientId);
+      
+    console.log('Patient exists check result:', patientExists);
+    
+    if (checkError) {
+      console.error('Error checking patient existence:', checkError);
+      throw new Error(`Database error: ${checkError.message}`);
+    }
+    
+    if (!patientExists || patientExists.length === 0) {
+      throw new Error(`Patient ID "${patientId}" not found in the database`);
+    }
+    
+    // Fetch the report URL from the 'patient' table
+    const { data: patientData, error: patientError } = await supabase
+      .from('patient')
+      .select('report_url')
+      .eq('Patient_ID', patientId)
+      .single();
+    
+    console.log('Patient data result:', patientData);
+    
+    if (patientError) {
+      console.error('Error fetching patient data:', patientError);
+      throw patientError;
+    }
+    
+    if (!patientData) {
+      throw new Error('No report URL found for this patient ID');
+    }
+    
+    // Get the report URL from the patient data
+    const reportUrl = patientData.report_url;
+    console.log('Report URL:', reportUrl);
+    
+    if (!reportUrl || typeof reportUrl !== 'string') {
+      throw new Error('Invalid report URL format');
+    }
+    
+    // Extract file name for display purposes
+    const fileName = reportUrl.split('/').pop() || 'patient-report.pdf';
+    
+    // Return the public URL directly
+    return { 
+      fileUrl: reportUrl, 
+      fileName 
+    };
+  } catch (error) {
+    console.error('Error fetching patient report:', error);
+    throw error;
+  }
+};
+
+// Function to fetch annex report PDF by patient ID
+export const getAnnexReport = async (patientId: string) => {
+  try {
+    console.log('Fetching annex report for patient ID:', patientId);
+    
+    // Fetch the second report URL from the 'patient' table
+    const { data: patientData, error: patientError } = await supabase
+      .from('patient')
+      .select('report_url')
+      .eq('Patient_ID', patientId)
+      .single();
+    
+    console.log('Patient annex data result:', patientData);
+    
+    if (patientError) {
+      console.error('Error fetching patient annex data:', patientError);
+      throw patientError;
+    }
+    
+    if (!patientData || !patientData.report_url) {
+      throw new Error('No annex report URL found for this patient ID');
+    }
+    
+    // Get the report URL from the patient data
+    const reportUrl = patientData.report_url;
+    console.log('Annex Report URL:', reportUrl);
+    
+    if (!reportUrl || typeof reportUrl !== 'string') {
+      throw new Error('Invalid annex report URL format');
+    }
+    
+    // Extract file name for display purposes
+    const fileName = reportUrl.split('/').pop() || 'annex-report.pdf';
+    
+    // Return the public URL directly
+    return { 
+      fileUrl: reportUrl, 
+      fileName 
+    };
+  } catch (error) {
+    console.error('Error fetching annex report:', error);
+    throw error;
+  }
+};
+
+// Function to fetch supporting document link from Supabase
+export const getSupportingDocument = async () => {
+  try {
+    console.log('Fetching supporting document link');
+    
+    // Fetch the supporting document from the 'supporting_documents' table
+    const { data, error } = await supabase
+      .from('supporting_documents')
+      .select('document_url')
+      .single();
+    
+    console.log('Supporting document data result:', data);
+    
+    if (error) {
+      console.error('Error fetching supporting document:', error);
+      throw error;
+    }
+    
+    if (!data || !data.document_url) {
+      // If no document found in the table, return the hardcoded URL
+      const fallbackUrl = 'https://btfinmlyszedyeadqgvl.supabase.co/storage/v1/object/public/supporting-documents//Orange%20and%20Blue%20Minimal%20and%20Professional%20Company%20Annual%20Report.pdf';
+      console.log('No supporting document found in database, using fallback URL');
+      
+      // Extract file name for display purposes
+      const fileName = fallbackUrl.split('/').pop() || 'supporting-document.pdf';
+      
+      return { 
+        fileUrl: fallbackUrl, 
+        fileName 
+      };
+    }
+    
+    // Get the document URL from the data
+    const documentUrl = data.document_url;
+    console.log('Supporting document URL:', documentUrl);
+    
+    // Extract file name for display purposes
+    const fileName = documentUrl.split('/').pop() || 'supporting-document.pdf';
+    
+    // Return the document URL and file name
+    return { 
+      fileUrl: documentUrl, 
+      fileName 
+    };
+  } catch (error) {
+    console.error('Error fetching supporting document:', error);
+    
+    // If there's an error, return the hardcoded URL
+    const fallbackUrl = 'https://btfinmlyszedyeadqgvl.supabase.co/storage/v1/object/public/supporting-documents//Orange%20and%20Blue%20Minimal%20and%20Professional%20Company%20Annual%20Report.pdf';
+    const fileName = fallbackUrl.split('/').pop() || 'supporting-document.pdf';
+    
+    return { 
+      fileUrl: fallbackUrl, 
+      fileName 
+    };
+  }
+};

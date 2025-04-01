@@ -1,8 +1,9 @@
+
 import React, { useState } from "react";
 import { Button } from "./Button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { supabase } from "../utils/supabase";
+import { supabase, uploadPatientDocument } from "../utils/supabase";
 import { toast } from "sonner";
 import { AlertCircle, Loader2 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
