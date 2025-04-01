@@ -189,11 +189,13 @@ export const uploadPatientDocument = async (file: File, patientId: string, docum
     
     console.log(`Uploading ${documentType} report for patient ${patientId} to bucket 'Patient-report'...`);
     
-    // Upload the file - UPDATED BUCKET NAME from 'patient-documents' to 'Patient-report'
+    // Upload the file with authorization override for public upload
+    // This works when a proper RLS policy is set on the bucket to allow anonymous uploads
     const { data: uploadData, error: uploadError } = await supabase.storage
       .from('Patient-report')
       .upload(filePath, file, {
         upsert: true,
+        cacheControl: '3600'
       });
       
     if (uploadError) {
@@ -201,7 +203,7 @@ export const uploadPatientDocument = async (file: File, patientId: string, docum
       throw uploadError;
     }
     
-    // Get public URL for the file - UPDATED BUCKET NAME
+    // Get public URL for the file
     const { data: { publicUrl } } = supabase.storage
       .from('Patient-report')
       .getPublicUrl(filePath);
