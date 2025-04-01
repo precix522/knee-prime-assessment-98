@@ -58,11 +58,12 @@ export default function PatientID() {
       console.log("User phone number:", userPhoneNumber);
       
       // Check if the patient ID exists AND is associated with the user's phone number
+      // Updated to use 'phone' instead of 'phone_number'
       const { data, error: patientError } = await supabase
         .from('patient')
         .select('*')
         .eq('Patient_ID', patientId)
-        .eq('phone_number', userPhoneNumber);
+        .eq('phone', userPhoneNumber);
       
       console.log("Query response:", data, patientError);
       
