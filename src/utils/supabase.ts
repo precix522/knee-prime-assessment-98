@@ -1,4 +1,3 @@
-
 import { createClient } from '@supabase/supabase-js';
 
 // Supabase configuration with your provided credentials
@@ -76,10 +75,11 @@ export const getAnnexReport = async (patientId: string) => {
   try {
     console.log('Fetching annex report for patient ID:', patientId);
     
-    // Fetch the annex report URL from the 'patient' table
+    // Fetch the second report URL from the 'patient' table
+    // Note: We are changing from 'annex_report_url' to 'report_url' as the column name
     const { data: patientData, error: patientError } = await supabase
       .from('patient')
-      .select('annex_report_url')
+      .select('report_url')
       .eq('Patient_ID', patientId)
       .single();
     
@@ -90,12 +90,12 @@ export const getAnnexReport = async (patientId: string) => {
       throw patientError;
     }
     
-    if (!patientData || !patientData.annex_report_url) {
+    if (!patientData || !patientData.report_url) {
       throw new Error('No annex report URL found for this patient ID');
     }
     
-    // Get the annex report URL from the patient data
-    const reportUrl = patientData.annex_report_url;
+    // Get the report URL from the patient data
+    const reportUrl = patientData.report_url;
     console.log('Annex Report URL:', reportUrl);
     
     if (!reportUrl || typeof reportUrl !== 'string') {
@@ -243,7 +243,6 @@ export const createPatientRecord = async (patientData: {
   patientName: string;
   phoneNumber: string;
   reportUrl: string | null;
-  annexReportUrl: string | null;
 }) => {
   try {
     const { error } = await supabase
@@ -253,8 +252,7 @@ export const createPatientRecord = async (patientData: {
           Patient_ID: patientData.patientId,
           patient_name: patientData.patientName,
           phone_number: patientData.phoneNumber,
-          report_url: patientData.reportUrl,
-          annex_report_url: patientData.annexReportUrl
+          report_url: patientData.reportUrl
         }
       ]);
       

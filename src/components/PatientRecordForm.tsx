@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Button } from "./Button";
 import { Input } from "@/components/ui/input";
@@ -68,25 +67,22 @@ export default function PatientRecordForm() {
   };
   
   const uploadFiles = async () => {
-    if (!formData.reportFiles) return { reportUrl: null, annexReportUrl: null };
+    if (!formData.reportFiles) return { reportUrl: null };
     
-    const urls: { reportUrl: string | null; annexReportUrl: string | null } = {
-      reportUrl: null,
-      annexReportUrl: null
-    };
+    let reportUrl = null;
     
     try {
       // Create a folder path using patient ID
       const folderPath = `patient-reports/${formData.patientId}`;
       
-      // Upload each file
-      for (let i = 0; i < formData.reportFiles.length; i++) {
-        const file = formData.reportFiles[i];
+      // Upload the first file (main report)
+      if (formData.reportFiles.length > 0) {
+        const file = formData.reportFiles[0];
         const fileExt = file.name.split('.').pop();
-        const fileName = `${i === 0 ? 'main-report' : 'annex-report'}-${Date.now()}.${fileExt}`;
+        const fileName = `main-report-${Date.now()}.${fileExt}`;
         const filePath = `${folderPath}/${fileName}`;
         
-        console.log(`Uploading file ${i + 1} of ${formData.reportFiles.length} to bucket 'Patient-report'...`);
+        console.log(`Uploading file 1 of ${formData.reportFiles.length} to bucket 'Patient-report'...`);
         
         // Upload the file with proper error handling
         const { data: uploadData, error: uploadError } = await supabase.storage
@@ -106,17 +102,13 @@ export default function PatientRecordForm() {
           .from('Patient-report')
           .getPublicUrl(filePath);
           
-        if (i === 0) {
-          urls.reportUrl = publicUrl;
-        } else if (i === 1) {
-          urls.annexReportUrl = publicUrl;
-        }
+        reportUrl = publicUrl;
         
         // Update progress
-        setUploadProgress(Math.round(((i + 1) / formData.reportFiles.length) * 100));
+        setUploadProgress(100);
       }
       
-      return urls;
+      return { reportUrl };
       
     } catch (error: any) {
       console.error("File upload error:", error);
@@ -153,9 +145,9 @@ export default function PatientRecordForm() {
       }
       
       // Upload files to storage
-      const { reportUrl, annexReportUrl } = await uploadFiles();
+      const { reportUrl } = await uploadFiles();
       
-      // Insert record into patient table
+      // Insert record into patient table with just the report_url column
       const { error: insertError } = await supabase
         .from('patient')
         .insert([
@@ -163,8 +155,7 @@ export default function PatientRecordForm() {
             Patient_ID: formData.patientId,
             patient_name: formData.patientName,
             phone_number: formData.phoneNumber,
-            report_url: reportUrl,
-            annex_report_url: annexReportUrl
+            report_url: reportUrl
           }
         ]);
         
