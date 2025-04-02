@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "../components/Button";
@@ -7,12 +8,14 @@ import { useTwilioAuthStore } from "../utils/twilio-auth-store";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Calendar, FileText } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "../utils/supabase";
 
 export default function Dashboard() {
   const { user, logout, isLoading } = useTwilioAuthStore();
   const [pageLoading, setPageLoading] = useState(true);
   const [downloadLoading, setDownloadLoading] = useState(false);
   const [downloadError, setDownloadError] = useState("");
+  const [patientId, setPatientId] = useState<string | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -37,9 +40,43 @@ export default function Dashboard() {
     }
   }, [user, isLoading, pageLoading, navigate]);
 
+  // New effect to fetch patient data from Supabase based on phone number
+  useEffect(() => {
+    const fetchPatientData = async () => {
+      if (!user?.phone) return;
+      
+      try {
+        // Query Supabase for patient data with matching phone number
+        const { data, error } = await supabase
+          .from('patient')
+          .select('Patient_ID')
+          .eq('phone', user.phone)
+          .single();
+          
+        if (error) {
+          console.error("Error fetching patient data:", error);
+          return;
+        }
+        
+        if (data) {
+          setPatientId(data.Patient_ID);
+        } else {
+          console.log("No patient record found for this user");
+        }
+      } catch (error) {
+        console.error("Error in fetchPatientData:", error);
+      }
+    };
+    
+    if (user) {
+      fetchPatientData();
+    }
+  }, [user]);
+
   const handleDownloadReport = async () => {
-    if (!user?.id) {
-      setDownloadError("User not found");
+    if (!patientId) {
+      setDownloadError("Patient record not found");
+      toast.error("Patient record not found. Please contact support.");
       return;
     }
 
@@ -62,10 +99,8 @@ export default function Dashboard() {
   };
 
   const handleViewReport = () => {
-    const patientId = user?.id || "";
-    
     if (!patientId) {
-      toast.error("User ID not found. Please log in again.");
+      toast.error("Patient record not found. Please contact support.");
       return;
     }
     
@@ -120,7 +155,7 @@ export default function Dashboard() {
                           variant="health"
                           size="default"
                           onClick={handleDownloadReport}
-                          disabled={downloadLoading}
+                          disabled={downloadLoading || !patientId}
                         >
                           {downloadLoading ? (
                             <>
@@ -136,11 +171,18 @@ export default function Dashboard() {
                           variant="outline"
                           size="default"
                           onClick={handleViewReport}
+                          disabled={!patientId}
                         >
                           <FileText className="mr-2 h-4 w-4" />
                           View Report Online
                         </Button>
                       </div>
+
+                      {!patientId && (
+                        <div className="text-amber-500 text-sm mt-2">
+                          No patient record found. Please contact support to link your account.
+                        </div>
+                      )}
 
                       {downloadError && (
                         <div className="text-red-500 text-sm mt-2">
