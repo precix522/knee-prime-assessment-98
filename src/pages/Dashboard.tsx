@@ -39,12 +39,6 @@ export default function Dashboard() {
     }
   }, [user, isLoading, pageLoading, navigate]);
 
-  // Handle logout
-  const handleLogout = async () => {
-    await logout();
-    navigate("/");
-  };
-
   // Handle PDF report download and redirect after download completes (Approach #4)
   const handleDownloadReport = async () => {
     if (!user?.id) {
@@ -189,17 +183,6 @@ export default function Dashboard() {
                   </TabsContent>
                 </Tabs>
               </div>
-            </div>
-
-            {/* Logout section */}
-            <div className="mt-8 text-center">
-              <Button
-                variant="ghost"
-                onClick={() => navigate("/logout")}
-                disabled={isLoading}
-              >
-                Sign Out
-              </Button>
             </div>
           </div>
         </div>
