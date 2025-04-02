@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "../components/Button";
@@ -7,6 +6,7 @@ import { Footer } from "../components/Footer";
 import { useTwilioAuthStore } from "../utils/twilio-auth-store";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Calendar, FileText } from "lucide-react";
+import { toast } from "sonner";
 
 export default function Dashboard() {
   const { user, logout, isLoading } = useTwilioAuthStore();
@@ -15,7 +15,6 @@ export default function Dashboard() {
   const [downloadError, setDownloadError] = useState("");
   const navigate = useNavigate();
 
-  // Check authentication (using Twilio session)
   useEffect(() => {
     const checkAuth = async () => {
       try {
@@ -32,14 +31,12 @@ export default function Dashboard() {
     checkAuth();
   }, [user, navigate]);
 
-  // Redirect to login if not authenticated after initialization
   useEffect(() => {
     if (!pageLoading && !isLoading && !user) {
       navigate("/login");
     }
   }, [user, isLoading, pageLoading, navigate]);
 
-  // Handle PDF report download and redirect after download completes (Approach #4)
   const handleDownloadReport = async () => {
     if (!user?.id) {
       setDownloadError("User not found");
@@ -50,12 +47,9 @@ export default function Dashboard() {
       setDownloadLoading(true);
       setDownloadError("");
 
-      // Simulate PDF generation
       setTimeout(() => {
         setDownloadLoading(false);
-        // In a real app, this would download a file instead
         alert("PDF Report would download here in a real application");
-        // Redirect to the "Thank You" page after PDF generation/download
         navigate("/thank-you");
       }, 2000);
     } catch (error) {
@@ -68,9 +62,13 @@ export default function Dashboard() {
   };
 
   const handleViewReport = () => {
-    // Get the patient ID from the user object or use a default value
-    // In a real application, you might want to fetch this from your database
-    const patientId = user?.id || "default-patient-id";
+    const patientId = user?.id || "";
+    
+    if (!patientId) {
+      toast.error("User ID not found. Please log in again.");
+      return;
+    }
+    
     navigate(`/report-viewer?patientId=${encodeURIComponent(patientId)}`);
   };
 
@@ -116,7 +114,6 @@ export default function Dashboard() {
                   </TabsList>
                   
                   <TabsContent value="report">
-                    {/* Report actions */}
                     <div className="flex flex-col gap-3">
                       <div className="flex flex-col sm:flex-row gap-4">
                         <Button
