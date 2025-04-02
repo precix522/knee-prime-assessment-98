@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Calendar, FileText } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "../utils/supabase";
+import { getPatientReport } from "../utils/supabase";
 
 export default function Dashboard() {
   const { user, logout, isLoading } = useTwilioAuthStore();
@@ -84,16 +85,36 @@ export default function Dashboard() {
       setDownloadLoading(true);
       setDownloadError("");
 
+      // Fetch the report URL from Supabase
+      const reportData = await getPatientReport(patientId);
+      
+      if (!reportData || !reportData.fileUrl) {
+        throw new Error("Report not found");
+      }
+
+      // Create a temporary anchor element to trigger the download
+      const link = document.createElement('a');
+      link.href = reportData.fileUrl;
+      link.setAttribute('download', reportData.fileName || 'patient-report.pdf');
+      link.setAttribute('target', '_blank');
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      toast.success("Your report has been downloaded");
+      
+      // Optional: Navigate to thank you page after successful download
       setTimeout(() => {
-        setDownloadLoading(false);
-        alert("PDF Report would download here in a real application");
         navigate("/thank-you");
-      }, 2000);
+      }, 1000);
+      
     } catch (error) {
       console.error("Error downloading report:", error);
       setDownloadError(
         error instanceof Error ? error.message : "Failed to download report"
       );
+      toast.error("Failed to download report. Please try again later.");
+    } finally {
       setDownloadLoading(false);
     }
   };
