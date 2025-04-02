@@ -68,7 +68,10 @@ export default function Dashboard() {
   };
 
   const handleViewReport = () => {
-    navigate("/report-viewer");
+    // Get the patient ID from the user object or use a default value
+    // In a real application, you might want to fetch this from your database
+    const patientId = user?.id || "default-patient-id";
+    navigate(`/report-viewer?patientId=${encodeURIComponent(patientId)}`);
   };
 
   if (pageLoading) {
