@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useTwilioAuthStore } from "../utils/twilio-auth-store";
@@ -48,7 +47,7 @@ export default function ReportViewer() {
         setReportUrl(fileUrl);
         setReportName(fileName);
         
-        // Fetch the annex report from Supabase
+        // Fetch the annex report (supporting document with ID 12345) from Supabase
         try {
           const annexData = await getAnnexReport(patientId);
           setAnnexReportUrl(annexData.fileUrl);
@@ -59,7 +58,7 @@ export default function ReportViewer() {
           toast.error("Failed to load the annex report");
         }
         
-        // Fetch the supporting document
+        // Fetch the supporting document (same as annex in this implementation)
         try {
           const supportingDocData = await getSupportingDocument();
           setSupportingDocUrl(supportingDocData.fileUrl);
@@ -100,13 +99,13 @@ export default function ReportViewer() {
     if (annexReportUrl) {
       const link = document.createElement('a');
       link.href = annexReportUrl;
-      link.download = annexReportName || 'annex-report.pdf';
+      link.download = annexReportName || 'supporting-document.pdf';
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      toast.success("Annex download started");
+      toast.success("Annex document download started");
     } else {
-      toast.error("Annex report not available");
+      toast.error("Annex document not available");
     }
   };
   
@@ -262,7 +261,7 @@ export default function ReportViewer() {
             </TabsContent>
             
             <TabsContent value="annex" className="mt-0">
-              <h1 className="text-2xl font-bold text-gray-900 mb-4">Annex Document</h1>
+              <h1 className="text-2xl font-bold text-gray-900 mb-4">Supporting Documents</h1>
               
               {annexReportUrl ? (
                 <div className="flex flex-col">
@@ -270,7 +269,7 @@ export default function ReportViewer() {
                     <iframe 
                       src={annexReportUrl}
                       className="w-full h-full"
-                      title="Annex Document PDF"
+                      title="Supporting Document PDF"
                       frameBorder="0"
                     ></iframe>
                   </div>
@@ -285,14 +284,14 @@ export default function ReportViewer() {
                         <polyline points="7 10 12 15 17 10"></polyline>
                         <line x1="12" y1="15" x2="12" y2="3"></line>
                       </svg>
-                      Download Annex
+                      Download Supporting Document
                     </Button>
                   </div>
                 </div>
               ) : (
                 <div className="border border-gray-200 rounded-md p-8 mb-6 bg-gray-50">
                   <p className="text-center text-lg">
-                    No annex document available.
+                    No supporting documents available.
                   </p>
                   <p className="text-center text-gray-600 mt-2">
                     Please contact support if you believe this is an error.
