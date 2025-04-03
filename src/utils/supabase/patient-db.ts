@@ -1,5 +1,5 @@
 
-import { supabase, supabaseUrl, supabaseKey } from './client';
+import { supabase } from './client';
 
 // Function to check if patient ID already exists
 export const checkPatientIdExists = async (patientId: string): Promise<boolean> => {
@@ -17,6 +17,26 @@ export const checkPatientIdExists = async (patientId: string): Promise<boolean> 
     return !!data;
   } catch (error) {
     console.error('Error checking patient ID:', error);
+    throw error;
+  }
+};
+
+// Function to check if phone number already exists
+export const checkPhoneExists = async (phoneNumber: string): Promise<boolean> => {
+  try {
+    const { data, error } = await supabase
+      .from('patient')
+      .select('phone')
+      .eq('phone', phoneNumber)
+      .maybeSingle();
+      
+    if (error) {
+      throw error;
+    }
+    
+    return !!data;
+  } catch (error) {
+    console.error('Error checking phone number:', error);
     throw error;
   }
 };
@@ -47,68 +67,54 @@ export const createPatientRecord = async (patientData: {
       Patient_ID: patientData.patientId,
       patient_name: patientData.patientName,
       phone: patientData.phoneNumber,
-      report_url: reportUrl, // Use the placeholder URL if no report URL was provided
+      report_url: reportUrl,
       last_modified_tm: formattedDate
     };
     
     console.log('Sending record to database:', patientRecord);
     
-    // Use REST API directly to bypass RLS
-    const response = await fetch(
-      `${supabaseUrl}/rest/v1/patient`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'apikey': supabaseKey,
-          'Prefer': 'return=minimal'
-        },
-        body: JSON.stringify(patientRecord)
-      }
-    );
+    // First check if the patient exists already
+    const phoneExists = await checkPhoneExists(patientData.phoneNumber);
+    const patientIdExists = await checkPatientIdExists(patientData.patientId);
     
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('Error response:', response.status, errorText);
+    if (patientIdExists || phoneExists) {
+      console.log('Patient record exists, updating...');
       
-      // If it's a unique constraint violation (record already exists), try updating
-      if (response.status === 409 || errorText.includes('duplicate key')) {
-        console.log('Record exists, attempting update...');
-        
-        const updateResponse = await fetch(
-          `${supabaseUrl}/rest/v1/patient?Patient_ID=eq.${encodeURIComponent(patientData.patientId)}`,
-          {
-            method: 'PATCH',
-            headers: {
-              'Content-Type': 'application/json',
-              'apikey': supabaseKey,
-              'Prefer': 'return=minimal'
-            },
-            body: JSON.stringify({
-              patient_name: patientRecord.patient_name,
-              phone: patientRecord.phone,
-              report_url: patientRecord.report_url,
-              last_modified_tm: patientRecord.last_modified_tm
-            })
-          }
-        );
-        
-        if (!updateResponse.ok) {
-          const updateErrorText = await updateResponse.text();
-          throw new Error(`Failed to update patient record: ${updateResponse.status} - ${updateErrorText}`);
-        }
-        
-        console.log('Patient record updated successfully');
-        return true;
+      // If patient already exists, update the record
+      const { error: updateError } = await supabase
+        .from('patient')
+        .update({
+          patient_name: patientRecord.patient_name,
+          report_url: patientRecord.report_url,
+          last_modified_tm: patientRecord.last_modified_tm
+        })
+        .eq(patientIdExists ? 'Patient_ID' : 'phone', 
+            patientIdExists ? patientData.patientId : patientData.phoneNumber);
+      
+      if (updateError) {
+        console.error('Error updating patient record:', updateError);
+        throw new Error(`Failed to update patient record: ${updateError.message}`);
       }
       
-      throw new Error(`Database error: ${response.status} - ${errorText}`);
+      console.log('Patient record updated successfully');
+      return true;
     }
     
-    console.log('Patient record saved successfully.');
+    // If patient doesn't exist, create a new record
+    const { error: insertError } = await supabase
+      .from('patient')
+      .insert([patientRecord]);
+      
+    if (insertError) {
+      console.error('Error creating patient record:', insertError);
+      throw new Error(`Failed to create patient record: ${insertError.message}`);
+    }
+    
+    console.log('Patient record created successfully');
     return true;
+    
   } catch (error: any) {
-    console.error('Error creating patient record:', error.message || error);
+    console.error('Error creating/updating patient record:', error.message || error);
     throw error;
   }
 };

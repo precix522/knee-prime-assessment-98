@@ -1,6 +1,6 @@
 
 // Re-export the client for direct access
-export { supabase, supabaseUrl, supabaseKey } from './supabase/client';
+export { supabase } from './supabase/client';
 
 // Re-export patient database operations
 export { 
@@ -16,4 +16,7 @@ export {
 } from './supabase/patient-reports';
 
 // Re-export storage operations
-export { uploadPatientDocument } from './supabase/storage';
+export { 
+  uploadPatientDocument, 
+  checkBucketExists 
+} from './supabase/storage';

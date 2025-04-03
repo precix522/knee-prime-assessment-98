@@ -1,15 +1,14 @@
-
 import React, { useState } from "react";
 import { Button } from "./Button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createPatientRecord } from "../utils/supabase/patient-db";
-import { uploadPatientDocument, ensureBucketExists } from "../utils/supabase/storage";
+import { uploadPatientDocument, checkBucketExists } from "../utils/supabase/storage";
 import { toast } from "sonner";
 import { AlertCircle, Loader2, Info } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useForm } from "react-hook-form";
-import { supabase, supabaseUrl } from "../utils/supabase/client";
+import { supabase } from "../utils/supabase/client";
 
 interface PatientFormData {
   patientName: string;
@@ -37,8 +36,8 @@ export default function PatientRecordForm() {
     const checkBucket = async () => {
       try {
         const bucketName = 'Patient-report';
-        const result = await ensureBucketExists(bucketName);
-        setBucketStatus({ checked: true, exists: result.success });
+        const result = await checkBucketExists(bucketName);
+        setBucketStatus({ checked: true, exists: result.exists });
       } catch (err) {
         console.error("Error checking bucket:", err);
         setBucketStatus({ checked: true, exists: false });
@@ -99,16 +98,18 @@ export default function PatientRecordForm() {
     toast.info("Processing patient record...");
     
     try {
-      // Check if bucket exists first
+      // First check if bucket exists
       if (!bucketStatus.exists) {
-        const bucketResult = await ensureBucketExists('Patient-report');
-        if (!bucketResult.success) {
-          setUploadError(`Storage bucket could not be created: ${bucketResult.error}. Patient record will be saved without the report file.`);
-        }
+        setUploadError(`Storage bucket "Patient-report" does not exist. Please create it in the Supabase dashboard. Patient record will be saved without the report file.`);
       }
       
-      // Upload the file first
-      const reportUrl = await uploadFiles(formData.patientId);
+      let reportUrl = 'https://placeholder-url.com/no-report';
+      
+      // Only attempt to upload if bucket exists
+      if (bucketStatus.exists && reportFiles && reportFiles.length > 0) {
+        // Upload the file first
+        reportUrl = await uploadFiles(formData.patientId);
+      }
       
       // Format date in YYYY-MM-DD format for database
       const currentDate = new Date().toISOString().split('T')[0];
@@ -124,6 +125,8 @@ export default function PatientRecordForm() {
       
       if (uploadError) {
         toast.warning("Patient record created, but file upload was not successful");
+      } else if (!reportFiles || reportFiles.length === 0) {
+        toast.success("Patient record created successfully without report file");
       } else {
         toast.success("Patient record created successfully with report file");
       }
@@ -150,26 +153,8 @@ export default function PatientRecordForm() {
   
   const handleOpenSupabaseDashboard = () => {
     // Open the Supabase storage dashboard in a new tab
-    const storageUrl = `${supabaseUrl}/storage/buckets`;
+    const storageUrl = `https://app.supabase.com/project/_/storage/buckets`;
     window.open(storageUrl, '_blank');
-  };
-  
-  const handleCreateBucket = async () => {
-    setIsLoading(true);
-    try {
-      const result = await ensureBucketExists('Patient-report');
-      if (result.success) {
-        setBucketStatus({ checked: true, exists: true });
-        toast.success("Storage bucket created successfully!");
-      } else {
-        toast.error(`Failed to create storage bucket: ${result.error}`);
-      }
-    } catch (err) {
-      console.error("Error creating bucket:", err);
-      toast.error("An error occurred while creating the storage bucket");
-    } finally {
-      setIsLoading(false);
-    }
   };
   
   return (
@@ -186,25 +171,21 @@ export default function PatientRecordForm() {
         </Alert>
       )}
       
-      {!bucketStatus.exists && (
+      {!bucketStatus.exists && bucketStatus.checked && (
         <Alert className="mb-4 bg-blue-50 border-blue-200">
           <Info className="h-4 w-4" />
           <AlertDescription>
-            <p>The "Patient-report" bucket doesn't exist in your Supabase project. You can:</p>
-            <div className="flex flex-col sm:flex-row gap-2 mt-2">
-              <button 
-                onClick={handleCreateBucket}
-                className="text-white bg-blue-600 px-3 py-1 rounded text-sm hover:bg-blue-700 disabled:opacity-50"
-                disabled={isLoading}
-              >
-                {isLoading ? "Creating..." : "Create Bucket Automatically"}
-              </button>
+            <p>The "Patient-report" bucket doesn't exist in your Supabase project.</p>
+            <div className="mt-2">
               <button 
                 onClick={handleOpenSupabaseDashboard}
                 className="text-blue-600 underline text-sm hover:text-blue-800"
               >
                 Create in Supabase Dashboard
               </button>
+              <p className="text-xs mt-1 text-gray-600">
+                After creating the bucket, make sure to set it to public and reload this page.
+              </p>
             </div>
           </AlertDescription>
         </Alert>

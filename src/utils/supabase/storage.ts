@@ -1,35 +1,60 @@
 
 import { supabase } from './client';
 
-// Function to check if a bucket exists and create it if it doesn't
-export const ensureBucketExists = async (bucketName: string) => {
+// Function to check if a bucket exists
+export const checkBucketExists = async (bucketName: string) => {
   try {
     // Check if bucket exists
     const { data: bucketData, error: bucketError } = await supabase
       .storage
-      .getBucket(bucketName);
+      .listBuckets();
     
     if (bucketError) {
-      console.log(`Bucket "${bucketName}" does not exist. Attempting to create it...`);
-      
-      // Create the bucket if it doesn't exist
-      const { data, error } = await supabase
-        .storage
-        .createBucket(bucketName, {
-          public: true, // Make files publicly accessible
-          fileSizeLimit: 10485760, // Limit file size to 10MB (adjust as needed)
-        });
-      
-      if (error) {
-        console.error('Error creating bucket:', error);
-        return { success: false, error: error.message };
-      }
-      
-      console.log(`Bucket "${bucketName}" created successfully.`);
-      return { success: true, error: null };
+      console.error('Error checking buckets:', bucketError);
+      return { success: false, exists: false, error: bucketError.message };
     }
     
-    console.log(`Bucket "${bucketName}" already exists.`);
+    // Look for the bucket in the list
+    const bucketExists = bucketData.some(bucket => bucket.name === bucketName);
+    
+    console.log(`Bucket "${bucketName}" exists: ${bucketExists}`);
+    return { 
+      success: true, 
+      exists: bucketExists, 
+      error: null 
+    };
+  } catch (error) {
+    console.error('Error checking if bucket exists:', error);
+    return { 
+      success: false, 
+      exists: false,
+      error: error instanceof Error ? error.message : 'Unknown error checking bucket' 
+    };
+  }
+};
+
+// Function to ensure bucket exists - just checks, doesn't create (due to RLS)
+export const ensureBucketExists = async (bucketName: string) => {
+  try {
+    // Check if the bucket exists
+    const bucketStatus = await checkBucketExists(bucketName);
+    
+    if (!bucketStatus.success) {
+      return { 
+        success: false, 
+        error: `Failed to check if bucket exists: ${bucketStatus.error}` 
+      };
+    }
+    
+    if (!bucketStatus.exists) {
+      console.log(`Bucket "${bucketName}" does not exist. Please create it in the Supabase dashboard.`);
+      return { 
+        success: false, 
+        error: 'Bucket does not exist. Please create it in the Supabase dashboard.' 
+      };
+    }
+    
+    console.log(`Bucket "${bucketName}" exists.`);
     return { success: true, error: null };
   } catch (error) {
     console.error('Error ensuring bucket exists:', error);
@@ -50,14 +75,14 @@ export const uploadPatientDocument = async (file: File, patientId: string, docum
     // Use 'Patient-report' as the bucket name
     const bucketName = 'Patient-report';
     
-    // First, ensure the bucket exists
-    const bucketResult = await ensureBucketExists(bucketName);
-    if (!bucketResult.success) {
-      console.error('Failed to ensure bucket exists:', bucketResult.error);
+    // First, check if the bucket exists
+    const bucketResult = await checkBucketExists(bucketName);
+    if (!bucketResult.success || !bucketResult.exists) {
+      console.error('Bucket does not exist or could not be checked:', bucketResult.error);
       return {
         success: false,
         url: 'https://placeholder-url.com/no-report',
-        error: `Failed to ensure storage bucket exists: ${bucketResult.error}`
+        error: `Storage bucket doesn't exist: ${bucketResult.error || 'Unknown error'}`
       };
     }
     
@@ -101,7 +126,6 @@ export const uploadPatientDocument = async (file: File, patientId: string, docum
     
   } catch (error) {
     console.error('Error in uploadPatientDocument:', error);
-    // Return an object with error information
     return {
       success: false,
       url: 'https://placeholder-url.com/no-report',
