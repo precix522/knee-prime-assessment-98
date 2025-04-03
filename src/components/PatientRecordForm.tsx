@@ -63,7 +63,10 @@ export default function PatientRecordForm() {
   };
   
   const uploadFiles = async () => {
-    if (!reportFiles || reportFiles.length === 0) return { reportUrl: null };
+    if (!reportFiles || reportFiles.length === 0) {
+      // No files to upload, return a placeholder URL to satisfy DB not-null constraint
+      return { reportUrl: 'https://placeholder-url.com/no-report' };
+    }
     
     try {
       setUploadProgress(10);
@@ -88,13 +91,13 @@ export default function PatientRecordForm() {
             
           if (bucketError) {
             console.error('Bucket error:', bucketError);
-            toast.error("Storage bucket not available. Creating patient record without report file.");
-            return { reportUrl: null, bucketError };
+            toast.error("Storage bucket not available. Creating patient record with placeholder URL.");
+            return { reportUrl: 'https://placeholder-url.com/no-report', bucketError };
           }
         } catch (bucketErr) {
           console.error('Error checking bucket:', bucketErr);
-          toast.error("Storage bucket not available. Creating patient record without report file.");
-          return { reportUrl: null, bucketError: bucketErr };
+          toast.error("Storage bucket not available. Creating patient record with placeholder URL.");
+          return { reportUrl: 'https://placeholder-url.com/no-report', bucketError: bucketErr };
         }
         
         setUploadProgress(50);
@@ -125,14 +128,14 @@ export default function PatientRecordForm() {
         return { reportUrl: publicUrl };
       }
       
-      return { reportUrl: null };
+      return { reportUrl: 'https://placeholder-url.com/no-report' };
       
     } catch (error: any) {
       console.error("File upload error:", error);
       // If this is a bucket not found error, we'll continue with creating the patient record
       if (error.message && error.message.includes("Bucket not found")) {
-        toast.error("Storage bucket not configured. Saving patient record without file.");
-        return { reportUrl: null, bucketError: error };
+        toast.error("Storage bucket not configured. Saving patient record with placeholder URL.");
+        return { reportUrl: 'https://placeholder-url.com/no-report', bucketError: error };
       }
       throw new Error(`File upload failed: ${error.message}`);
     }
@@ -156,7 +159,7 @@ export default function PatientRecordForm() {
         patientId: formData.patientId,
         patientName: formData.patientName,
         phoneNumber: formData.phoneNumber,
-        reportUrl: reportUrl, // This might be null if upload failed
+        reportUrl: reportUrl, // This will now be a URL (real or placeholder)
         lastModifiedTime: currentDate
       };
       
@@ -164,9 +167,9 @@ export default function PatientRecordForm() {
       const insertResult = await createPatientRecord(patientData);
       
       if (bucketError) {
-        toast.success("Patient record created successfully without report file");
-        setError("Note: Report file could not be uploaded. The storage bucket 'Patient-report' doesn't exist. Patient data was saved without the report file.");
-      } else if (!reportUrl) {
+        toast.success("Patient record created successfully");
+        setError("Note: The 'Patient-report' storage bucket doesn't exist in Supabase. Please create it in the Supabase dashboard. Patient data was saved with a placeholder URL.");
+      } else if (reportUrl === 'https://placeholder-url.com/no-report') {
         toast.warning("Patient record created, but without a report file");
       } else {
         toast.success("Patient record created successfully with report file");
@@ -216,7 +219,7 @@ export default function PatientRecordForm() {
         <Info className="h-4 w-4" />
         <AlertDescription>
           Make sure the "Patient-report" storage bucket exists in your Supabase project. 
-          If patient data is saved without a file, you can upload the file later.
+          You can create it at https://supabase.com/dashboard/project/btfinmlyszedyeadqgvl/storage/buckets.
         </AlertDescription>
       </Alert>
       
@@ -279,7 +282,7 @@ export default function PatientRecordForm() {
               className="cursor-pointer"
             />
             <p className="text-xs text-gray-500 mt-1">
-              Upload a PDF report file (recommended but not required)
+              Upload a PDF report file (optional)
             </p>
           </div>
           
