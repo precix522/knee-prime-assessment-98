@@ -58,7 +58,7 @@ const Index = () => {
           <div className="text-center max-w-3xl mx-auto">
             <div className="animate-float bg-gray-50/50 backdrop-blur-sm px-3 py-1 rounded-full inline-flex items-center mb-8 border border-gray-200/50">
               <span className="bg-health-500 h-2 w-2 rounded-full mr-2"></span>
-              <span className="text-sm text-gray-600 font-medium">Advanced Knee Health Assessment</span>
+              <span className="text-sm text-gray-600 font-medium">Advanced Knee Functionality Assessment</span>
             </div>
             
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-gray-900 mb-6">
@@ -108,18 +108,18 @@ const Index = () => {
               About GATOR PRIME
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              A comprehensive assessment system designed to evaluate and protect knee joint health.
+              A comprehensive assessment system designed to evaluate and protect knee joint functionality.
             </p>
           </div>
           
           <div className="max-w-3xl mx-auto glassmorphism p-8 rounded-2xl">
             <div>
-              <h3 className="text-2xl font-semibold text-gray-900 mb-4">The Next Generation of Knee Health Assessment</h3>
+              <h3 className="text-2xl font-semibold text-gray-900 mb-4">The Next Generation of Knee Assessment</h3>
               <p className="text-gray-600 mb-6 leading-relaxed">
-                GATOR PRIME is an innovative assessment tool developed by Precix to help patients and healthcare providers understand and manage knee health. Using advanced analytics and medical expertise, we provide personalized reports that guide treatment and prevention strategies.
+                GATOR PRIME is an innovative assessment tool developed by Precix to help patients and healthcare providers understand and manage knee functionality. Using advanced analytics and medical expertise, we provide personalized reports that guide treatment and management strategies.
               </p>
               <p className="text-gray-600 leading-relaxed">
-                By combining clinical data, biomechanical assessments, and lifestyle factors, GATOR PRIME delivers a comprehensive view of your knee joint health and potential risk factors.
+                By combining clinical data and biomechanical assessments, GATOR PRIME delivers a comprehensive view of your knee joint function and potential risk factors.
               </p>
             </div>
           </div>
@@ -146,7 +146,7 @@ const Index = () => {
               Understanding Your PRIME Score
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              The PRIME Score is your personalized knee health metric, providing clear insights into your current status and future risks.
+              The PRIME Score is your personalized knee functionality metric, providing clear insights into your current status and future risks.
             </p>
           </div>
           
@@ -159,11 +159,11 @@ const Index = () => {
                   </svg>
                 </div>
                 <CardTitle>Assessment</CardTitle>
-                <CardDescription>Comprehensive evaluation of your knee health</CardDescription>
+                <CardDescription>Comprehensive evaluation of your knee function </CardDescription>
               </CardHeader>
               <CardContent>
                 <p className="text-gray-600">
-                  Your PRIME assessment combines clinical examination, functional testing, and self-reported health information to create a complete picture of your knee joint status.
+                  Your PRIME assessment combines clinical examination and functional testing information to create a complete picture of your knee joint status.
                 </p>
               </CardContent>
             </Card>
@@ -176,7 +176,7 @@ const Index = () => {
                   </svg>
                 </div>
                 <CardTitle>Scoring</CardTitle>
-                <CardDescription>Your numerical knee health rating</CardDescription>
+                <CardDescription>Your numerical knee function rating</CardDescription>
               </CardHeader>
               <CardContent>
                 <p className="text-gray-600">
@@ -197,7 +197,7 @@ const Index = () => {
               </CardHeader>
               <CardContent>
                 <p className="text-gray-600">
-                  Based on your PRIME Score, you'll receive tailored recommendations for exercises, lifestyle modifications, and potential medical interventions to maintain or improve your knee health.
+                  Based on your PRIME Score, you'll receive tailored recommendations for exercises, lifestyle modifications, and potential medical interventions to maintain or improve your knee function.
                 </p>
               </CardContent>
             </Card>
@@ -273,7 +273,7 @@ const Index = () => {
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-2">Early Intervention</h3>
               <p className="text-gray-600">
-                Identify potential issues before they develop into serious problems, allowing for preventative measures and early treatment.
+                Identify potential issues before they develop into serious problems.
               </p>
             </div>
             
@@ -285,7 +285,7 @@ const Index = () => {
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-2">Personalized Plan</h3>
               <p className="text-gray-600">
-                Receive custom recommendations specific to your knee health profile, lifestyle, and goals for optimized results.
+                Receive custom recommendations specific to your knee function profile, lifestyle, and goals for optimized results.
               </p>
             </div>
             
@@ -297,7 +297,7 @@ const Index = () => {
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-2">Progress Tracking</h3>
               <p className="text-gray-600">
-                Monitor changes in your knee health over time with objective metrics, helping you stay motivated and informed.
+                Monitor changes in your knee function over time with objective metrics, helping you stay motivated and informed.
               </p>
             </div>
             
@@ -359,7 +359,7 @@ const Index = () => {
           
           <h2 className="text-3xl md:text-4xl font-bold mb-6">Ready to Access Your PRIME Report?</h2>
           <p className="text-xl mb-8 max-w-2xl mx-auto">
-            Your personalized knee health assessment is just a few clicks away. Secure, confidential, and invaluable for your long-term mobility.
+            Your personalized knee assessment is just a few clicks away. Secure, confidential, and invaluable for your long-term mobility.
           </p>
           
           <Button 
