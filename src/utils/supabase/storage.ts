@@ -47,6 +47,7 @@ export const uploadPatientDocument = async (file: File, patientId: string, docum
       throw new Error('No file provided');
     }
     
+    // Use 'Patient-report' as the bucket name
     const bucketName = 'Patient-report';
     
     // First, ensure the bucket exists
@@ -60,13 +61,13 @@ export const uploadPatientDocument = async (file: File, patientId: string, docum
       };
     }
     
-    // Create a folder path using patient ID
-    const folderPath = `patient-reports/${patientId}`;
+    // Create a path using 'patient-reports' as the folder name inside the 'Patient-report' bucket
+    const folderName = 'patient-reports';
     const fileExt = file.name.split('.').pop();
     const fileName = `${documentType}-report-${Date.now()}.${fileExt}`;
-    const filePath = `${folderPath}/${fileName}`;
+    const filePath = `${folderName}/${patientId}/${fileName}`;
     
-    console.log(`Uploading ${documentType} report for patient ${patientId} to bucket '${bucketName}'...`);
+    console.log(`Uploading ${documentType} report for patient ${patientId} to bucket '${bucketName}', path: ${filePath}`);
     
     // Upload the file
     const { data: uploadData, error: uploadError } = await supabase.storage

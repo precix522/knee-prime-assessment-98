@@ -1,122 +1,128 @@
 
 import { supabase } from './client';
 
-// Function to fetch patient report PDF by patient ID
+// Function to get main patient report from Supabase storage
 export const getPatientReport = async (patientId: string) => {
   try {
-    console.log('Fetching patient data for ID:', patientId);
+    console.log('Attempting to fetch patient report for ID:', patientId);
     
-    // First, check if the patient exists to provide better error messages
-    const { data: patientExists, error: checkError } = await supabase
-      .from('patient')
-      .select('Patient_ID')
-      .eq('Patient_ID', patientId);
+    // List all files in the patient's folder to find the main report
+    const { data: files, error } = await supabase.storage
+      .from('Patient-report')
+      .list(`patient-reports/${patientId}`, {
+        limit: 10, // Limit to first 10 files
+        sortBy: { column: 'name', order: 'asc' },
+      });
       
-    console.log('Patient exists check result:', patientExists);
-    
-    if (checkError) {
-      console.error('Error checking patient existence:', checkError);
-      throw new Error(`Database error: ${checkError.message}`);
+    if (error) {
+      console.error('Error fetching patient report files:', error);
+      throw new Error('Failed to fetch report files');
     }
     
-    if (!patientExists || patientExists.length === 0) {
-      throw new Error(`Patient ID "${patientId}" not found in the database`);
+    if (!files || files.length === 0) {
+      console.warn('No report files found for patient', patientId);
+      throw new Error('No report found for this patient');
     }
     
-    // Fetch the report URL from the 'patient' table
-    const { data: patientData, error: patientError } = await supabase
-      .from('patient')
-      .select('report_url')
-      .eq('Patient_ID', patientId)
-      .single();
+    // Find main report file (named with 'main-report' prefix)
+    const mainReport = files.find(file => file.name.startsWith('main-report'));
     
-    console.log('Patient data result:', patientData);
-    
-    if (patientError) {
-      console.error('Error fetching patient data:', patientError);
-      throw patientError;
+    if (!mainReport) {
+      console.warn('No main report found, using first file instead');
+      // If no main report is found, use the first file in the list
+      const firstReport = files[0];
+      
+      const filePath = `patient-reports/${patientId}/${firstReport.name}`;
+      
+      // Generate public URL for the file
+      const { data: { publicUrl } } = supabase.storage
+        .from('Patient-report')
+        .getPublicUrl(filePath);
+        
+      return {
+        fileUrl: publicUrl,
+        fileName: firstReport.name
+      };
     }
     
-    if (!patientData) {
-      throw new Error('No report URL found for this patient ID');
-    }
-    
-    // Get the report URL from the patient data
-    const reportUrl = patientData.report_url;
-    console.log('Report URL:', reportUrl);
-    
-    if (!reportUrl || typeof reportUrl !== 'string') {
-      throw new Error('Invalid report URL format');
-    }
-    
-    // Extract file name for display purposes
-    const fileName = reportUrl.split('/').pop() || 'patient-report.pdf';
-    
-    // Return the public URL directly
-    return { 
-      fileUrl: reportUrl, 
-      fileName 
+    // Generate public URL for the main report file
+    const mainReportPath = `patient-reports/${patientId}/${mainReport.name}`;
+    const { data: { publicUrl } } = supabase.storage
+      .from('Patient-report')
+      .getPublicUrl(mainReportPath);
+      
+    return {
+      fileUrl: publicUrl,
+      fileName: mainReport.name
     };
+    
   } catch (error) {
-    console.error('Error fetching patient report:', error);
+    console.error('Error in getPatientReport:', error);
     throw error;
   }
 };
 
-// Updated function to fetch supporting documents for the Annex view
+// Function to get annex report from Supabase storage
 export const getAnnexReport = async (patientId: string) => {
   try {
-    console.log('Fetching annex report for patient ID:', patientId);
+    // List all files in the patient's folder to find annex report
+    const { data: files, error } = await supabase.storage
+      .from('Patient-report')
+      .list(`patient-reports/${patientId}`, {
+        limit: 10,
+        sortBy: { column: 'name', order: 'asc' },
+      });
+      
+    if (error) {
+      console.error('Error fetching annex report files:', error);
+      throw new Error('Failed to fetch annex report files');
+    }
     
-    // Use a fallback URL directly since the table doesn't exist
-    const fallbackUrl = 'https://btfinmlyszedyeadqgvl.supabase.co/storage/v1/object/public/supporting-documents//Orange%20and%20Blue%20Minimal%20and%20Professional%20Company%20Annual%20Report%20(3).pdf';
-    const fileName = 'annex-report.pdf';
+    // Find annex report file (named with 'annex-report' prefix)
+    const annexReport = files.find(file => file.name.startsWith('annex-report'));
     
-    console.log('Using fallback annex report URL:', fallbackUrl);
+    if (!annexReport) {
+      throw new Error('No annex report found for this patient');
+    }
     
-    return { 
-      fileUrl: fallbackUrl, 
-      fileName 
+    // Generate public URL for the annex report file
+    const annexReportPath = `patient-reports/${patientId}/${annexReport.name}`;
+    const { data: { publicUrl } } = supabase.storage
+      .from('Patient-report')
+      .getPublicUrl(annexReportPath);
+      
+    return {
+      fileUrl: publicUrl,
+      fileName: annexReport.name
     };
+    
   } catch (error) {
-    console.error('Error in annex report handling:', error);
-    // Always return the fallback URL on any error
-    const fallbackUrl = 'https://btfinmlyszedyeadqgvl.supabase.co/storage/v1/object/public/supporting-documents//Orange%20and%20Blue%20Minimal%20and%20Professional%20Company%20Annual%20Report.pdf';
-    const fileName = 'annex-report.pdf';
-    
-    return { 
-      fileUrl: fallbackUrl, 
-      fileName 
-    };
+    console.error('Error in getAnnexReport:', error);
+    throw error;
   }
 };
 
-// Function to fetch supporting document link from Supabase
+// Function to get supporting document from Supabase storage
 export const getSupportingDocument = async () => {
   try {
-    console.log('Fetching supporting document');
+    // Hard-coded URL for supporting document (typically not patient-specific)
+    // This is a placeholder implementation - replace with actual logic if needed
     
-    // Use the fallback URL directly since the table doesn't exist
-    const fallbackUrl = 'https://btfinmlyszedyeadqgvl.supabase.co/storage/v1/object/public/supporting-documents//Orange%20and%20Blue%20Minimal%20and%20Professional%20Company%20Annual%20Report.pdf';
-    console.log('Using fallback supporting document URL:', fallbackUrl);
+    // For a real implementation, you might store this in a specific folder
+    const supportingDocPath = 'supporting-docs/general-information.pdf';
     
-    // Extract file name for display purposes
-    const fileName = fallbackUrl.split('/').pop() || 'supporting-document.pdf';
-    
-    return { 
-      fileUrl: fallbackUrl, 
-      fileName 
+    // Try to get the supporting document
+    const { data: { publicUrl } } = supabase.storage
+      .from('Patient-report')
+      .getPublicUrl(supportingDocPath);
+      
+    return {
+      fileUrl: publicUrl,
+      fileName: 'general-information.pdf'
     };
+    
   } catch (error) {
-    console.error('Error in supporting document handling:', error);
-    
-    // If there's an error, return the hardcoded URL
-    const fallbackUrl = 'https://btfinmlyszedyeadqgvl.supabase.co/storage/v1/object/public/supporting-documents//Orange%20and%20Blue%20Minimal%20and%20Professional%20Company%20Annual%20Report.pdf';
-    const fileName = fallbackUrl.split('/').pop() || 'supporting-document.pdf';
-    
-    return { 
-      fileUrl: fallbackUrl, 
-      fileName 
-    };
+    console.error('Error in getSupportingDocument:', error);
+    throw new Error('Supporting document not available');
   }
 };
