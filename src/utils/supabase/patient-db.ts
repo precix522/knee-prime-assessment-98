@@ -56,20 +56,45 @@ export const createPatientRecord = async (patientData: {
     
     console.log('Sending record to database:', patientRecord);
     
-    // Use upsert with proper options (removing the 'returning' option that caused the error)
-    const { data, error } = await supabase
+    // First check if the record exists
+    const { data: existingRecord } = await supabase
       .from('patient')
-      .upsert([patientRecord], { 
-        onConflict: 'Patient_ID'
-      });
+      .select('Patient_ID')
+      .eq('Patient_ID', patientData.patientId);
       
-    if (error) {
-      console.error('Supabase error while storing patient record:', error);
-      throw error;
+    let result;
+    
+    if (existingRecord && existingRecord.length > 0) {
+      // Update existing record
+      console.log('Updating existing record for Patient_ID:', patientData.patientId);
+      const { data, error } = await supabase
+        .from('patient')
+        .update(patientRecord)
+        .eq('Patient_ID', patientData.patientId);
+        
+      if (error) {
+        console.error('Supabase error while updating patient record:', error);
+        throw error;
+      }
+      
+      result = data;
+    } else {
+      // Insert new record
+      console.log('Inserting new record for Patient_ID:', patientData.patientId);
+      const { data, error } = await supabase
+        .from('patient')
+        .insert([patientRecord]);
+        
+      if (error) {
+        console.error('Supabase error while inserting patient record:', error);
+        throw error;
+      }
+      
+      result = data;
     }
     
-    console.log('Patient record saved successfully. Database response:', data);
-    return data || true;
+    console.log('Patient record saved successfully. Database response:', result);
+    return result || true;
   } catch (error: any) {
     console.error('Error creating patient record:', error.message || error);
     throw error;
