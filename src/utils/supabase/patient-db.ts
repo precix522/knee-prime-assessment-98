@@ -38,13 +38,20 @@ export const createPatientRecord = async (patientData: {
       throw new Error(`Database connection issue: ${pingError.message}`);
     }
     
+    // Format the date to YYYY-MM-DD format
+    const formattedDate = patientData.lastModifiedTime 
+      ? new Date(patientData.lastModifiedTime).toISOString().split('T')[0] 
+      : new Date().toISOString().split('T')[0];
+    
+    console.log('Formatted date for database:', formattedDate);
+    
     // Prepare the record object with correct field names matching the database schema
     const patientRecord = {
       Patient_ID: patientData.patientId,
       patient_name: patientData.patientName,
       phone: patientData.phoneNumber,
       report_url: patientData.reportUrl,
-      last_modified_tm: patientData.lastModifiedTime || new Date().toISOString()
+      last_modified_tm: formattedDate
     };
     
     console.log('Sending record to database:', patientRecord);

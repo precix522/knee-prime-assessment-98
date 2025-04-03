@@ -131,9 +131,9 @@ export default function PatientRecordForm() {
       const { reportUrl } = await uploadFiles();
       console.log('Report URL after upload:', reportUrl);
       
-      // Step 2: Generate timestamp for the record
-      const currentDate = new Date().toISOString();
-      console.log('Current timestamp for database:', currentDate);
+      // Step 2: Generate date in YYYY-MM-DD format
+      const currentDate = new Date().toISOString().split('T')[0];
+      console.log('Current formatted date for database:', currentDate);
       
       // Step 3: Create the patient record with strong typing
       const patientData = {
