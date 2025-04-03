@@ -42,11 +42,18 @@ export const getPatientReport = async (patientId: string) => {
     }
     
     // Get the report URL from the patient data
-    const reportUrl = patientData.report_url;
+    let reportUrl = patientData.report_url;
     console.log('Report URL:', reportUrl);
     
     if (!reportUrl || typeof reportUrl !== 'string') {
       throw new Error('Invalid report URL format');
+    }
+    
+    // Handle case where report_url contains multiple URLs separated by comma
+    if (reportUrl.includes(',')) {
+      // Extract the first URL (main report)
+      reportUrl = reportUrl.split(',')[0].trim();
+      console.log('Extracted main report URL:', reportUrl);
     }
     
     // Extract file name for display purposes
@@ -68,8 +75,34 @@ export const getAnnexReport = async (patientId: string) => {
   try {
     console.log('Fetching annex report for patient ID:', patientId);
     
-    // Use a fallback URL directly since the table doesn't exist
-    const fallbackUrl = 'https://btfinmlyszedyeadqgvl.supabase.co/storage/v1/object/public/supporting-documents//Orange%20and%20Blue%20Minimal%20and%20Professional%20Company%20Annual%20Report%20(3).pdf';
+    // First, check if the patient has a report_url with multiple URLs
+    const { data: patientData, error: patientError } = await supabase
+      .from('patient')
+      .select('report_url')
+      .eq('Patient_ID', patientId)
+      .single();
+      
+    if (patientError) {
+      throw patientError;
+    }
+    
+    if (patientData && patientData.report_url && patientData.report_url.includes(',')) {
+      // Extract the second URL (annex report) if it exists
+      const urls = patientData.report_url.split(',');
+      if (urls.length > 1) {
+        const annexUrl = urls[1].trim();
+        console.log('Extracted annex report URL:', annexUrl);
+        const fileName = annexUrl.split('/').pop() || 'annex-report.pdf';
+        
+        return { 
+          fileUrl: annexUrl, 
+          fileName 
+        };
+      }
+    }
+    
+    // Use a fallback URL if no annex report is found
+    const fallbackUrl = 'https://btfinmlyszedyeadqgvl.supabase.co/storage/v1/object/public/supporting-documents/Orange%20and%20Blue%20Minimal%20and%20Professional%20Company%20Annual%20Report%20(3).pdf';
     const fileName = 'annex-report.pdf';
     
     console.log('Using fallback annex report URL:', fallbackUrl);
@@ -81,7 +114,7 @@ export const getAnnexReport = async (patientId: string) => {
   } catch (error) {
     console.error('Error in annex report handling:', error);
     // Always return the fallback URL on any error
-    const fallbackUrl = 'https://btfinmlyszedyeadqgvl.supabase.co/storage/v1/object/public/supporting-documents//Orange%20and%20Blue%20Minimal%20and%20Professional%20Company%20Annual%20Report.pdf';
+    const fallbackUrl = 'https://btfinmlyszedyeadqgvl.supabase.co/storage/v1/object/public/supporting-documents/Orange%20and%20Blue%20Minimal%20and%20Professional%20Company%20Annual%20Report.pdf';
     const fileName = 'annex-report.pdf';
     
     return { 
@@ -97,7 +130,7 @@ export const getSupportingDocument = async () => {
     console.log('Fetching supporting document');
     
     // Use the fallback URL directly since the table doesn't exist
-    const fallbackUrl = 'https://btfinmlyszedyeadqgvl.supabase.co/storage/v1/object/public/supporting-documents//Orange%20and%20Blue%20Minimal%20and%20Professional%20Company%20Annual%20Report.pdf';
+    const fallbackUrl = 'https://btfinmlyszedyeadqgvl.supabase.co/storage/v1/object/public/supporting-documents/Orange%20and%20Blue%20Minimal%20and%20Professional%20Company%20Annual%20Report.pdf';
     console.log('Using fallback supporting document URL:', fallbackUrl);
     
     // Extract file name for display purposes
@@ -111,7 +144,7 @@ export const getSupportingDocument = async () => {
     console.error('Error in supporting document handling:', error);
     
     // If there's an error, return the hardcoded URL
-    const fallbackUrl = 'https://btfinmlyszedyeadqgvl.supabase.co/storage/v1/object/public/supporting-documents//Orange%20and%20Blue%20Minimal%20and%20Professional%20Company%20Annual%20Report.pdf';
+    const fallbackUrl = 'https://btfinmlyszedyeadqgvl.supabase.co/storage/v1/object/public/supporting-documents/Orange%20and%20Blue%20Minimal%20and%20Professional%20Company%20Annual%20Report.pdf';
     const fileName = fallbackUrl.split('/').pop() || 'supporting-document.pdf';
     
     return { 
