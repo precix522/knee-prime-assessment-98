@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useTwilioAuthStore } from "../utils/twilio-auth-store";
@@ -22,10 +21,8 @@ export default function ReportViewer() {
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("report");
   
-  // Get auth state from store
   const { validateSession } = useTwilioAuthStore();
   
-  // Fetch patient report from Supabase
   useEffect(() => {
     const fetchReports = async () => {
       try {
@@ -43,23 +40,19 @@ export default function ReportViewer() {
         
         console.log("Fetching reports for patient ID:", patientId);
         
-        // Fetch the main report from Supabase
         const { fileUrl, fileName } = await getPatientReport(patientId);
         setReportUrl(fileUrl);
         setReportName(fileName);
         
-        // Fetch the annex report (supporting document with ID 12345) from Supabase
         try {
           const annexData = await getAnnexReport(patientId);
           setAnnexReportUrl(annexData.fileUrl);
           setAnnexReportName(annexData.fileName);
         } catch (annexErr: any) {
           console.error("Error fetching annex report:", annexErr);
-          // We don't set the main error here to not block the main report display
           toast.error("Failed to load the annex report");
         }
         
-        // Fetch the supporting document (same as annex in this implementation)
         try {
           const supportingDocData = await getSupportingDocument();
           setSupportingDocUrl(supportingDocData.fileUrl);
@@ -82,7 +75,6 @@ export default function ReportViewer() {
     fetchReports();
   }, [navigate, validateSession, patientId]);
   
-  // Download report function
   const handleDownload = () => {
     if (reportUrl) {
       const link = document.createElement('a');
@@ -95,7 +87,6 @@ export default function ReportViewer() {
     }
   };
   
-  // Download annex report function
   const handleAnnexDownload = () => {
     if (annexReportUrl) {
       const link = document.createElement('a');
@@ -110,7 +101,6 @@ export default function ReportViewer() {
     }
   };
   
-  // Download supporting document function
   const handleSupportingDocDownload = () => {
     if (supportingDocUrl) {
       const link = document.createElement('a');
@@ -125,9 +115,8 @@ export default function ReportViewer() {
     }
   };
 
-  // Handle booking appointment (placeholder)
   const handleBookAppointment = () => {
-    toast.info("Booking appointment functionality will be implemented soon");
+    window.open("https://precix.webflow.io/contact", "_blank");
   };
   
   if (isLoading) {
@@ -144,7 +133,6 @@ export default function ReportViewer() {
   return (
     <div className="min-h-screen bg-gray-50 p-4 md:p-8">
       <div className="max-w-6xl mx-auto flex flex-col md:flex-row gap-4">
-        {/* Left Side Navigation */}
         <div className="bg-white rounded-lg shadow-md p-4 md:w-64 lg:w-72">
           <div className="text-center mb-6">
             <div className="font-bold text-xl text-orange-600 flex items-center justify-center mb-2">
@@ -207,7 +195,6 @@ export default function ReportViewer() {
           </div>
         </div>
 
-        {/* Main Content Area */}
         <div className="flex-1 bg-white rounded-lg shadow-md p-4 md:p-8">
           <Tabs value={activeTab} className="w-full">
             <TabsContent value="report" className="mt-0">
@@ -306,10 +293,10 @@ export default function ReportViewer() {
               
               <div className="border border-gray-200 rounded-md p-8 mb-6 bg-gray-50">
                 <p className="text-center text-lg">
-                  Appointment booking will be available soon.
+                  Ready to discuss your GATOR PRIME report with a specialist?
                 </p>
                 <p className="text-center text-gray-600 mt-2">
-                  Please check back later or contact our support team for assistance.
+                  Click the button below to schedule a consultation with our medical team.
                 </p>
                 
                 <div className="mt-8 text-center">
