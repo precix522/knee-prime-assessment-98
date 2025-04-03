@@ -180,7 +180,7 @@ const Index = () => {
               </CardHeader>
               <CardContent>
                 <p className="text-gray-600">
-                  The PRIME Score ranges from 0-100, with higher scores indicating better knee health and lower risk of future issues. This score helps you and your healthcare provider track progress over time.
+                  The PRIME Score ranges from 0-100, with higher scores indicating better knee function and lower risk of future issues. This score helps you and your healthcare provider track progress over time.
                 </p>
               </CardContent>
             </Card>
