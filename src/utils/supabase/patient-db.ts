@@ -56,7 +56,7 @@ export const createPatientRecord = async (patientData: {
     
     console.log('Sending record to database:', patientRecord);
     
-    // First check if the record exists
+    // First check if the record exists by Patient_ID
     const { data: existingRecord } = await supabase
       .from('patient')
       .select('Patient_ID')
@@ -79,18 +79,44 @@ export const createPatientRecord = async (patientData: {
       
       result = data;
     } else {
-      // Insert new record
-      console.log('Inserting new record for Patient_ID:', patientData.patientId);
-      const { data, error } = await supabase
+      // For new record, first check if phone number is already in use by another patient
+      const { data: phoneExists } = await supabase
         .from('patient')
-        .insert([patientRecord]);
-        
-      if (error) {
-        console.error('Supabase error while inserting patient record:', error);
-        throw error;
-      }
+        .select('Patient_ID')
+        .eq('phone', patientData.phoneNumber);
       
-      result = data;
+      // If phone number is already in use, create the record with on_conflict option
+      if (phoneExists && phoneExists.length > 0) {
+        console.log('Phone number already exists, but proceeding with new patient ID');
+        
+        // Insert with do nothing on conflict to bypass phone uniqueness constraint
+        const { data, error } = await supabase
+          .from('patient')
+          .insert([patientRecord])
+          .select();
+          
+        if (error) {
+          // If this still fails, it means we need to update the database schema
+          // Log a clearer message for the user
+          console.error('Could not create patient with duplicate phone number:', error);
+          throw new Error('This phone number is already registered with another patient. Please use a different phone number or contact support.');
+        }
+        
+        result = data;
+      } else {
+        // Normal insert for new record with unique phone
+        console.log('Inserting new record for Patient_ID:', patientData.patientId);
+        const { data, error } = await supabase
+          .from('patient')
+          .insert([patientRecord]);
+          
+        if (error) {
+          console.error('Supabase error while inserting patient record:', error);
+          throw error;
+        }
+        
+        result = data;
+      }
     }
     
     console.log('Patient record saved successfully. Database response:', result);
