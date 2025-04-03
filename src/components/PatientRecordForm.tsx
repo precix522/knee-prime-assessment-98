@@ -2,8 +2,7 @@ import React, { useState } from "react";
 import { Button } from "./Button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { checkPatientIdExists, createPatientRecord } from "../utils/supabase/patient-db";
-import { uploadPatientDocument } from "../utils/supabase/storage";
+import { createPatientRecord } from "../utils/supabase/patient-db";
 import { toast } from "sonner";
 import { AlertCircle, Loader2 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -99,6 +98,7 @@ export default function PatientRecordForm() {
           .from('Patient-report')
           .getPublicUrl(filePath);
           
+        console.log('File uploaded successfully. Public URL:', publicUrl);
         reportUrl = publicUrl;
         
         setUploadProgress(100);
@@ -127,10 +127,12 @@ export default function PatientRecordForm() {
     
     try {
       const { reportUrl } = await uploadFiles();
+      console.log('Report URL after upload:', reportUrl);
       
       const currentDate = new Date().toISOString();
+      console.log('Current timestamp for database:', currentDate);
       
-      await createPatientRecord({
+      const result = await createPatientRecord({
         patientId: formData.patientId,
         patientName: formData.patientName,
         phoneNumber: formData.phoneNumber,
@@ -138,6 +140,7 @@ export default function PatientRecordForm() {
         lastModifiedTime: currentDate
       });
       
+      console.log('Patient record creation result:', result);
       toast.success("Patient record created successfully");
       
       setFormData({
@@ -146,6 +149,11 @@ export default function PatientRecordForm() {
         phoneNumber: "",
         reportFiles: null
       });
+      
+      const fileInput = document.getElementById('reportFiles') as HTMLInputElement;
+      if (fileInput) {
+        fileInput.value = '';
+      }
       
     } catch (err: any) {
       console.error("Error creating patient record:", err);

@@ -29,8 +29,10 @@ export const createPatientRecord = async (patientData: {
   lastModifiedTime?: string;
 }) => {
   try {
+    console.log('Creating/updating patient record with data:', patientData);
+    
     // Use upsert instead of insert to update if exists
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from('patient')
       .upsert([
         {
@@ -40,15 +42,20 @@ export const createPatientRecord = async (patientData: {
           report_url: patientData.reportUrl,
           last_modified_tm: patientData.lastModifiedTime || new Date().toISOString()
         }
-      ], { onConflict: 'Patient_ID' });
+      ], { 
+        onConflict: 'Patient_ID',
+        returning: 'minimal'
+      });
       
     if (error) {
+      console.error('Supabase error while storing patient record:', error);
       throw error;
     }
     
+    console.log('Patient record saved successfully');
     return true;
-  } catch (error) {
-    console.error('Error creating patient record:', error);
+  } catch (error: any) {
+    console.error('Error creating patient record:', error.message || error);
     throw error;
   }
 };
