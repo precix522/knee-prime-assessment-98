@@ -46,13 +46,25 @@ export const uploadPatientDocument = async (file: File, patientId: string, docum
     
     const bucketName = 'Patient-report';
     
-    // Ensure the bucket exists before attempting to upload
+    // Check if we can access the bucket first
     try {
-      await ensureBucketExists(bucketName);
-    } catch (bucketError) {
-      console.error('Failed to ensure bucket exists:', bucketError);
-      // If we can't create the bucket (likely due to permissions), return a placeholder
-      return 'https://placeholder-url.com/no-report';
+      // Check if bucket exists without trying to create it (which requires special permissions)
+      const { data: bucketData, error: bucketError } = await supabase
+        .storage
+        .getBucket(bucketName);
+      
+      // If we get an error, the bucket might not exist or we don't have permissions
+      if (bucketError) {
+        console.error('Error accessing storage bucket:', bucketError);
+        throw new Error(`Bucket access error: ${bucketError.message}`);
+      }
+    } catch (err) {
+      console.error('Cannot access storage bucket:', err);
+      return {
+        success: false,
+        url: 'https://placeholder-url.com/no-report',
+        error: err instanceof Error ? err.message : 'Failed to access storage bucket'
+      };
     }
     
     // Create a folder path using patient ID
@@ -63,8 +75,7 @@ export const uploadPatientDocument = async (file: File, patientId: string, docum
     
     console.log(`Uploading ${documentType} report for patient ${patientId} to bucket '${bucketName}'...`);
     
-    // Upload the file with authorization override for public upload
-    // This works when a proper RLS policy is set on the bucket to allow anonymous uploads
+    // Upload the file
     const { data: uploadData, error: uploadError } = await supabase.storage
       .from(bucketName)
       .upload(filePath, file, {
@@ -74,7 +85,11 @@ export const uploadPatientDocument = async (file: File, patientId: string, docum
       
     if (uploadError) {
       console.error('File upload error:', uploadError);
-      throw uploadError;
+      return {
+        success: false,
+        url: 'https://placeholder-url.com/no-report',
+        error: uploadError.message
+      };
     }
     
     // Get public URL for the file
@@ -84,11 +99,19 @@ export const uploadPatientDocument = async (file: File, patientId: string, docum
       
     console.log(`${documentType} report uploaded successfully, URL:`, publicUrl);
     
-    return publicUrl;
+    return {
+      success: true,
+      url: publicUrl,
+      error: null
+    };
     
   } catch (error) {
     console.error('Error in uploadPatientDocument:', error);
-    // If upload fails, return a placeholder URL to satisfy DB constraints
-    return 'https://placeholder-url.com/no-report';
+    // Return an object with error information
+    return {
+      success: false,
+      url: 'https://placeholder-url.com/no-report',
+      error: error instanceof Error ? error.message : 'Unknown upload error'
+    };
   }
 };

@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { AlertCircle, Loader2, Info } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useForm } from "react-hook-form";
+import { supabase } from "../utils/supabase/client";
 
 interface PatientFormData {
   patientName: string;
@@ -21,6 +22,7 @@ export default function PatientRecordForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   
   const { register, handleSubmit: formSubmit, formState: { errors }, reset } = useForm<PatientFormData>({
     defaultValues: {
@@ -33,6 +35,7 @@ export default function PatientRecordForm() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       setReportFiles(e.target.files);
+      setUploadError(null); // Clear previous upload errors
     }
   };
   
@@ -52,14 +55,21 @@ export default function PatientRecordForm() {
       
       // Upload the first file
       const file = reportFiles[0];
-      const reportUrl = await uploadPatientDocument(file, patientId, 'main');
+      const result = await uploadPatientDocument(file, patientId, 'main');
       
       setUploadProgress(100);
-      return reportUrl;
+      
+      if (!result.success) {
+        setUploadError(result.error || "File upload failed. The patient record was saved, but without the report file.");
+        return result.url; // Return the placeholder URL
+      }
+      
+      return result.url;
       
     } catch (error: any) {
       console.error("File upload error:", error);
       setUploadProgress(0);
+      setUploadError(error.message || "File upload failed");
       // Return placeholder URL if upload fails
       return 'https://placeholder-url.com/no-report';
     }
@@ -68,6 +78,7 @@ export default function PatientRecordForm() {
   const onSubmit = async (formData: PatientFormData) => {
     setIsLoading(true);
     setError(null);
+    setUploadError(null);
     setUploadProgress(0);
     toast.info("Processing patient record...");
     
@@ -87,7 +98,7 @@ export default function PatientRecordForm() {
         lastModifiedTime: currentDate
       });
       
-      if (reportUrl === 'https://placeholder-url.com/no-report') {
+      if (uploadError) {
         toast.warning("Patient record created, but file upload was not successful");
       } else {
         toast.success("Patient record created successfully with report file");
@@ -113,6 +124,13 @@ export default function PatientRecordForm() {
     }
   };
   
+  const handleOpenSupabaseDashboard = () => {
+    // Open the Supabase storage dashboard in a new tab
+    const supabaseUrl = supabase.supabaseUrl;
+    const storageUrl = `${supabaseUrl}/storage/buckets`;
+    window.open(storageUrl, '_blank');
+  };
+  
   return (
     <div className="max-w-md w-full p-6 bg-white rounded-lg shadow-md">
       <div className="text-center mb-6">
@@ -128,13 +146,27 @@ export default function PatientRecordForm() {
       )}
       
       {/* Information message about storage setup */}
-      <Alert variant="info" className="mb-4 bg-blue-50 border-blue-200">
+      <Alert className="mb-4 bg-blue-50 border-blue-200">
         <Info className="h-4 w-4" />
         <AlertDescription>
-          The system will attempt to create the "Patient-report" storage bucket if it doesn't exist.
-          If uploads fail, check your Supabase permissions.
+          <p>To enable file uploads, make sure the "Patient-report" bucket exists in your Supabase project.</p>
+          <button 
+            onClick={handleOpenSupabaseDashboard}
+            className="text-blue-600 underline mt-1 text-sm hover:text-blue-800"
+          >
+            Open Supabase Storage Dashboard
+          </button>
         </AlertDescription>
       </Alert>
+      
+      {uploadError && (
+        <Alert className="mb-4 bg-amber-50 border-amber-200">
+          <AlertCircle className="h-4 w-4 text-amber-600" />
+          <AlertDescription className="text-amber-700">
+            {uploadError}
+          </AlertDescription>
+        </Alert>
+      )}
       
       <form onSubmit={formSubmit(onSubmit)}>
         <div className="space-y-4">
