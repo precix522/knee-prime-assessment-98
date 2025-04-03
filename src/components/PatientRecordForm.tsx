@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Button } from "./Button";
 import { Input } from "@/components/ui/input";
@@ -126,23 +127,30 @@ export default function PatientRecordForm() {
     toast.info("Processing patient record...");
     
     try {
+      // Step 1: Upload files and get the report URL
       const { reportUrl } = await uploadFiles();
       console.log('Report URL after upload:', reportUrl);
       
+      // Step 2: Generate timestamp for the record
       const currentDate = new Date().toISOString();
       console.log('Current timestamp for database:', currentDate);
       
-      const result = await createPatientRecord({
+      // Step 3: Create the patient record with strong typing
+      const patientData = {
         patientId: formData.patientId,
         patientName: formData.patientName,
         phoneNumber: formData.phoneNumber,
         reportUrl: reportUrl,
         lastModifiedTime: currentDate
-      });
+      };
+      
+      // Step 4: Submit the data to Supabase
+      const result = await createPatientRecord(patientData);
       
       console.log('Patient record creation result:', result);
       toast.success("Patient record created successfully");
       
+      // Reset form after successful submission
       setFormData({
         patientName: "",
         patientId: "",
@@ -150,6 +158,7 @@ export default function PatientRecordForm() {
         reportFiles: null
       });
       
+      // Reset file input
       const fileInput = document.getElementById('reportFiles') as HTMLInputElement;
       if (fileInput) {
         fileInput.value = '';

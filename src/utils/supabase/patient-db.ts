@@ -31,20 +31,30 @@ export const createPatientRecord = async (patientData: {
   try {
     console.log('Creating/updating patient record with data:', patientData);
     
-    // Use upsert instead of insert to update if exists
+    // Verify database connection before attempting write
+    const { data: pingData, error: pingError } = await supabase.from('patient').select('count').limit(1);
+    if (pingError) {
+      console.error('Database connection test failed:', pingError);
+      throw new Error(`Database connection issue: ${pingError.message}`);
+    }
+    
+    // Prepare the record object with correct field names matching the database schema
+    const patientRecord = {
+      Patient_ID: patientData.patientId,
+      patient_name: patientData.patientName,
+      phone: patientData.phoneNumber,
+      report_url: patientData.reportUrl,
+      last_modified_tm: patientData.lastModifiedTime || new Date().toISOString()
+    };
+    
+    console.log('Sending record to database:', patientRecord);
+    
+    // Use upsert with explicit returning to confirm operation
     const { data, error } = await supabase
       .from('patient')
-      .upsert([
-        {
-          Patient_ID: patientData.patientId,
-          patient_name: patientData.patientName,
-          phone: patientData.phoneNumber,
-          report_url: patientData.reportUrl,
-          last_modified_tm: patientData.lastModifiedTime || new Date().toISOString()
-        }
-      ], { 
+      .upsert([patientRecord], { 
         onConflict: 'Patient_ID',
-        returning: 'minimal'
+        returning: 'representation'  // Get back the inserted/updated row
       });
       
     if (error) {
@@ -52,8 +62,8 @@ export const createPatientRecord = async (patientData: {
       throw error;
     }
     
-    console.log('Patient record saved successfully');
-    return true;
+    console.log('Patient record saved successfully. Database response:', data);
+    return data || true;
   } catch (error: any) {
     console.error('Error creating patient record:', error.message || error);
     throw error;
