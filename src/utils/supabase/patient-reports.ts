@@ -8,7 +8,7 @@ export const getPatientReport = async (patientId: string) => {
     
     // List all files in the patient's folder to find the main report
     const { data: files, error } = await supabase.storage
-      .from('Patient-report')
+      .from('patient-report')  // Changed to lowercase
       .list(`patient-reports/${patientId}`, {
         limit: 10, // Limit to first 10 files
         sortBy: { column: 'name', order: 'asc' },
@@ -36,7 +36,7 @@ export const getPatientReport = async (patientId: string) => {
       
       // Generate public URL for the file
       const { data: { publicUrl } } = supabase.storage
-        .from('Patient-report')
+        .from('patient-report')  // Changed to lowercase
         .getPublicUrl(filePath);
         
       return {
@@ -48,7 +48,7 @@ export const getPatientReport = async (patientId: string) => {
     // Generate public URL for the main report file
     const mainReportPath = `patient-reports/${patientId}/${mainReport.name}`;
     const { data: { publicUrl } } = supabase.storage
-      .from('Patient-report')
+      .from('patient-report')  // Changed to lowercase
       .getPublicUrl(mainReportPath);
       
     return {
@@ -67,7 +67,7 @@ export const getAnnexReport = async (patientId: string) => {
   try {
     // List all files in the patient's folder to find annex report
     const { data: files, error } = await supabase.storage
-      .from('Patient-report')
+      .from('patient-report')  // Changed to lowercase
       .list(`patient-reports/${patientId}`, {
         limit: 10,
         sortBy: { column: 'name', order: 'asc' },
@@ -88,7 +88,7 @@ export const getAnnexReport = async (patientId: string) => {
     // Generate public URL for the annex report file
     const annexReportPath = `patient-reports/${patientId}/${annexReport.name}`;
     const { data: { publicUrl } } = supabase.storage
-      .from('Patient-report')
+      .from('patient-report')  // Changed to lowercase
       .getPublicUrl(annexReportPath);
       
     return {
@@ -113,7 +113,7 @@ export const getSupportingDocument = async () => {
     
     // Try to get the supporting document
     const { data: { publicUrl } } = supabase.storage
-      .from('Patient-report')
+      .from('patient-report')  // Changed to lowercase
       .getPublicUrl(supportingDocPath);
       
     return {

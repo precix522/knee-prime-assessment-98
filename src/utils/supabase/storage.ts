@@ -72,8 +72,8 @@ export const uploadPatientDocument = async (file: File, patientId: string, docum
       throw new Error('No file provided');
     }
     
-    // Use 'Patient-report' as the bucket name
-    const bucketName = 'Patient-report';
+    // Use 'patient-report' as the bucket name (lowercase)
+    const bucketName = 'patient-report';
     
     // First, check if the bucket exists
     const bucketResult = await checkBucketExists(bucketName);
@@ -86,7 +86,7 @@ export const uploadPatientDocument = async (file: File, patientId: string, docum
       };
     }
     
-    // Create a path using 'patient-reports' as the folder name inside the 'Patient-report' bucket
+    // Create a path using 'patient-reports' as the folder name inside the 'patient-report' bucket
     const folderName = 'patient-reports';
     const fileExt = file.name.split('.').pop();
     const fileName = `${documentType}-report-${Date.now()}.${fileExt}`;

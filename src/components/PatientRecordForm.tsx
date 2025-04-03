@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Button } from "./Button";
 import { Input } from "@/components/ui/input";
@@ -8,7 +9,6 @@ import { toast } from "sonner";
 import { AlertCircle, Loader2, Info } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useForm } from "react-hook-form";
-import { supabase } from "../utils/supabase/client";
 
 interface PatientFormData {
   patientName: string;
@@ -35,7 +35,7 @@ export default function PatientRecordForm() {
   React.useEffect(() => {
     const checkBucket = async () => {
       try {
-        const bucketName = 'Patient-report';
+        const bucketName = 'patient-report'; // Changed to lowercase
         const result = await checkBucketExists(bucketName);
         setBucketStatus({ checked: true, exists: result.exists });
       } catch (err) {
@@ -100,7 +100,7 @@ export default function PatientRecordForm() {
     try {
       // First check if bucket exists
       if (!bucketStatus.exists) {
-        setUploadError(`Storage bucket "Patient-report" does not exist. Please create it in the Supabase dashboard. Patient record will be saved without the report file.`);
+        setUploadError(`Storage bucket "patient-report" does not exist. Please create it in the Supabase dashboard. Patient record will be saved without the report file.`);
       }
       
       let reportUrl = 'https://placeholder-url.com/no-report';
@@ -175,7 +175,7 @@ export default function PatientRecordForm() {
         <Alert className="mb-4 bg-blue-50 border-blue-200">
           <Info className="h-4 w-4" />
           <AlertDescription>
-            <p>The "Patient-report" bucket doesn't exist in your Supabase project.</p>
+            <p>The "patient-report" bucket doesn't exist in your Supabase project.</p>
             <div className="mt-2">
               <button 
                 onClick={handleOpenSupabaseDashboard}
