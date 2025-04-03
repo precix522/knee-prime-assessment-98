@@ -26,6 +26,7 @@ export const createPatientRecord = async (patientData: {
   patientName: string;
   phoneNumber: string;
   reportUrl: string | null;
+  lastModifiedTime?: string;
 }) => {
   try {
     const { error } = await supabase
@@ -35,7 +36,8 @@ export const createPatientRecord = async (patientData: {
           Patient_ID: patientData.patientId,
           patient_name: patientData.patientName,
           phone: patientData.phoneNumber,
-          report_url: patientData.reportUrl
+          report_url: patientData.reportUrl,
+          last_modified_tm: patientData.lastModifiedTime || new Date().toISOString().split('T')[0]
         }
       ]);
       
