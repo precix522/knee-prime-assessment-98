@@ -1,10 +1,9 @@
-
 import React, { useState } from "react";
 import { Button } from "./Button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createPatientRecord } from "../utils/supabase/patient-db";
-import { uploadPatientDocument } from "../utils/supabase/storage";
+import { uploadPatientDocument, ensureBucketExists } from "../utils/supabase/storage";
 import { toast } from "sonner";
 import { AlertCircle, Loader2, Info } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -23,6 +22,7 @@ export default function PatientRecordForm() {
   const [error, setError] = useState<string | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [bucketStatus, setBucketStatus] = useState<{ checked: boolean; exists: boolean }>({ checked: false, exists: false });
   
   const { register, handleSubmit: formSubmit, formState: { errors }, reset } = useForm<PatientFormData>({
     defaultValues: {
@@ -31,6 +31,21 @@ export default function PatientRecordForm() {
       phoneNumber: ""
     }
   });
+  
+  React.useEffect(() => {
+    const checkBucket = async () => {
+      try {
+        const bucketName = 'Patient-report';
+        const result = await ensureBucketExists(bucketName);
+        setBucketStatus({ checked: true, exists: result.success });
+      } catch (err) {
+        console.error("Error checking bucket:", err);
+        setBucketStatus({ checked: true, exists: false });
+      }
+    };
+    
+    checkBucket();
+  }, []);
   
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -83,6 +98,14 @@ export default function PatientRecordForm() {
     toast.info("Processing patient record...");
     
     try {
+      // Check if bucket exists first
+      if (!bucketStatus.exists) {
+        const bucketResult = await ensureBucketExists('Patient-report');
+        if (!bucketResult.success) {
+          setUploadError(`Storage bucket could not be created: ${bucketResult.error}. Patient record will be saved without the report file.`);
+        }
+      }
+      
       // Upload the file first
       const reportUrl = await uploadFiles(formData.patientId);
       
@@ -131,6 +154,24 @@ export default function PatientRecordForm() {
     window.open(storageUrl, '_blank');
   };
   
+  const handleCreateBucket = async () => {
+    setIsLoading(true);
+    try {
+      const result = await ensureBucketExists('Patient-report');
+      if (result.success) {
+        setBucketStatus({ checked: true, exists: true });
+        toast.success("Storage bucket created successfully!");
+      } else {
+        toast.error(`Failed to create storage bucket: ${result.error}`);
+      }
+    } catch (err) {
+      console.error("Error creating bucket:", err);
+      toast.error("An error occurred while creating the storage bucket");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
   return (
     <div className="max-w-md w-full p-6 bg-white rounded-lg shadow-md">
       <div className="text-center mb-6">
@@ -145,19 +186,29 @@ export default function PatientRecordForm() {
         </Alert>
       )}
       
-      {/* Information message about storage setup */}
-      <Alert className="mb-4 bg-blue-50 border-blue-200">
-        <Info className="h-4 w-4" />
-        <AlertDescription>
-          <p>To enable file uploads, make sure the "Patient-report" bucket exists in your Supabase project.</p>
-          <button 
-            onClick={handleOpenSupabaseDashboard}
-            className="text-blue-600 underline mt-1 text-sm hover:text-blue-800"
-          >
-            Open Supabase Storage Dashboard
-          </button>
-        </AlertDescription>
-      </Alert>
+      {!bucketStatus.exists && (
+        <Alert className="mb-4 bg-blue-50 border-blue-200">
+          <Info className="h-4 w-4" />
+          <AlertDescription>
+            <p>The "Patient-report" bucket doesn't exist in your Supabase project. You can:</p>
+            <div className="flex flex-col sm:flex-row gap-2 mt-2">
+              <button 
+                onClick={handleCreateBucket}
+                className="text-white bg-blue-600 px-3 py-1 rounded text-sm hover:bg-blue-700 disabled:opacity-50"
+                disabled={isLoading}
+              >
+                {isLoading ? "Creating..." : "Create Bucket Automatically"}
+              </button>
+              <button 
+                onClick={handleOpenSupabaseDashboard}
+                className="text-blue-600 underline text-sm hover:text-blue-800"
+              >
+                Create in Supabase Dashboard
+              </button>
+            </div>
+          </AlertDescription>
+        </Alert>
+      )}
       
       {uploadError && (
         <Alert className="mb-4 bg-amber-50 border-amber-200">

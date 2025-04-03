@@ -22,18 +22,21 @@ export const ensureBucketExists = async (bucketName: string) => {
       
       if (error) {
         console.error('Error creating bucket:', error);
-        throw error;
+        return { success: false, error: error.message };
       }
       
       console.log(`Bucket "${bucketName}" created successfully.`);
-      return true;
+      return { success: true, error: null };
     }
     
     console.log(`Bucket "${bucketName}" already exists.`);
-    return true;
+    return { success: true, error: null };
   } catch (error) {
     console.error('Error ensuring bucket exists:', error);
-    throw error;
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : 'Unknown error checking bucket' 
+    };
   }
 };
 
@@ -46,24 +49,14 @@ export const uploadPatientDocument = async (file: File, patientId: string, docum
     
     const bucketName = 'Patient-report';
     
-    // Check if we can access the bucket first
-    try {
-      // Check if bucket exists without trying to create it (which requires special permissions)
-      const { data: bucketData, error: bucketError } = await supabase
-        .storage
-        .getBucket(bucketName);
-      
-      // If we get an error, the bucket might not exist or we don't have permissions
-      if (bucketError) {
-        console.error('Error accessing storage bucket:', bucketError);
-        throw new Error(`Bucket access error: ${bucketError.message}`);
-      }
-    } catch (err) {
-      console.error('Cannot access storage bucket:', err);
+    // First, ensure the bucket exists
+    const bucketResult = await ensureBucketExists(bucketName);
+    if (!bucketResult.success) {
+      console.error('Failed to ensure bucket exists:', bucketResult.error);
       return {
         success: false,
         url: 'https://placeholder-url.com/no-report',
-        error: err instanceof Error ? err.message : 'Failed to access storage bucket'
+        error: `Failed to ensure storage bucket exists: ${bucketResult.error}`
       };
     }
     
