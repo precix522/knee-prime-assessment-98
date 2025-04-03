@@ -7,6 +7,7 @@ import { uploadPatientDocument } from "../utils/supabase/storage";
 import { toast } from "sonner";
 import { AlertCircle, Loader2 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { supabase } from "../utils/supabase/client";
 
 interface PatientRecord {
   patientName: string;
@@ -125,15 +126,9 @@ export default function PatientRecordForm() {
     toast.info("Processing patient record...");
     
     try {
-      const patientExists = await checkPatientIdExists(formData.patientId);
-      
-      if (patientExists) {
-        throw new Error(`Patient ID ${formData.patientId} already exists`);
-      }
-      
       const { reportUrl } = await uploadFiles();
       
-      const currentDate = new Date().toISOString().split('T')[0];
+      const currentDate = new Date().toISOString();
       
       await createPatientRecord({
         patientId: formData.patientId,

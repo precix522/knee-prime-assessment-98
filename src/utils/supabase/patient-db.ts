@@ -29,17 +29,18 @@ export const createPatientRecord = async (patientData: {
   lastModifiedTime?: string;
 }) => {
   try {
+    // Use upsert instead of insert to update if exists
     const { error } = await supabase
       .from('patient')
-      .insert([
+      .upsert([
         {
           Patient_ID: patientData.patientId,
           patient_name: patientData.patientName,
           phone: patientData.phoneNumber,
           report_url: patientData.reportUrl,
-          last_modified_tm: patientData.lastModifiedTime || new Date().toISOString().split('T')[0]
+          last_modified_tm: patientData.lastModifiedTime || new Date().toISOString()
         }
-      ]);
+      ], { onConflict: 'Patient_ID' });
       
     if (error) {
       throw error;
