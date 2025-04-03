@@ -15,6 +15,7 @@ interface AuthState {
   error: string | null;
   phoneNumber: string;
   sessionId: string | null;
+  sessionExpiry: number | null;
   
   // Auth methods
   setPhoneNumber: (phone: string) => void;
@@ -42,6 +43,9 @@ interface ValidateSessionResponse {
   phone_number: string | null;
 }
 
+// Session expiration time in milliseconds (2 hours)
+const SESSION_EXPIRY_TIME = 2 * 60 * 60 * 1000;
+
 export const useTwilioAuthStore = create<AuthState>((set, get) => ({
   user: null,
   isLoading: true,
@@ -49,6 +53,7 @@ export const useTwilioAuthStore = create<AuthState>((set, get) => ({
   error: null,
   phoneNumber: '',
   sessionId: localStorage.getItem('gator_prime_session_id'),
+  sessionExpiry: Number(localStorage.getItem('gator_prime_session_expiry')) || null,
   
   setPhoneNumber: (phone) => set({ phoneNumber: phone }),
   
@@ -101,8 +106,12 @@ export const useTwilioAuthStore = create<AuthState>((set, get) => ({
       
       // If verification successful, create a user object and store session
       if (response.session_id) {
-        // Store the session ID in localStorage
+        // Calculate expiry time (current time + 2 hours)
+        const expiryTime = Date.now() + SESSION_EXPIRY_TIME;
+        
+        // Store the session ID and expiry time in localStorage
         localStorage.setItem('gator_prime_session_id', response.session_id);
+        localStorage.setItem('gator_prime_session_expiry', expiryTime.toString());
         
         set({
           user: {
@@ -110,6 +119,7 @@ export const useTwilioAuthStore = create<AuthState>((set, get) => ({
             phone: phone
           },
           sessionId: response.session_id,
+          sessionExpiry: expiryTime,
           isVerifying: false
         });
         
@@ -128,9 +138,27 @@ export const useTwilioAuthStore = create<AuthState>((set, get) => ({
   
   validateSession: async () => {
     const sessionId = get().sessionId || localStorage.getItem('gator_prime_session_id');
+    const sessionExpiry = Number(localStorage.getItem('gator_prime_session_expiry')) || null;
     
+    // Check if session exists
     if (!sessionId) {
       set({ user: null, isLoading: false });
+      return false;
+    }
+    
+    // Check if session has expired
+    if (sessionExpiry && Date.now() > sessionExpiry) {
+      // Session expired, clear it
+      localStorage.removeItem('gator_prime_session_id');
+      localStorage.removeItem('gator_prime_session_expiry');
+      set({ 
+        user: null, 
+        sessionId: null, 
+        sessionExpiry: null,
+        isLoading: false, 
+        error: 'Your session has expired. Please log in again.' 
+      });
+      toast.info('Your session has expired. Please log in again.');
       return false;
     }
     
@@ -143,7 +171,8 @@ export const useTwilioAuthStore = create<AuthState>((set, get) => ({
       if (!response.valid) {
         // Session is invalid
         localStorage.removeItem('gator_prime_session_id');
-        set({ user: null, sessionId: null, isLoading: false });
+        localStorage.removeItem('gator_prime_session_expiry');
+        set({ user: null, sessionId: null, sessionExpiry: null, isLoading: false });
         return false;
       } else {
         // Session is valid
@@ -159,14 +188,16 @@ export const useTwilioAuthStore = create<AuthState>((set, get) => ({
     } catch (error) {
       console.error('Session validation error:', error);
       localStorage.removeItem('gator_prime_session_id');
-      set({ user: null, sessionId: null, isLoading: false, error: 'Session expired. Please log in again.' });
+      localStorage.removeItem('gator_prime_session_expiry');
+      set({ user: null, sessionId: null, sessionExpiry: null, isLoading: false, error: 'Session expired. Please log in again.' });
       return false;
     }
   },
   
   logout: () => {
     localStorage.removeItem('gator_prime_session_id');
-    set({ user: null, sessionId: null, isVerifying: false });
+    localStorage.removeItem('gator_prime_session_expiry');
+    set({ user: null, sessionId: null, sessionExpiry: null, isVerifying: false });
     toast.success('Logged out successfully');
   },
   
