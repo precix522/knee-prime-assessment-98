@@ -1,121 +1,138 @@
-
 import React, { useState } from "react";
 import { Button } from "./Button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createPatientRecord } from "../utils/supabase/patient-db";
-import { uploadPatientDocument, checkBucketExists } from "../utils/supabase/storage";
 import { toast } from "sonner";
-import { AlertCircle, Loader2, Info } from "lucide-react";
+import { AlertCircle, Loader2 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { useForm } from "react-hook-form";
+import { supabase } from "../utils/supabase/client";
 
-interface PatientFormData {
+interface PatientRecord {
   patientName: string;
   patientId: string;
   phoneNumber: string;
+  reportFiles: FileList | null;
 }
 
 export default function PatientRecordForm() {
-  const [reportFiles, setReportFiles] = useState<FileList | null>(null);
+  const [formData, setFormData] = useState<PatientRecord>({
+    patientName: "",
+    patientId: "",
+    phoneNumber: "",
+    reportFiles: null,
+  });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const [uploadError, setUploadError] = useState<string | null>(null);
-  const [bucketStatus, setBucketStatus] = useState<{ checked: boolean; exists: boolean }>({ checked: false, exists: false });
   
-  const { register, handleSubmit: formSubmit, formState: { errors }, reset } = useForm<PatientFormData>({
-    defaultValues: {
-      patientName: "",
-      patientId: "",
-      phoneNumber: ""
-    }
-  });
-  
-  React.useEffect(() => {
-    const checkBucket = async () => {
-      try {
-        const bucketName = 'patient-report'; // Changed to lowercase
-        const result = await checkBucketExists(bucketName);
-        setBucketStatus({ checked: true, exists: result.exists });
-      } catch (err) {
-        console.error("Error checking bucket:", err);
-        setBucketStatus({ checked: true, exists: false });
-      }
-    };
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value, files } = e.target;
     
-    checkBucket();
-  }, []);
-  
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      setReportFiles(e.target.files);
-      setUploadError(null); // Clear previous upload errors
+    if (name === "reportFiles" && files) {
+      setFormData({ ...formData, reportFiles: files });
+    } else {
+      setFormData({ ...formData, [name]: value });
     }
   };
   
-  const validatePhoneNumber = (value: string) => {
+  const validateForm = () => {
+    if (!formData.patientName.trim()) {
+      setError("Patient name is required");
+      return false;
+    }
+    
+    if (!formData.patientId.trim()) {
+      setError("Patient ID is required");
+      return false;
+    }
+    
+    if (!formData.phoneNumber.trim()) {
+      setError("Phone number is required");
+      return false;
+    }
+    
     const phoneRegex = /^\d{10}$/;
-    return phoneRegex.test(value.replace(/\D/g, '')) || "Please enter a valid 10-digit phone number";
+    if (!phoneRegex.test(formData.phoneNumber.replace(/\D/g, ''))) {
+      setError("Please enter a valid 10-digit phone number");
+      return false;
+    }
+    
+    if (!formData.reportFiles || formData.reportFiles.length === 0) {
+      setError("Please upload at least one PDF report");
+      return false;
+    }
+    
+    return true;
   };
   
-  const uploadFiles = async (patientId: string): Promise<string> => {
-    if (!reportFiles || reportFiles.length === 0) {
-      // No files to upload, return a placeholder URL
-      return 'https://placeholder-url.com/no-report';
-    }
+  const uploadFiles = async () => {
+    if (!formData.reportFiles) return { reportUrl: null };
+    
+    let reportUrl = null;
     
     try {
-      setUploadProgress(20);
+      const folderPath = `patient-reports/${formData.patientId}`;
       
-      // Upload the first file
-      const file = reportFiles[0];
-      const result = await uploadPatientDocument(file, patientId, 'main');
-      
-      setUploadProgress(100);
-      
-      if (!result.success) {
-        setUploadError(result.error || "File upload failed. The patient record was saved, but without the report file.");
-        return result.url; // Return the placeholder URL
+      if (formData.reportFiles.length > 0) {
+        const file = formData.reportFiles[0];
+        const fileExt = file.name.split('.').pop();
+        const fileName = `main-report-${Date.now()}.${fileExt}`;
+        const filePath = `${folderPath}/${fileName}`;
+        
+        console.log(`Uploading file 1 of ${formData.reportFiles.length} to bucket 'Patient-report'...`);
+        
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('Patient-report')
+          .upload(filePath, file, {
+            upsert: true,
+            cacheControl: '3600'
+          });
+          
+        if (uploadError) {
+          console.error('Upload error details:', uploadError);
+          throw new Error(`Error uploading file: ${uploadError.message}`);
+        }
+        
+        const { data: { publicUrl } } = supabase.storage
+          .from('Patient-report')
+          .getPublicUrl(filePath);
+          
+        console.log('File uploaded successfully. Public URL:', publicUrl);
+        reportUrl = publicUrl;
+        
+        setUploadProgress(100);
       }
       
-      return result.url;
+      return { reportUrl };
       
     } catch (error: any) {
       console.error("File upload error:", error);
-      setUploadProgress(0);
-      setUploadError(error.message || "File upload failed");
-      // Return placeholder URL if upload fails
-      return 'https://placeholder-url.com/no-report';
+      throw new Error(`File upload failed: ${error.message}`);
     }
   };
   
-  const onSubmit = async (formData: PatientFormData) => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!validateForm()) {
+      toast.error("Please fix the form errors");
+      return;
+    }
+    
     setIsLoading(true);
     setError(null);
-    setUploadError(null);
     setUploadProgress(0);
     toast.info("Processing patient record...");
     
     try {
-      // First check if bucket exists
-      if (!bucketStatus.exists) {
-        setUploadError(`Storage bucket "patient-report" does not exist. Please create it in the Supabase dashboard. Patient record will be saved without the report file.`);
-      }
+      const { reportUrl } = await uploadFiles();
+      console.log('Report URL after upload:', reportUrl);
       
-      let reportUrl = 'https://placeholder-url.com/no-report';
+      const currentDate = new Date().toISOString();
+      console.log('Current timestamp for database:', currentDate);
       
-      // Only attempt to upload if bucket exists
-      if (bucketStatus.exists && reportFiles && reportFiles.length > 0) {
-        // Upload the file first
-        reportUrl = await uploadFiles(formData.patientId);
-      }
-      
-      // Format date in YYYY-MM-DD format for database
-      const currentDate = new Date().toISOString().split('T')[0];
-      
-      // Create patient record with the report URL (real or placeholder)
-      await createPatientRecord({
+      const result = await createPatientRecord({
         patientId: formData.patientId,
         patientName: formData.patientName,
         phoneNumber: formData.phoneNumber,
@@ -123,19 +140,16 @@ export default function PatientRecordForm() {
         lastModifiedTime: currentDate
       });
       
-      if (uploadError) {
-        toast.warning("Patient record created, but file upload was not successful");
-      } else if (!reportFiles || reportFiles.length === 0) {
-        toast.success("Patient record created successfully without report file");
-      } else {
-        toast.success("Patient record created successfully with report file");
-      }
+      console.log('Patient record creation result:', result);
+      toast.success("Patient record created successfully");
       
-      // Reset form after successful submission
-      reset();
-      setReportFiles(null);
+      setFormData({
+        patientName: "",
+        patientId: "",
+        phoneNumber: "",
+        reportFiles: null
+      });
       
-      // Reset file input
       const fileInput = document.getElementById('reportFiles') as HTMLInputElement;
       if (fileInput) {
         fileInput.value = '';
@@ -149,12 +163,6 @@ export default function PatientRecordForm() {
       setIsLoading(false);
       setUploadProgress(0);
     }
-  };
-  
-  const handleOpenSupabaseDashboard = () => {
-    // Open the Supabase storage dashboard in a new tab
-    const storageUrl = `https://app.supabase.com/project/_/storage/buckets`;
-    window.open(storageUrl, '_blank');
   };
   
   return (
@@ -171,95 +179,58 @@ export default function PatientRecordForm() {
         </Alert>
       )}
       
-      {!bucketStatus.exists && bucketStatus.checked && (
-        <Alert className="mb-4 bg-blue-50 border-blue-200">
-          <Info className="h-4 w-4" />
-          <AlertDescription>
-            <p>The "patient-report" bucket doesn't exist in your Supabase project.</p>
-            <div className="mt-2">
-              <button 
-                onClick={handleOpenSupabaseDashboard}
-                className="text-blue-600 underline text-sm hover:text-blue-800"
-              >
-                Create in Supabase Dashboard
-              </button>
-              <p className="text-xs mt-1 text-gray-600">
-                After creating the bucket, make sure to set it to public and reload this page.
-              </p>
-            </div>
-          </AlertDescription>
-        </Alert>
-      )}
-      
-      {uploadError && (
-        <Alert className="mb-4 bg-amber-50 border-amber-200">
-          <AlertCircle className="h-4 w-4 text-amber-600" />
-          <AlertDescription className="text-amber-700">
-            {uploadError}
-          </AlertDescription>
-        </Alert>
-      )}
-      
-      <form onSubmit={formSubmit(onSubmit)}>
+      <form onSubmit={handleSubmit}>
         <div className="space-y-4">
           <div>
             <Label htmlFor="patientName">Patient Name</Label>
             <Input 
-              id="patientName"
-              {...register("patientName", { 
-                required: "Patient name is required" 
-              })}
+              id="patientName" 
+              name="patientName"
+              value={formData.patientName}
+              onChange={handleInputChange}
               placeholder="Enter patient name" 
               disabled={isLoading}
             />
-            {errors.patientName && (
-              <p className="text-sm text-red-500 mt-1">{errors.patientName.message}</p>
-            )}
           </div>
           
           <div>
             <Label htmlFor="patientId">Patient ID</Label>
             <Input 
-              id="patientId"
-              {...register("patientId", { 
-                required: "Patient ID is required" 
-              })}
+              id="patientId" 
+              name="patientId"
+              value={formData.patientId}
+              onChange={handleInputChange}
               placeholder="Enter unique patient ID" 
               disabled={isLoading}
             />
-            {errors.patientId && (
-              <p className="text-sm text-red-500 mt-1">{errors.patientId.message}</p>
-            )}
           </div>
           
           <div>
             <Label htmlFor="phoneNumber">Phone Number</Label>
             <Input 
-              id="phoneNumber"
-              {...register("phoneNumber", { 
-                required: "Phone number is required",
-                validate: validatePhoneNumber
-              })}
+              id="phoneNumber" 
+              name="phoneNumber"
+              value={formData.phoneNumber}
+              onChange={handleInputChange}
               placeholder="Enter 10-digit phone number" 
               disabled={isLoading}
             />
-            {errors.phoneNumber && (
-              <p className="text-sm text-red-500 mt-1">{errors.phoneNumber.message}</p>
-            )}
           </div>
           
           <div>
             <Label htmlFor="reportFiles">Patient Reports (PDF)</Label>
             <Input 
               id="reportFiles" 
+              name="reportFiles"
               type="file"
-              onChange={handleFileChange}
+              onChange={handleInputChange}
               accept=".pdf"
+              multiple
               disabled={isLoading}
               className="cursor-pointer"
             />
             <p className="text-xs text-gray-500 mt-1">
-              Upload a PDF report file (optional)
+              Upload up to 2 PDF files (main report and annex report)
             </p>
           </div>
           

@@ -16,7 +16,4 @@ export {
 } from './supabase/patient-reports';
 
 // Re-export storage operations
-export { 
-  uploadPatientDocument, 
-  checkBucketExists 
-} from './supabase/storage';
+export { uploadPatientDocument } from './supabase/storage';
