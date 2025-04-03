@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useTwilioAuthStore } from "../utils/twilio-auth-store";
@@ -175,7 +176,7 @@ export default function ReportViewer() {
                 className="justify-start w-full mb-1 data-[state=active]:bg-orange-100 data-[state=active]:text-orange-700"
               >
                 <BookOpen className="mr-2 h-5 w-5" />
-                <span>View Annex</span>
+                <span>View Annex Report</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="appointment" 
@@ -261,7 +262,7 @@ export default function ReportViewer() {
             </TabsContent>
             
             <TabsContent value="annex" className="mt-0">
-              <h1 className="text-2xl font-bold text-gray-900 mb-4">Supporting Documents</h1>
+              <h1 className="text-2xl font-bold text-gray-900 mb-4">Annex Report</h1>
               
               {annexReportUrl ? (
                 <div className="flex flex-col">
@@ -269,7 +270,7 @@ export default function ReportViewer() {
                     <iframe 
                       src={annexReportUrl}
                       className="w-full h-full"
-                      title="Supporting Document PDF"
+                      title="Annex Report PDF"
                       frameBorder="0"
                     ></iframe>
                   </div>
@@ -284,14 +285,14 @@ export default function ReportViewer() {
                         <polyline points="7 10 12 15 17 10"></polyline>
                         <line x1="12" y1="15" x2="12" y2="3"></line>
                       </svg>
-                      Download Supporting Document
+                      Download Annex Report
                     </Button>
                   </div>
                 </div>
               ) : (
                 <div className="border border-gray-200 rounded-md p-8 mb-6 bg-gray-50">
                   <p className="text-center text-lg">
-                    No supporting documents available.
+                    No annex report available.
                   </p>
                   <p className="text-center text-gray-600 mt-2">
                     Please contact support if you believe this is an error.
