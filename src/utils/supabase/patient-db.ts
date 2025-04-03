@@ -44,7 +44,7 @@ export const createPatientRecord = async (patientData: {
       Patient_ID: patientData.patientId,
       patient_name: patientData.patientName,
       phone: patientData.phoneNumber,
-      report_url: patientData.reportUrl,
+      report_url: patientData.reportUrl, // This can be null if upload failed
       last_modified_tm: formattedDate
     };
     
@@ -67,6 +67,38 @@ export const createPatientRecord = async (patientData: {
     if (!response.ok) {
       const errorText = await response.text();
       console.error('Error response:', response.status, errorText);
+      
+      // If it's a unique constraint violation (record already exists), try updating
+      if (response.status === 409 || errorText.includes('duplicate key')) {
+        console.log('Record exists, attempting update...');
+        
+        const updateResponse = await fetch(
+          `${supabase.supabaseUrl}/rest/v1/patient?Patient_ID=eq.${encodeURIComponent(patientData.patientId)}`,
+          {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+              'apikey': supabase.supabaseKey,
+              'Prefer': 'return=minimal'
+            },
+            body: JSON.stringify({
+              patient_name: patientRecord.patient_name,
+              phone: patientRecord.phone,
+              report_url: patientRecord.report_url,
+              last_modified_tm: patientRecord.last_modified_tm
+            })
+          }
+        );
+        
+        if (!updateResponse.ok) {
+          const updateErrorText = await updateResponse.text();
+          throw new Error(`Failed to update patient record: ${updateResponse.status} - ${updateErrorText}`);
+        }
+        
+        console.log('Patient record updated successfully');
+        return true;
+      }
+      
       throw new Error(`Database error: ${response.status} - ${errorText}`);
     }
     
