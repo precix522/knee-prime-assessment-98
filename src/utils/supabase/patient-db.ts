@@ -56,12 +56,11 @@ export const createPatientRecord = async (patientData: {
     
     console.log('Sending record to database:', patientRecord);
     
-    // Use upsert with explicit returning to confirm operation
+    // Use upsert with proper options (removing the 'returning' option that caused the error)
     const { data, error } = await supabase
       .from('patient')
       .upsert([patientRecord], { 
-        onConflict: 'Patient_ID',
-        returning: 'representation'  // Get back the inserted/updated row
+        onConflict: 'Patient_ID'
       });
       
     if (error) {
