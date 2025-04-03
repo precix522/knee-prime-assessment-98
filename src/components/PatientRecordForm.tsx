@@ -1,12 +1,12 @@
+
 import React, { useState } from "react";
 import { Button } from "./Button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { createPatientRecord } from "../utils/supabase/patient-db";
+import { supabase, uploadPatientDocument } from "../utils/supabase";
 import { toast } from "sonner";
 import { AlertCircle, Loader2 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { supabase } from "../utils/supabase/client";
 
 interface PatientRecord {
   patientName: string;
@@ -52,6 +52,7 @@ export default function PatientRecordForm() {
       return false;
     }
     
+    // Simple phone validation (can be made more sophisticated)
     const phoneRegex = /^\d{10}$/;
     if (!phoneRegex.test(formData.phoneNumber.replace(/\D/g, ''))) {
       setError("Please enter a valid 10-digit phone number");
@@ -72,8 +73,10 @@ export default function PatientRecordForm() {
     let reportUrl = null;
     
     try {
+      // Create a folder path using patient ID
       const folderPath = `patient-reports/${formData.patientId}`;
       
+      // Upload the first file (main report)
       if (formData.reportFiles.length > 0) {
         const file = formData.reportFiles[0];
         const fileExt = file.name.split('.').pop();
@@ -82,6 +85,7 @@ export default function PatientRecordForm() {
         
         console.log(`Uploading file 1 of ${formData.reportFiles.length} to bucket 'Patient-report'...`);
         
+        // Upload the file with proper error handling
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from('Patient-report')
           .upload(filePath, file, {
@@ -94,13 +98,14 @@ export default function PatientRecordForm() {
           throw new Error(`Error uploading file: ${uploadError.message}`);
         }
         
+        // Get public URL for the file
         const { data: { publicUrl } } = supabase.storage
           .from('Patient-report')
           .getPublicUrl(filePath);
           
-        console.log('File uploaded successfully. Public URL:', publicUrl);
         reportUrl = publicUrl;
         
+        // Update progress
         setUploadProgress(100);
       }
       
@@ -126,34 +131,49 @@ export default function PatientRecordForm() {
     toast.info("Processing patient record...");
     
     try {
+      // First check if patient ID already exists
+      const { data: existingPatient, error: checkError } = await supabase
+        .from('patient')
+        .select('Patient_ID')
+        .eq('Patient_ID', formData.patientId);
+        
+      if (checkError) {
+        throw new Error(`Error checking patient ID: ${checkError.message}`);
+      }
+      
+      if (existingPatient && existingPatient.length > 0) {
+        throw new Error(`Patient ID ${formData.patientId} already exists`);
+      }
+      
+      // Upload files to storage
       const { reportUrl } = await uploadFiles();
-      console.log('Report URL after upload:', reportUrl);
       
-      const currentDate = new Date().toISOString();
-      console.log('Current timestamp for database:', currentDate);
+      // Insert record into patient table with just the report_url column
+      const { error: insertError } = await supabase
+        .from('patient')
+        .insert([
+          {
+            Patient_ID: formData.patientId,
+            patient_name: formData.patientName,
+            phone: formData.phoneNumber,
+            report_url: reportUrl
+          }
+        ]);
+        
+      if (insertError) {
+        throw new Error(`Error saving patient record: ${insertError.message}`);
+      }
       
-      const result = await createPatientRecord({
-        patientId: formData.patientId,
-        patientName: formData.patientName,
-        phoneNumber: formData.phoneNumber,
-        reportUrl: reportUrl,
-        lastModifiedTime: currentDate
-      });
-      
-      console.log('Patient record creation result:', result);
+      // Success!
       toast.success("Patient record created successfully");
       
+      // Reset the form
       setFormData({
         patientName: "",
         patientId: "",
         phoneNumber: "",
         reportFiles: null
       });
-      
-      const fileInput = document.getElementById('reportFiles') as HTMLInputElement;
-      if (fileInput) {
-        fileInput.value = '';
-      }
       
     } catch (err: any) {
       console.error("Error creating patient record:", err);
