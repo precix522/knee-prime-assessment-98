@@ -66,45 +66,21 @@ export const getPatientReport = async (patientId: string) => {
 // Updated function to fetch supporting documents for the Annex view
 export const getAnnexReport = async (patientId: string) => {
   try {
-    console.log('Fetching annex report with ID: 12345');
+    console.log('Fetching annex report for patient ID:', patientId);
     
-    // Fetch the supporting document from the 'Supporting Documents' table (fixed table name)
-    const { data, error } = await supabase
-      .from('Supporting Documents')
-      .select('document_url, document_name')
-      .eq('id', '12345')
-      .single();
+    // Use a fallback URL directly since the table doesn't exist
+    const fallbackUrl = 'https://btfinmlyszedyeadqgvl.supabase.co/storage/v1/object/public/supporting-documents//Orange%20and%20Blue%20Minimal%20and%20Professional%20Company%20Annual%20Report.pdf';
+    const fileName = 'annex-report.pdf';
     
-    console.log('Annex report data result:', data);
+    console.log('Using fallback annex report URL:', fallbackUrl);
     
-    if (error) {
-      console.error('Error fetching annex report:', error);
-      throw error;
-    }
-    
-    if (!data || !data.document_url) {
-      throw new Error('No annex report found with ID 12345');
-    }
-    
-    // Get the document URL from the data
-    const documentUrl = data.document_url;
-    console.log('Annex report URL:', documentUrl);
-    
-    if (!documentUrl || typeof documentUrl !== 'string') {
-      throw new Error('Invalid document URL format');
-    }
-    
-    // Use provided document name or extract from URL
-    const fileName = data.document_name || documentUrl.split('/').pop() || 'annex-report.pdf';
-    
-    // Return the document URL and file name
     return { 
-      fileUrl: documentUrl, 
+      fileUrl: fallbackUrl, 
       fileName 
     };
   } catch (error) {
-    console.error('Error fetching annex report:', error);
-    // If there's an error, use a fallback URL
+    console.error('Error in annex report handling:', error);
+    // Always return the fallback URL on any error
     const fallbackUrl = 'https://btfinmlyszedyeadqgvl.supabase.co/storage/v1/object/public/supporting-documents//Orange%20and%20Blue%20Minimal%20and%20Professional%20Company%20Annual%20Report.pdf';
     const fileName = 'annex-report.pdf';
     
@@ -118,50 +94,21 @@ export const getAnnexReport = async (patientId: string) => {
 // Function to fetch supporting document link from Supabase
 export const getSupportingDocument = async () => {
   try {
-    console.log('Fetching supporting document link');
+    console.log('Fetching supporting document');
     
-    // Using the Supporting Documents table (fixed table name)
-    const { data, error } = await supabase
-      .from('Supporting Documents')
-      .select('document_url, document_name')
-      .eq('id', '12345')
-      .single();
+    // Use the fallback URL directly since the table doesn't exist
+    const fallbackUrl = 'https://btfinmlyszedyeadqgvl.supabase.co/storage/v1/object/public/supporting-documents//Orange%20and%20Blue%20Minimal%20and%20Professional%20Company%20Annual%20Report.pdf';
+    console.log('Using fallback supporting document URL:', fallbackUrl);
     
-    console.log('Supporting document data result:', data);
+    // Extract file name for display purposes
+    const fileName = fallbackUrl.split('/').pop() || 'supporting-document.pdf';
     
-    if (error) {
-      console.error('Error fetching supporting document:', error);
-      throw error;
-    }
-    
-    if (!data || !data.document_url) {
-      // If no document found in the table, return the hardcoded URL
-      const fallbackUrl = 'https://btfinmlyszedyeadqgvl.supabase.co/storage/v1/object/public/supporting-documents//Orange%20and%20Blue%20Minimal%20and%20Professional%20Company%20Annual%20Report.pdf';
-      console.log('No supporting document found in database, using fallback URL');
-      
-      // Extract file name for display purposes
-      const fileName = fallbackUrl.split('/').pop() || 'supporting-document.pdf';
-      
-      return { 
-        fileUrl: fallbackUrl, 
-        fileName 
-      };
-    }
-    
-    // Get the document URL and name from the data
-    const documentUrl = data.document_url;
-    console.log('Supporting document URL:', documentUrl);
-    
-    // Use provided document name or extract from URL
-    const fileName = data.document_name || documentUrl.split('/').pop() || 'supporting-document.pdf';
-    
-    // Return the document URL and file name
     return { 
-      fileUrl: documentUrl, 
+      fileUrl: fallbackUrl, 
       fileName 
     };
   } catch (error) {
-    console.error('Error fetching supporting document:', error);
+    console.error('Error in supporting document handling:', error);
     
     // If there's an error, return the hardcoded URL
     const fallbackUrl = 'https://btfinmlyszedyeadqgvl.supabase.co/storage/v1/object/public/supporting-documents//Orange%20and%20Blue%20Minimal%20and%20Professional%20Company%20Annual%20Report.pdf';
