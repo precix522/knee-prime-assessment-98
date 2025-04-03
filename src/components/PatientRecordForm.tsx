@@ -4,10 +4,10 @@ import { Button } from "./Button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createPatientRecord } from "../utils/supabase/patient-db";
+import { uploadPatientDocument } from "../utils/supabase/storage";
 import { toast } from "sonner";
 import { AlertCircle, Loader2, Info } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { supabase } from "../utils/supabase/client";
 import { useForm } from "react-hook-form";
 
 interface PatientFormData {
@@ -41,103 +41,27 @@ export default function PatientRecordForm() {
     return phoneRegex.test(value.replace(/\D/g, '')) || "Please enter a valid 10-digit phone number";
   };
   
-  const createPatientWithoutUpload = async (formData: PatientFormData) => {
-    try {
-      // Format the date to YYYY-MM-DD format for the database
-      const currentDate = new Date().toISOString().split('T')[0];
-      
-      // Create patient record without file
-      const result = await createPatientRecord({
-        patientId: formData.patientId,
-        patientName: formData.patientName,
-        phoneNumber: formData.phoneNumber,
-        reportUrl: null, // No report URL since upload failed
-        lastModifiedTime: currentDate
-      });
-      
-      return result;
-    } catch (err: any) {
-      console.error("Error creating patient without upload:", err);
-      throw err;
-    }
-  };
-  
-  const uploadFiles = async () => {
+  const uploadFiles = async (patientId: string): Promise<string> => {
     if (!reportFiles || reportFiles.length === 0) {
-      // No files to upload, return a placeholder URL to satisfy DB not-null constraint
-      return { reportUrl: 'https://placeholder-url.com/no-report' };
+      // No files to upload, return a placeholder URL
+      return 'https://placeholder-url.com/no-report';
     }
     
     try {
-      setUploadProgress(10);
+      setUploadProgress(20);
       
-      if (reportFiles.length > 0) {
-        const file = reportFiles[0];
-        const fileExt = file.name.split('.').pop();
-        
-        // Generate a unique path
-        const safePath = `patient-reports/${Math.random().toString(36).substring(2, 12)}`;
-        const fileName = `main-report-${Date.now()}.${fileExt}`;
-        const filePath = `${safePath}/${fileName}`;
-        
-        console.log(`Attempting to upload file to bucket 'Patient-report', path: ${filePath}`);
-        setUploadProgress(30);
-        
-        // First check if the bucket exists and is accessible
-        try {
-          const { data: bucketData, error: bucketError } = await supabase
-            .storage
-            .getBucket('Patient-report');
-            
-          if (bucketError) {
-            console.error('Bucket error:', bucketError);
-            toast.error("Storage bucket not available. Creating patient record with placeholder URL.");
-            return { reportUrl: 'https://placeholder-url.com/no-report', bucketError };
-          }
-        } catch (bucketErr) {
-          console.error('Error checking bucket:', bucketErr);
-          toast.error("Storage bucket not available. Creating patient record with placeholder URL.");
-          return { reportUrl: 'https://placeholder-url.com/no-report', bucketError: bucketErr };
-        }
-        
-        setUploadProgress(50);
-        
-        // Upload file
-        const { data: uploadData, error: uploadError } = await supabase.storage
-          .from('Patient-report')
-          .upload(filePath, file, {
-            upsert: true,
-            cacheControl: '3600'
-          });
-          
-        if (uploadError) {
-          console.error('Upload error details:', uploadError);
-          throw new Error(`Error uploading file: ${uploadError.message}`);
-        }
-        
-        setUploadProgress(80);
-        
-        // Get public URL
-        const { data: { publicUrl } } = supabase.storage
-          .from('Patient-report')
-          .getPublicUrl(filePath);
-          
-        console.log('File uploaded successfully. Public URL:', publicUrl);
-        setUploadProgress(100);
-        
-        return { reportUrl: publicUrl };
-      }
+      // Upload the first file
+      const file = reportFiles[0];
+      const reportUrl = await uploadPatientDocument(file, patientId, 'main');
       
-      return { reportUrl: 'https://placeholder-url.com/no-report' };
+      setUploadProgress(100);
+      return reportUrl;
       
     } catch (error: any) {
       console.error("File upload error:", error);
-      // If this is a bucket not found error, we'll continue with creating the patient record
-      if (error.message && error.message.includes("Bucket not found")) {
-        toast.error("Storage bucket not configured. Saving patient record with placeholder URL.");
-        return { reportUrl: 'https://placeholder-url.com/no-report', bucketError: error };
-      }
-      throw new Error(`File upload failed: ${error.message}`);
+      setUploadProgress(0);
+      // Return placeholder URL if upload fails
+      return 'https://placeholder-url.com/no-report';
     }
   };
   
@@ -148,29 +72,23 @@ export default function PatientRecordForm() {
     toast.info("Processing patient record...");
     
     try {
-      // Try to upload files first
-      const { reportUrl, bucketError } = await uploadFiles();
+      // Upload the file first
+      const reportUrl = await uploadFiles(formData.patientId);
       
       // Format date in YYYY-MM-DD format for database
       const currentDate = new Date().toISOString().split('T')[0];
       
-      // Create patient record with or without the report URL
-      const patientData = {
+      // Create patient record with the report URL (real or placeholder)
+      await createPatientRecord({
         patientId: formData.patientId,
         patientName: formData.patientName,
         phoneNumber: formData.phoneNumber,
-        reportUrl: reportUrl, // This will now be a URL (real or placeholder)
+        reportUrl: reportUrl,
         lastModifiedTime: currentDate
-      };
+      });
       
-      // Try direct insert into database
-      const insertResult = await createPatientRecord(patientData);
-      
-      if (bucketError) {
-        toast.success("Patient record created successfully");
-        setError("Note: The 'Patient-report' storage bucket doesn't exist in Supabase. Please create it in the Supabase dashboard. Patient data was saved with a placeholder URL.");
-      } else if (reportUrl === 'https://placeholder-url.com/no-report') {
-        toast.warning("Patient record created, but without a report file");
+      if (reportUrl === 'https://placeholder-url.com/no-report') {
+        toast.warning("Patient record created, but file upload was not successful");
       } else {
         toast.success("Patient record created successfully with report file");
       }
@@ -188,11 +106,6 @@ export default function PatientRecordForm() {
     } catch (err: any) {
       console.error("Error creating patient record:", err);
       setError(err.message || "An error occurred while creating the patient record");
-      
-      if (err.message && err.message.includes("Bucket not found")) {
-        setError("Storage bucket 'Patient-report' doesn't exist in Supabase. Please create it in the Supabase dashboard first.");
-      }
-      
       toast.error("Failed to create patient record");
     } finally {
       setIsLoading(false);
@@ -218,8 +131,8 @@ export default function PatientRecordForm() {
       <Alert variant="info" className="mb-4 bg-blue-50 border-blue-200">
         <Info className="h-4 w-4" />
         <AlertDescription>
-          Make sure the "Patient-report" storage bucket exists in your Supabase project. 
-          You can create it at https://supabase.com/dashboard/project/btfinmlyszedyeadqgvl/storage/buckets.
+          The system will attempt to create the "Patient-report" storage bucket if it doesn't exist.
+          If uploads fail, check your Supabase permissions.
         </AlertDescription>
       </Alert>
       

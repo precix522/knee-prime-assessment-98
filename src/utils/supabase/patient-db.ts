@@ -40,7 +40,6 @@ export const createPatientRecord = async (patientData: {
     console.log('Formatted date for database:', formattedDate);
     
     // Handle null report URL - provide a default placeholder URL since the column can't be null
-    // This is a temporary solution until the database schema can be modified to accept nulls
     const reportUrl = patientData.reportUrl || 'https://placeholder-url.com/no-report';
     
     // Prepare the record object with correct field names matching the database schema
