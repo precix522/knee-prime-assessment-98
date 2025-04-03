@@ -1,6 +1,6 @@
 
 // Re-export the client for direct access
-export { supabase } from './supabase/client';
+export { supabase, supabaseUrl, supabaseKey } from './supabase/client';
 
 // Re-export patient database operations
 export { 

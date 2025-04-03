@@ -1,5 +1,5 @@
 
-import { supabase } from './client';
+import { supabase, supabaseUrl, supabaseKey } from './client';
 
 // Function to check if patient ID already exists
 export const checkPatientIdExists = async (patientId: string): Promise<boolean> => {
@@ -55,12 +55,12 @@ export const createPatientRecord = async (patientData: {
     
     // Use REST API directly to bypass RLS
     const response = await fetch(
-      `${supabase.supabaseUrl}/rest/v1/patient`,
+      `${supabaseUrl}/rest/v1/patient`,
       {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'apikey': supabase.supabaseKey,
+          'apikey': supabaseKey,
           'Prefer': 'return=minimal'
         },
         body: JSON.stringify(patientRecord)
@@ -76,12 +76,12 @@ export const createPatientRecord = async (patientData: {
         console.log('Record exists, attempting update...');
         
         const updateResponse = await fetch(
-          `${supabase.supabaseUrl}/rest/v1/patient?Patient_ID=eq.${encodeURIComponent(patientData.patientId)}`,
+          `${supabaseUrl}/rest/v1/patient?Patient_ID=eq.${encodeURIComponent(patientData.patientId)}`,
           {
             method: 'PATCH',
             headers: {
               'Content-Type': 'application/json',
-              'apikey': supabase.supabaseKey,
+              'apikey': supabaseKey,
               'Prefer': 'return=minimal'
             },
             body: JSON.stringify({

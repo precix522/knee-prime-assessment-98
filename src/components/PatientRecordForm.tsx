@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Button } from "./Button";
 import { Input } from "@/components/ui/input";
@@ -8,7 +9,7 @@ import { toast } from "sonner";
 import { AlertCircle, Loader2, Info } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useForm } from "react-hook-form";
-import { supabase } from "../utils/supabase/client";
+import { supabase, supabaseUrl } from "../utils/supabase/client";
 
 interface PatientFormData {
   patientName: string;
@@ -149,7 +150,6 @@ export default function PatientRecordForm() {
   
   const handleOpenSupabaseDashboard = () => {
     // Open the Supabase storage dashboard in a new tab
-    const supabaseUrl = supabase.supabaseUrl;
     const storageUrl = `${supabaseUrl}/storage/buckets`;
     window.open(storageUrl, '_blank');
   };
