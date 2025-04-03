@@ -69,7 +69,7 @@ export const getAnnexReport = async (patientId: string) => {
     console.log('Fetching annex report for patient ID:', patientId);
     
     // Use a fallback URL directly since the table doesn't exist
-    const fallbackUrl = 'https://btfinmlyszedyeadqgvl.supabase.co/storage/v1/object/public/supporting-documents//Orange%20and%20Blue%20Minimal%20and%20Professional%20Company%20Annual%20Report.pdf';
+    const fallbackUrl = 'https://btfinmlyszedyeadqgvl.supabase.co/storage/v1/object/public/supporting-documents//Orange%20and%20Blue%20Minimal%20and%20Professional%20Company%20Annual%20Report%20(3).pdf';
     const fileName = 'annex-report.pdf';
     
     console.log('Using fallback annex report URL:', fallbackUrl);
