@@ -137,9 +137,20 @@ export default function PatientRecordForm() {
       const { reportUrl } = await uploadFiles();
       console.log('Report URL after upload:', reportUrl);
       
-      // Step 2: Generate date in YYYY-MM-DD format
-      const currentDate = new Date().toISOString().split('T')[0];
-      console.log('Current formatted date for database:', currentDate);
+      // Step 2: Get current date and time in format MM/DD/YYYY, hh:mm:ss AM/PM
+      const now = new Date();
+      const formattedDateTime = now.toLocaleDateString('en-US', {
+        month: '2-digit',
+        day: '2-digit',
+        year: 'numeric',
+      }) + ' ' + now.toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true
+      });
+      
+      console.log('Current formatted date/time for database:', formattedDateTime);
       
       // Step 3: Create the patient record with strong typing
       const patientData = {
@@ -147,10 +158,10 @@ export default function PatientRecordForm() {
         patientName: formData.patientName,
         phoneNumber: formData.phoneNumber,
         reportUrl: reportUrl,
-        lastModifiedTime: currentDate
+        lastModifiedTime: formattedDateTime
       };
       
-      // Step 4: Submit the data to Supabase (will now always create a new record)
+      // Step 4: Submit the data to Supabase
       const result = await createPatientRecord(patientData);
       
       console.log('Patient record creation result:', result);

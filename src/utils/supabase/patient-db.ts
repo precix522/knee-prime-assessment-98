@@ -38,10 +38,18 @@ export const createPatientRecord = async (patientData: {
       throw new Error(`Database connection issue: ${pingError.message}`);
     }
     
-    // Format the date to YYYY-MM-DD format
-    const formattedDate = patientData.lastModifiedTime 
-      ? new Date(patientData.lastModifiedTime).toISOString().split('T')[0] 
-      : new Date().toISOString().split('T')[0];
+    // Format the date in MM/DD/YYYY, hh:mm:ss AM/PM format
+    const now = new Date();
+    const formattedDate = now.toLocaleDateString('en-US', {
+      month: '2-digit',
+      day: '2-digit',
+      year: 'numeric',
+    }) + ' ' + now.toLocaleTimeString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: true
+    });
     
     console.log('Formatted date for database:', formattedDate);
     
