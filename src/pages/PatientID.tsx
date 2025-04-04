@@ -57,21 +57,45 @@ export default function PatientID() {
       const userPhoneNumber = user.phone;
       console.log("User phone number:", userPhoneNumber);
       
-      // Check if the patient ID exists AND is associated with the user's phone number
-      // Updated to use 'phone' instead of 'phone_number'
-      const { data, error: patientError } = await supabase
-        .from('patient')
-        .select('*')
-        .eq('Patient_ID', patientId)
-        .eq('phone', userPhoneNumber);
+      // Try different phone number formats to check for a match
+      const phoneFormats = [
+        userPhoneNumber,  // With '+' prefix
+        userPhoneNumber.replace('+', '')  // Without '+' prefix
+      ];
       
-      console.log("Query response:", data, patientError);
+      let patientFound = false;
       
-      if (patientError) {
-        throw patientError;
+      // Try each phone format
+      for (const phoneFormat of phoneFormats) {
+        const { data, error: phoneError } = await supabase
+          .from('patient')
+          .select('*')
+          .eq('Patient_ID', patientId)
+          .eq('phone', phoneFormat);
+        
+        console.log(`Query response for phone ${phoneFormat}:`, data, phoneError);
+        
+        if (!phoneError && data && data.length > 0) {
+          patientFound = true;
+          break;
+        }
+        
+        // Also check for phone numbers with timestamps appended (from previous bug)
+        const { data: timestampData, error: timestampError } = await supabase
+          .from('patient')
+          .select('*')
+          .eq('Patient_ID', patientId)
+          .like('phone', `${phoneFormat}_%`);
+          
+        console.log(`Query response for phone with timestamp ${phoneFormat}:`, timestampData, timestampError);
+        
+        if (!timestampError && timestampData && timestampData.length > 0) {
+          patientFound = true;
+          break;
+        }
       }
       
-      if (!data || data.length === 0) {
+      if (!patientFound) {
         // Check if the patient ID exists but belongs to a different phone number
         const { data: patientExists } = await supabase
           .from('patient')

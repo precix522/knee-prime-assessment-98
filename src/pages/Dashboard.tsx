@@ -47,22 +47,43 @@ export default function Dashboard() {
       if (!user?.phone) return;
       
       try {
+        // Format the phone number to match Supabase (remove '+')
+        const formattedPhone = user.phone.replace('+', '');
+        
         // Query Supabase for patient data with matching phone number
         const { data, error } = await supabase
           .from('patient')
           .select('Patient_ID')
-          .eq('phone', user.phone)
-          .single();
+          .eq('phone', formattedPhone)
+          .order('last_modified_tm', { ascending: false })
+          .limit(1);
           
         if (error) {
           console.error("Error fetching patient data:", error);
           return;
         }
         
-        if (data) {
-          setPatientId(data.Patient_ID);
+        if (data && data.length > 0) {
+          setPatientId(data[0].Patient_ID);
         } else {
-          console.log("No patient record found for this user");
+          // Try again with the formatted phone number that includes '+'
+          const { data: dataWithPlus, error: errorWithPlus } = await supabase
+            .from('patient')
+            .select('Patient_ID')
+            .eq('phone', user.phone)
+            .order('last_modified_tm', { ascending: false })
+            .limit(1);
+            
+          if (errorWithPlus) {
+            console.error("Error fetching patient data with + prefix:", errorWithPlus);
+            return;
+          }
+          
+          if (dataWithPlus && dataWithPlus.length > 0) {
+            setPatientId(dataWithPlus[0].Patient_ID);
+          } else {
+            console.log("No patient record found for this user");
+          }
         }
       } catch (error) {
         console.error("Error in fetchPatientData:", error);

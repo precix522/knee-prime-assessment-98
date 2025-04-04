@@ -23,12 +23,12 @@ export const getPatientReport = async (patientId: string) => {
       throw new Error(`Patient ID "${patientId}" not found in the database`);
     }
     
-    // Fetch the report URL from the 'patient' table
+    // Fetch all reports for this patient ID from the 'patient' table
     const { data: patientData, error: patientError } = await supabase
       .from('patient')
-      .select('report_url')
+      .select('report_url, last_modified_tm, assessment_id')
       .eq('Patient_ID', patientId)
-      .single();
+      .order('last_modified_tm', { ascending: false });
     
     console.log('Patient data result:', patientData);
     
@@ -37,32 +37,64 @@ export const getPatientReport = async (patientId: string) => {
       throw patientError;
     }
     
-    if (!patientData) {
-      throw new Error('No report URL found for this patient ID');
+    if (!patientData || patientData.length === 0) {
+      throw new Error('No reports found for this patient ID');
     }
     
-    // Get the report URL from the patient data
-    let reportUrl = patientData.report_url;
-    console.log('Report URL:', reportUrl);
+    // Transform the result to include all reports
+    const patientReports = patientData.map(record => {
+      // Get the report URL from the patient data
+      let reportUrl = record.report_url;
+      
+      if (!reportUrl || typeof reportUrl !== 'string') {
+        return null;
+      }
+      
+      // Handle case where report_url contains multiple URLs separated by comma
+      if (reportUrl.includes(',')) {
+        // Extract the first URL (main report)
+        reportUrl = reportUrl.split(',')[0].trim();
+      }
+      
+      // Extract file name for display purposes
+      const fileName = reportUrl.split('/').pop() || 'patient-report.pdf';
+      
+      // Format the timestamp if it exists
+      let formattedTimestamp = '';
+      if (record.last_modified_tm) {
+        try {
+          const date = new Date(record.last_modified_tm);
+          formattedTimestamp = date.toLocaleString('en-US', {
+            month: '2-digit',
+            day: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: true
+          });
+        } catch (e) {
+          formattedTimestamp = record.last_modified_tm || '';
+        }
+      }
+      
+      return { 
+        fileUrl: reportUrl, 
+        fileName,
+        timestamp: formattedTimestamp,
+        assessmentId: record.assessment_id
+      };
+    }).filter(Boolean);
     
-    if (!reportUrl || typeof reportUrl !== 'string') {
-      throw new Error('Invalid report URL format');
+    if (patientReports.length === 0) {
+      throw new Error('No valid reports found for this patient ID');
     }
     
-    // Handle case where report_url contains multiple URLs separated by comma
-    if (reportUrl.includes(',')) {
-      // Extract the first URL (main report)
-      reportUrl = reportUrl.split(',')[0].trim();
-      console.log('Extracted main report URL:', reportUrl);
-    }
-    
-    // Extract file name for display purposes
-    const fileName = reportUrl.split('/').pop() || 'patient-report.pdf';
-    
-    // Return the public URL directly
+    // Return all reports and the main report for backward compatibility
     return { 
-      fileUrl: reportUrl, 
-      fileName 
+      allReports: patientReports,
+      fileUrl: patientReports[0].fileUrl, 
+      fileName: patientReports[0].fileName 
     };
   } catch (error) {
     console.error('Error fetching patient report:', error);
@@ -80,24 +112,27 @@ export const getAnnexReport = async (patientId: string) => {
       .from('patient')
       .select('report_url')
       .eq('Patient_ID', patientId)
-      .single();
+      .order('last_modified_tm', { ascending: false });
       
     if (patientError) {
       throw patientError;
     }
     
-    if (patientData && patientData.report_url && patientData.report_url.includes(',')) {
-      // Extract the second URL (annex report) if it exists
-      const urls = patientData.report_url.split(',');
-      if (urls.length > 1) {
-        const annexUrl = urls[1].trim();
-        console.log('Extracted annex report URL:', annexUrl);
-        const fileName = annexUrl.split('/').pop() || 'annex-report.pdf';
-        
-        return { 
-          fileUrl: annexUrl, 
-          fileName 
-        };
+    if (patientData && patientData.length > 0) {
+      const reportUrls = patientData[0].report_url;
+      if (reportUrls && reportUrls.includes(',')) {
+        // Extract the second URL (annex report) if it exists
+        const urls = reportUrls.split(',');
+        if (urls.length > 1) {
+          const annexUrl = urls[1].trim();
+          console.log('Extracted annex report URL:', annexUrl);
+          const fileName = annexUrl.split('/').pop() || 'annex-report.pdf';
+          
+          return { 
+            fileUrl: annexUrl, 
+            fileName 
+          };
+        }
       }
     }
     

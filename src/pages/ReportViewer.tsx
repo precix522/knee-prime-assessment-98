@@ -1,11 +1,28 @@
+
 import React, { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useTwilioAuthStore } from "../utils/twilio-auth-store";
 import { Button } from "../components/Button";
 import { getPatientReport, getAnnexReport, getSupportingDocument } from "../utils/supabase";
 import { toast } from "sonner";
-import { CalendarDays, FileText, BookOpen } from "lucide-react";
+import { CalendarDays, FileText, BookOpen, Clock } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "../components/ui/tabs";
+import { 
+  Table, 
+  TableBody, 
+  TableCaption, 
+  TableCell, 
+  TableHead, 
+  TableHeader, 
+  TableRow 
+} from "../components/ui/table";
+
+type PatientReport = {
+  fileUrl: string;
+  fileName: string;
+  timestamp: string;
+  assessmentId?: number;
+};
 
 export default function ReportViewer() {
   const [searchParams] = useSearchParams();
@@ -20,6 +37,8 @@ export default function ReportViewer() {
   const [supportingDocName, setSupportingDocName] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("report");
+  const [reportHistory, setReportHistory] = useState<PatientReport[]>([]);
+  const [selectedReportIndex, setSelectedReportIndex] = useState(0);
   
   const { validateSession } = useTwilioAuthStore();
   
@@ -40,7 +59,13 @@ export default function ReportViewer() {
         
         console.log("Fetching reports for patient ID:", patientId);
         
-        const { fileUrl, fileName } = await getPatientReport(patientId);
+        const { fileUrl, fileName, allReports } = await getPatientReport(patientId);
+        
+        // Set the report history
+        if (allReports && allReports.length > 0) {
+          setReportHistory(allReports);
+        }
+        
         setReportUrl(fileUrl);
         setReportName(fileName);
         
@@ -75,11 +100,11 @@ export default function ReportViewer() {
     fetchReports();
   }, [navigate, validateSession, patientId]);
   
-  const handleDownload = () => {
-    if (reportUrl) {
+  const handleDownload = (url: string | null, filename: string | null) => {
+    if (url) {
       const link = document.createElement('a');
-      link.href = reportUrl;
-      link.download = reportName || 'patient-report.pdf';
+      link.href = url;
+      link.download = filename || 'patient-report.pdf';
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -87,32 +112,20 @@ export default function ReportViewer() {
     }
   };
   
-  const handleAnnexDownload = () => {
-    if (annexReportUrl) {
-      const link = document.createElement('a');
-      link.href = annexReportUrl;
-      link.download = annexReportName || 'supporting-document.pdf';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      toast.success("Annex document download started");
-    } else {
-      toast.error("Annex document not available");
+  const handleReportSelect = (index: number) => {
+    if (reportHistory[index]) {
+      setSelectedReportIndex(index);
+      setReportUrl(reportHistory[index].fileUrl);
+      setReportName(reportHistory[index].fileName);
     }
   };
   
+  const handleAnnexDownload = () => {
+    handleDownload(annexReportUrl, annexReportName);
+  };
+  
   const handleSupportingDocDownload = () => {
-    if (supportingDocUrl) {
-      const link = document.createElement('a');
-      link.href = supportingDocUrl;
-      link.download = supportingDocName || 'supporting-document.pdf';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      toast.success("Supporting document download started");
-    } else {
-      toast.error("Supporting document not available");
-    }
+    handleDownload(supportingDocUrl, supportingDocName);
   };
 
   const handleBookAppointment = () => {
@@ -158,6 +171,13 @@ export default function ReportViewer() {
               >
                 <FileText className="mr-2 h-5 w-5" />
                 <span>View My Report</span>
+              </TabsTrigger>
+              <TabsTrigger 
+                value="history" 
+                className="justify-start w-full mb-1 data-[state=active]:bg-orange-100 data-[state=active]:text-orange-700"
+              >
+                <Clock className="mr-2 h-5 w-5" />
+                <span>Report History</span>
               </TabsTrigger>
               <TabsTrigger 
                 value="annex" 
@@ -211,6 +231,13 @@ export default function ReportViewer() {
               
               {!error && reportUrl ? (
                 <div className="flex flex-col">
+                  <div className="mb-4">
+                    {reportHistory.length > 0 && (
+                      <div className="text-gray-600 text-sm mb-2">
+                        <span className="font-medium">Report Date:</span> {reportHistory[selectedReportIndex]?.timestamp || 'Unknown'}
+                      </div>
+                    )}
+                  </div>
                   <div className="border border-gray-200 rounded-md mb-6 overflow-hidden bg-gray-50 h-[600px]">
                     <iframe 
                       src={reportUrl}
@@ -222,7 +249,7 @@ export default function ReportViewer() {
                   <div className="mb-4">
                     <Button 
                       variant="health" 
-                      onClick={handleDownload}
+                      onClick={() => handleDownload(reportUrl, reportName)}
                       className="flex items-center gap-2"
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -245,6 +272,63 @@ export default function ReportViewer() {
                     </p>
                   </div>
                 )
+              )}
+            </TabsContent>
+            
+            <TabsContent value="history" className="mt-0">
+              <h1 className="text-2xl font-bold text-gray-900 mb-4">Report History</h1>
+              
+              {reportHistory && reportHistory.length > 0 ? (
+                <div className="flex flex-col">
+                  <Table>
+                    <TableCaption>List of all reports for patient {patientId}</TableCaption>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Report Date</TableHead>
+                        <TableHead>Assessment ID</TableHead>
+                        <TableHead>Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {reportHistory.map((report, index) => (
+                        <TableRow key={index} className={index === selectedReportIndex ? "bg-orange-50" : ""}>
+                          <TableCell className="font-medium">{report.timestamp || 'Unknown'}</TableCell>
+                          <TableCell>{report.assessmentId || 'N/A'}</TableCell>
+                          <TableCell>
+                            <div className="flex gap-2">
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => {
+                                  handleReportSelect(index);
+                                  setActiveTab("report");
+                                }}
+                              >
+                                View
+                              </Button>
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => handleDownload(report.fileUrl, report.fileName)}
+                              >
+                                Download
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              ) : (
+                <div className="border border-gray-200 rounded-md p-8 mb-6 bg-gray-50">
+                  <p className="text-center text-lg">
+                    No report history found for this patient ID.
+                  </p>
+                  <p className="text-center text-gray-600 mt-2">
+                    Please check if the patient ID is correct or contact support.
+                  </p>
+                </div>
               )}
             </TabsContent>
             
