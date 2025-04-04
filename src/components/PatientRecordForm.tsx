@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { Button } from "./Button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { createPatientRecord, checkPatientIdExists } from "../utils/supabase/patient-db";
+import { createPatientRecord } from "../utils/supabase/patient-db";
 import { toast } from "sonner";
 import { AlertCircle, Loader2 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -53,11 +53,9 @@ export default function PatientRecordForm() {
       return false;
     }
     
-    // Improve phone validation to match different formats
-    // Strip all non-digits and then check if length is at least 10
-    const cleanedPhone = formData.phoneNumber.replace(/\D/g, '');
-    if (cleanedPhone.length < 10 || cleanedPhone.length > 15) {
-      setError("Please enter a valid phone number with at least 10 digits");
+    const phoneRegex = /^\d{10}$/;
+    if (!phoneRegex.test(formData.phoneNumber.replace(/\D/g, ''))) {
+      setError("Please enter a valid 10-digit phone number");
       return false;
     }
     
@@ -85,9 +83,6 @@ export default function PatientRecordForm() {
         
         console.log(`Uploading file 1 of ${formData.reportFiles.length} to bucket 'Patient-report'...`);
         
-        // Update progress indicator
-        setUploadProgress(20);
-        
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from('Patient-report')
           .upload(filePath, file, {
@@ -99,9 +94,6 @@ export default function PatientRecordForm() {
           console.error('Upload error details:', uploadError);
           throw new Error(`Error uploading file: ${uploadError.message}`);
         }
-        
-        // Update progress indicator
-        setUploadProgress(60);
         
         const { data: { publicUrl } } = supabase.storage
           .from('Patient-report')
@@ -147,7 +139,7 @@ export default function PatientRecordForm() {
       const patientData = {
         patientId: formData.patientId,
         patientName: formData.patientName,
-        phoneNumber: formData.phoneNumber.replace(/\D/g, ''),  // Clean the phone number
+        phoneNumber: formData.phoneNumber,
         reportUrl: reportUrl,
         lastModifiedTime: currentDate
       };
