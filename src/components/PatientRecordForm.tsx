@@ -53,9 +53,11 @@ export default function PatientRecordForm() {
       return false;
     }
     
-    const phoneRegex = /^\d{10}$/;
-    if (!phoneRegex.test(formData.phoneNumber.replace(/\D/g, ''))) {
-      setError("Please enter a valid 10-digit phone number");
+    // Improve phone validation to match different formats
+    // Strip all non-digits and then check if length is at least 10
+    const cleanedPhone = formData.phoneNumber.replace(/\D/g, '');
+    if (cleanedPhone.length < 10 || cleanedPhone.length > 15) {
+      setError("Please enter a valid phone number with at least 10 digits");
       return false;
     }
     
@@ -145,7 +147,7 @@ export default function PatientRecordForm() {
       const patientData = {
         patientId: formData.patientId,
         patientName: formData.patientName,
-        phoneNumber: formData.phoneNumber,
+        phoneNumber: formData.phoneNumber.replace(/\D/g, ''),  // Clean the phone number
         reportUrl: reportUrl,
         lastModifiedTime: currentDate
       };
