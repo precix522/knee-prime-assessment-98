@@ -73,15 +73,19 @@ export default function PatientRecordForm() {
     let reportUrl = null;
     
     try {
-      const folderPath = `patient-reports/${formData.patientId}`;
+      // Generate a unique identifier for the upload
+      const timestamp = Date.now();
+      const uniqueId = `${formData.patientId}_${timestamp}`;
+      const folderPath = `patient-reports/${uniqueId}`;
       
       if (formData.reportFiles.length > 0) {
         const file = formData.reportFiles[0];
         const fileExt = file.name.split('.').pop();
-        const fileName = `main-report-${Date.now()}.${fileExt}`;
+        const fileName = `report-${timestamp}.${fileExt}`;
         const filePath = `${folderPath}/${fileName}`;
         
-        console.log(`Uploading file 1 of ${formData.reportFiles.length} to bucket 'Patient-report'...`);
+        console.log(`Uploading file to bucket 'Patient-report', path: ${filePath}`);
+        setUploadProgress(30);
         
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from('Patient-report')
@@ -94,6 +98,8 @@ export default function PatientRecordForm() {
           console.error('Upload error details:', uploadError);
           throw new Error(`Error uploading file: ${uploadError.message}`);
         }
+        
+        setUploadProgress(70);
         
         const { data: { publicUrl } } = supabase.storage
           .from('Patient-report')
@@ -144,7 +150,7 @@ export default function PatientRecordForm() {
         lastModifiedTime: currentDate
       };
       
-      // Step 4: Submit the data to Supabase
+      // Step 4: Submit the data to Supabase (will now always create a new record)
       const result = await createPatientRecord(patientData);
       
       console.log('Patient record creation result:', result);

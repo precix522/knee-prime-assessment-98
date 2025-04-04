@@ -29,7 +29,7 @@ export const createPatientRecord = async (patientData: {
   lastModifiedTime?: string;
 }) => {
   try {
-    console.log('Creating/updating patient record with data:', patientData);
+    console.log('Creating new patient record with data:', patientData);
     
     // Verify database connection before attempting write
     const { data: pingData, error: pingError } = await supabase.from('patient').select('count').limit(1);
@@ -54,73 +54,22 @@ export const createPatientRecord = async (patientData: {
       last_modified_tm: formattedDate
     };
     
-    console.log('Sending record to database:', patientRecord);
+    console.log('Sending new record to database:', patientRecord);
     
-    // First check if the record exists by Patient_ID
-    const { data: existingRecord } = await supabase
+    // Always insert as a new record, no checking for existing patient ID
+    const { data, error } = await supabase
       .from('patient')
-      .select('Patient_ID')
-      .eq('Patient_ID', patientData.patientId);
+      .insert([patientRecord])
+      .select();
       
-    let result;
-    
-    if (existingRecord && existingRecord.length > 0) {
-      // Update existing record
-      console.log('Updating existing record for Patient_ID:', patientData.patientId);
-      const { data, error } = await supabase
-        .from('patient')
-        .update(patientRecord)
-        .eq('Patient_ID', patientData.patientId);
-        
-      if (error) {
-        console.error('Supabase error while updating patient record:', error);
-        throw error;
-      }
-      
-      result = data;
-    } else {
-      // For new record, first check if phone number is already in use by another patient
-      const { data: phoneExists } = await supabase
-        .from('patient')
-        .select('Patient_ID')
-        .eq('phone', patientData.phoneNumber);
-      
-      // If phone number is already in use, create the record with on_conflict option
-      if (phoneExists && phoneExists.length > 0) {
-        console.log('Phone number already exists, but proceeding with new patient ID');
-        
-        // Insert with do nothing on conflict to bypass phone uniqueness constraint
-        const { data, error } = await supabase
-          .from('patient')
-          .insert([patientRecord])
-          .select();
-          
-        if (error) {
-          // If this still fails, it means we need to update the database schema
-          // Log a clearer message for the user
-          console.error('Could not create patient with duplicate phone number:', error);
-          throw new Error('This phone number is already registered with another patient. Please use a different phone number or contact support.');
-        }
-        
-        result = data;
-      } else {
-        // Normal insert for new record with unique phone
-        console.log('Inserting new record for Patient_ID:', patientData.patientId);
-        const { data, error } = await supabase
-          .from('patient')
-          .insert([patientRecord]);
-          
-        if (error) {
-          console.error('Supabase error while inserting patient record:', error);
-          throw error;
-        }
-        
-        result = data;
-      }
+    if (error) {
+      console.error('Supabase error while inserting patient record:', error);
+      throw new Error(`Failed to save patient record: ${error.message}`);
     }
     
-    console.log('Patient record saved successfully. Database response:', result);
-    return result || true;
+    console.log('Patient record saved successfully. Database response:', data);
+    return data;
+    
   } catch (error: any) {
     console.error('Error creating patient record:', error.message || error);
     throw error;
