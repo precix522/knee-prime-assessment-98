@@ -64,44 +64,38 @@ export const createPatientRecord = async (patientData: {
     
     console.log('Sending new record to database:', patientRecord);
     
-    // Use RPC call to insert record bypassing unique constraint on phone
-    // This will use a custom SQL function in Supabase
+    // Attempt to insert the record
     const { data, error } = await supabase
-      .rpc('insert_patient_ignore_phone_duplicate', patientRecord)
+      .from('patient')
+      .insert([patientRecord])
       .select();
       
     if (error) {
       console.error('Supabase error while inserting patient record:', error);
       
-      // Fallback to direct insert if RPC fails
-      // This will only work if the unique constraint on phone is removed from the database
-      const { data: insertData, error: insertError } = await supabase
-        .from('patient')
-        .insert([patientRecord])
-        .select();
+      // If there's a duplicate phone error, we'll use the upsert method instead
+      if (error.message && error.message.includes('patient_phone_key')) {
+        console.log('Phone number already exists, using upsert method');
         
-      if (insertError) {
-        console.error('Fallback insert also failed:', insertError);
-        
-        // If both methods fail, try one more approach - modify the record to make phone unique
-        const timestamp = Date.now();
-        patientRecord.phone = `${patientRecord.phone}_${timestamp}`;
-        
-        const { data: finalData, error: finalError } = await supabase
+        // Use the patientId as the unique key for upserting
+        const { data: upsertData, error: upsertError } = await supabase
           .from('patient')
-          .insert([patientRecord])
+          .upsert([patientRecord], { 
+            onConflict: 'Patient_ID',
+            ignoreDuplicates: false  // Update the record if it exists
+          })
           .select();
           
-        if (finalError) {
-          throw new Error(`Failed to save patient record: ${finalError.message}`);
+        if (upsertError) {
+          console.error('Upsert also failed:', upsertError);
+          throw new Error(`Failed to save patient record: ${upsertError.message}`);
         }
         
-        console.log('Patient record saved with modified phone number. Database response:', finalData);
-        return finalData;
+        console.log('Patient record upserted successfully:', upsertData);
+        return upsertData;
       }
       
-      console.log('Patient record saved with fallback method. Database response:', insertData);
-      return insertData;
+      throw new Error(`Failed to save patient record: ${error.message}`);
     }
     
     console.log('Patient record saved successfully. Database response:', data);
@@ -109,21 +103,6 @@ export const createPatientRecord = async (patientData: {
     
   } catch (error: any) {
     console.error('Error creating patient record:', error.message || error);
-    
-    // Special handling for duplicate key violations
-    if (error.message && error.message.includes('patient_phone_key')) {
-      // Create a timestamp to make the phone number unique
-      const timestamp = Date.now();
-      const modifiedPatientData = {
-        ...patientData,
-        phoneNumber: `${patientData.phoneNumber}_${timestamp}`
-      };
-      
-      // Try again with the modified phone number
-      console.log('Retrying with modified phone number:', modifiedPatientData.phoneNumber);
-      return createPatientRecord(modifiedPatientData);
-    }
-    
     throw error;
   }
 };
