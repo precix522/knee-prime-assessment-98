@@ -57,10 +57,15 @@ export const createPatientRecord = async (patientData: {
     console.log('Sending record to database:', patientRecord);
     
     // First check if the record exists by Patient_ID
-    const { data: existingRecord } = await supabase
+    const { data: existingRecord, error: checkError } = await supabase
       .from('patient')
       .select('Patient_ID')
       .eq('Patient_ID', patientData.patientId);
+    
+    if (checkError) {
+      console.error('Error checking if patient exists:', checkError);
+      throw new Error(`Database query error: ${checkError.message}`);
+    }
       
     let result;
     
@@ -70,7 +75,8 @@ export const createPatientRecord = async (patientData: {
       const { data, error } = await supabase
         .from('patient')
         .update(patientRecord)
-        .eq('Patient_ID', patientData.patientId);
+        .eq('Patient_ID', patientData.patientId)
+        .select();
         
       if (error) {
         console.error('Supabase error while updating patient record:', error);
@@ -80,16 +86,21 @@ export const createPatientRecord = async (patientData: {
       result = data;
     } else {
       // For new record, first check if phone number is already in use by another patient
-      const { data: phoneExists } = await supabase
+      const { data: phoneExists, error: phoneError } = await supabase
         .from('patient')
         .select('Patient_ID')
         .eq('phone', patientData.phoneNumber);
+      
+      if (phoneError) {
+        console.error('Error checking phone number:', phoneError);
+        throw new Error(`Database query error: ${phoneError.message}`);
+      }
       
       // If phone number is already in use, create the record with on_conflict option
       if (phoneExists && phoneExists.length > 0) {
         console.log('Phone number already exists, but proceeding with new patient ID');
         
-        // Insert with do nothing on conflict to bypass phone uniqueness constraint
+        // Insert with on_conflict option
         const { data, error } = await supabase
           .from('patient')
           .insert([patientRecord])
@@ -108,7 +119,8 @@ export const createPatientRecord = async (patientData: {
         console.log('Inserting new record for Patient_ID:', patientData.patientId);
         const { data, error } = await supabase
           .from('patient')
-          .insert([patientRecord]);
+          .insert([patientRecord])
+          .select();
           
         if (error) {
           console.error('Supabase error while inserting patient record:', error);

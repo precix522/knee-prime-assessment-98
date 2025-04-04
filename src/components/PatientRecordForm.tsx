@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { Button } from "./Button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { createPatientRecord } from "../utils/supabase/patient-db";
+import { createPatientRecord, checkPatientIdExists } from "../utils/supabase/patient-db";
 import { toast } from "sonner";
 import { AlertCircle, Loader2 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -83,6 +83,9 @@ export default function PatientRecordForm() {
         
         console.log(`Uploading file 1 of ${formData.reportFiles.length} to bucket 'Patient-report'...`);
         
+        // Update progress indicator
+        setUploadProgress(20);
+        
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from('Patient-report')
           .upload(filePath, file, {
@@ -94,6 +97,9 @@ export default function PatientRecordForm() {
           console.error('Upload error details:', uploadError);
           throw new Error(`Error uploading file: ${uploadError.message}`);
         }
+        
+        // Update progress indicator
+        setUploadProgress(60);
         
         const { data: { publicUrl } } = supabase.storage
           .from('Patient-report')
