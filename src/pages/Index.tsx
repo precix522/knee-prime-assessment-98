@@ -1,12 +1,17 @@
-
 import React, { useEffect, useRef } from "react";
 import { Navbar } from "../components/Navbar";
 import { Footer } from "../components/Footer";
 import { Button } from "../components/Button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../components/Card";
 import { cn } from "../lib/utils";
+import { useTwilioAuthStore } from "../utils/twilio-auth-store";
+import { UserRoundPlus } from "lucide-react";
 
 const Index = () => {
+  // Get user from auth store
+  const { user } = useTwilioAuthStore();
+  const isAdmin = user?.profile_type === 'admin';
+  
   // Refs for animation elements
   const heroRef = useRef<HTMLDivElement>(null);
   const aboutRef = useRef<HTMLDivElement>(null);
@@ -81,11 +86,21 @@ const Index = () => {
               <Button variant="outline" size="lg" onClick={() => window.location.href = '/general-login'}>
                 Login
               </Button>
+              {isAdmin && (
+                <Button 
+                  variant="outline" 
+                  size="lg" 
+                  className="border-health-500 text-health-600"
+                  onClick={() => window.location.href = '/manage-patients'}
+                >
+                  <UserRoundPlus size={20} className="mr-2" />
+                  Sign Up Patient
+                </Button>
+              )}
             </div>
           </div>
         </div>
         
-        {/* Decorative background elements */}
         <div className="absolute -top-24 -right-24 w-96 h-96 bg-health-50 rounded-full opacity-30 blur-3xl"></div>
         <div className="absolute bottom-0 -left-24 w-80 h-80 bg-gray-100 rounded-full opacity-40 blur-3xl"></div>
         
@@ -126,7 +141,6 @@ const Index = () => {
           </div>
         </div>
         
-        {/* Decorative elements */}
         <div className="absolute top-1/4 -right-12 w-64 h-64 bg-health-50 rounded-full opacity-20 blur-3xl"></div>
       </section>
       
@@ -240,7 +254,6 @@ const Index = () => {
           </div>
         </div>
         
-        {/* Decorative elements */}
         <div className="absolute bottom-1/4 -left-12 w-64 h-64 bg-health-50 rounded-full opacity-20 blur-3xl"></div>
       </section>
       
@@ -340,7 +353,6 @@ const Index = () => {
           </div>
         </div>
         
-        {/* Decorative elements */}
         <div className="absolute top-1/3 -right-12 w-64 h-64 bg-health-50 rounded-full opacity-20 blur-3xl"></div>
       </section>
       
@@ -383,10 +395,22 @@ const Index = () => {
               <span className="relative z-10">Login</span>
               <span className="absolute inset-0 w-0 bg-white/10 transition-all duration-300 ease-out group-hover:w-full"></span>
             </Button>
+            
+            {isAdmin && (
+              <Button 
+                variant="outline" 
+                size="lg" 
+                className="border-white text-white hover:bg-white/10 relative overflow-hidden group"
+                onClick={() => window.location.href = '/manage-patients'}
+              >
+                <UserRoundPlus size={20} className="mr-2" />
+                <span className="relative z-10">Sign Up Patient</span>
+                <span className="absolute inset-0 w-0 bg-white/10 transition-all duration-300 ease-out group-hover:w-full"></span>
+              </Button>
+            )}
           </div>
         </div>
         
-        {/* Decorative elements */}
         <div className="absolute bottom-0 left-1/4 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
         <div className="absolute top-1/4 right-1/4 w-48 h-48 bg-white/5 rounded-full blur-3xl"></div>
       </section>

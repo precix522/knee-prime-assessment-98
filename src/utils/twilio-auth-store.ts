@@ -1,4 +1,3 @@
-
 import { create } from 'zustand';
 import { toast } from 'sonner';
 import { sendOTP as sendOTPService, verifyOTP as verifyOTPService, validateSession as validateSessionService } from '../api/twilio-service';
@@ -6,6 +5,7 @@ import { sendOTP as sendOTPService, verifyOTP as verifyOTPService, validateSessi
 interface User {
   id: string;
   phone: string;
+  profile_type?: string; // Add profile_type to track user role
 }
 
 interface AuthState {
@@ -113,10 +113,15 @@ export const useTwilioAuthStore = create<AuthState>((set, get) => ({
         localStorage.setItem('gator_prime_session_id', response.session_id);
         localStorage.setItem('gator_prime_session_expiry', expiryTime.toString());
         
+        // Determine user profile type based on phone number (for demo purposes)
+        // In a real app, this would come from a database lookup
+        const profile_type = phone === '+6596739493' ? 'admin' : 'user';
+        
         set({
           user: {
             id: response.session_id,
-            phone: phone
+            phone: phone,
+            profile_type: profile_type
           },
           sessionId: response.session_id,
           sessionExpiry: expiryTime,
@@ -175,11 +180,16 @@ export const useTwilioAuthStore = create<AuthState>((set, get) => ({
         set({ user: null, sessionId: null, sessionExpiry: null, isLoading: false });
         return false;
       } else {
+        // Determine profile type based on phone number (for demo purposes)
+        // In a real app, this would come from a database lookup
+        const profile_type = response.phone_number === '+6596739493' ? 'admin' : 'user';
+        
         // Session is valid
         set({
           user: {
             id: sessionId,
-            phone: response.phone_number
+            phone: response.phone_number,
+            profile_type: profile_type
           },
           isLoading: false
         });

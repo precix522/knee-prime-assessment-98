@@ -1,36 +1,89 @@
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTwilioAuthStore } from "../utils/twilio-auth-store";
 import PatientRecordForm from "../components/PatientRecordForm";
 import { Navbar } from "../components/Navbar";
 import Footer from "../components/Footer";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ShieldAlert } from "lucide-react";
 import { Button } from "../components/ui/button";
 
 export default function ManagePatients() {
   const navigate = useNavigate();
-  const { validateSession } = useTwilioAuthStore();
+  const { user, validateSession } = useTwilioAuthStore();
+  const [isLoading, setIsLoading] = useState(true);
+  const [isAuthorized, setIsAuthorized] = useState(false);
   
-  // Redirect to login if not authenticated
+  // Check admin authorization and redirect if not authorized
   useEffect(() => {
     const checkAuth = async () => {
+      setIsLoading(true);
       try {
         const isValid = await validateSession();
+        
         if (!isValid) {
-          // Comment out navigation to allow non-authenticated users to register
-          // navigate("/login");
+          // Not logged in, redirect to login
+          navigate("/general-login");
+          return;
+        }
+        
+        // Check if user is admin
+        if (user?.profile_type === 'admin') {
+          setIsAuthorized(true);
+        } else {
+          // Not admin, redirect to home
+          navigate("/");
         }
       } catch (err) {
         console.error("Session validation error:", err);
-        // Comment out navigation to allow non-authenticated users to register
-        // navigate("/login");
+        navigate("/general-login");
+      } finally {
+        setIsLoading(false);
       }
     };
     
     checkAuth();
-  }, [navigate, validateSession]);
+  }, [navigate, validateSession, user]);
   
+  // Show loading state while checking authorization
+  if (isLoading) {
+    return (
+      <>
+        <Navbar />
+        <div className="min-h-screen bg-gray-50 pt-24 pb-12 flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-health-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Checking permissions...</p>
+          </div>
+        </div>
+        <Footer />
+      </>
+    );
+  }
+  
+  // Show unauthorized message if not admin
+  if (!isAuthorized) {
+    return (
+      <>
+        <Navbar />
+        <div className="min-h-screen bg-gray-50 pt-24 pb-12 flex items-center justify-center">
+          <div className="text-center max-w-md mx-auto">
+            <ShieldAlert className="h-16 w-16 text-health-600 mx-auto mb-4" />
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">Access Denied</h1>
+            <p className="text-gray-600 mb-6">
+              You don't have permission to access this page. Only administrators can register new patients.
+            </p>
+            <Button onClick={() => navigate('/')} variant="health">
+              Back to Home
+            </Button>
+          </div>
+        </div>
+        <Footer />
+      </>
+    );
+  }
+  
+  // Admin view
   return (
     <>
       <Navbar />
@@ -41,8 +94,11 @@ export default function ManagePatients() {
               Patient Registration
             </h1>
             <p className="mt-3 max-w-2xl mx-auto text-xl text-gray-500 sm:mt-4">
-              Register as a new patient and upload your medical reports
+              Register new patients and upload their medical reports
             </p>
+            <div className="inline-flex items-center justify-center mt-2 px-3 py-1 bg-health-100 text-health-700 rounded-full text-sm">
+              <span className="font-medium">Admin Access</span>
+            </div>
           </div>
           
           <div className="mt-12 flex justify-center">

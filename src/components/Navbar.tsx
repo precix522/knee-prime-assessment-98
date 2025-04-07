@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { Button } from "./Button";
 import { cn } from "../lib/utils";
 import { useTwilioAuthStore } from "../utils/twilio-auth-store";
-import { User, LogOut, LogIn } from "lucide-react";
+import { User, LogOut, LogIn, UserRoundPlus } from "lucide-react";
 import { useLocation } from "react-router-dom";
 
 export const Navbar = () => {
@@ -15,6 +15,9 @@ export const Navbar = () => {
   // Check if user is on dashboard or other authenticated pages
   const isAuthenticatedPage = location.pathname === "/dashboard" || 
                              location.pathname === "/report-viewer";
+  
+  // Check if user is an admin
+  const isAdmin = user?.profile_type === 'admin';
 
   useEffect(() => {
     const handleScroll = () => {
@@ -70,12 +73,16 @@ export const Navbar = () => {
                 >
                   Benefits
                 </a>
-                {!user && (
+                {/* Only show Sign Up link for admin users */}
+                {isAdmin && (
                   <a 
                     href="/manage-patients"
                     className="text-gray-700 hover:text-health-600 transition-colors duration-300 text-sm font-medium"
                   >
-                    Sign Up
+                    <span className="flex items-center">
+                      <UserRoundPlus size={16} className="mr-1" />
+                      Sign Up
+                    </span>
                   </a>
                 )}
               </>
@@ -85,7 +92,10 @@ export const Navbar = () => {
               <div className="flex items-center gap-4">
                 <div className="flex items-center gap-2">
                   <User size={16} className="text-health-600" />
-                  <span className="text-sm font-medium">{user.phone || "User"}</span>
+                  <span className="text-sm font-medium">
+                    {user.phone || "User"}
+                    {isAdmin && <span className="ml-1 text-health-600">(Admin)</span>}
+                  </span>
                 </div>
                 <Button 
                   onClick={() => window.location.href = '/logout'}
@@ -177,13 +187,17 @@ export const Navbar = () => {
                   >
                     Benefits
                   </a>
-                  {!user && (
+                  {/* Only show Sign Up link for admin users in mobile menu */}
+                  {isAdmin && (
                     <a
                       href="/manage-patients"
                       className="text-gray-900 hover:text-health-600 transition-colors duration-300 px-3 py-2 rounded-md text-base font-medium"
                       onClick={() => setMobileMenuOpen(false)}
                     >
-                      Sign Up
+                      <span className="flex items-center">
+                        <UserRoundPlus size={16} className="mr-1" />
+                        Sign Up
+                      </span>
                     </a>
                   )}
                 </>
@@ -193,7 +207,10 @@ export const Navbar = () => {
                 <div className="px-3 py-2">
                   <div className="flex items-center gap-2 mb-3">
                     <User size={16} className="text-health-600" />
-                    <span className="text-sm font-medium">{user.phone || "User"}</span>
+                    <span className="text-sm font-medium">
+                      {user.phone || "User"}
+                      {isAdmin && <span className="ml-1 text-health-600">(Admin)</span>}
+                    </span>
                   </div>
                   <Button 
                     onClick={() => {
