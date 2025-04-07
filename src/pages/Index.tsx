@@ -86,6 +86,7 @@ const Index = () => {
               <Button variant="outline" size="lg" onClick={() => window.location.href = '/general-login'}>
                 Login
               </Button>
+              
               {isAdmin && (
                 <Button 
                   variant="outline" 
@@ -103,7 +104,6 @@ const Index = () => {
         
         <div className="absolute -top-24 -right-24 w-96 h-96 bg-health-50 rounded-full opacity-30 blur-3xl"></div>
         <div className="absolute bottom-0 -left-24 w-80 h-80 bg-gray-100 rounded-full opacity-40 blur-3xl"></div>
-        
         <div className="absolute bottom-0 left-0 w-full h-24 bg-gradient-to-t from-white to-transparent"></div>
       </section>
       

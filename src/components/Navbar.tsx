@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "./Button";
 import { cn } from "../lib/utils";
@@ -16,7 +15,7 @@ export const Navbar = () => {
   const isAuthenticatedPage = location.pathname === "/dashboard" || 
                              location.pathname === "/report-viewer";
   
-  // Check if user is an admin
+  // Check if user is an admin based on profile_type from Supabase
   const isAdmin = user?.profile_type === 'admin';
 
   useEffect(() => {
@@ -76,7 +75,7 @@ export const Navbar = () => {
               </>
             )}
             
-            {/* Admin-specific navigation options */}
+            {/* Admin-specific navigation options - only shown for admin users */}
             {isAdmin && (
               <>
                 <a 
@@ -211,7 +210,7 @@ export const Navbar = () => {
                 </>
               )}
               
-              {/* Admin-specific mobile navigation options */}
+              {/* Admin-specific mobile navigation options - only shown for admin users */}
               {isAdmin && (
                 <>
                   <a
