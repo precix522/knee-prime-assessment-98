@@ -17,3 +17,10 @@ export {
 
 // Re-export storage operations
 export { uploadPatientDocument } from './supabase/storage';
+
+// Re-export user profile operations
+export {
+  getUserProfileByPhone,
+  createUserProfile,
+  type UserProfile
+} from './supabase/user-db';

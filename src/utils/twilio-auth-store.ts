@@ -1,11 +1,12 @@
 import { create } from 'zustand';
 import { toast } from 'sonner';
 import { sendOTP as sendOTPService, verifyOTP as verifyOTPService, validateSession as validateSessionService } from '../api/twilio-service';
+import { getUserProfileByPhone, createUserProfile, UserProfile } from './supabase';
 
 interface User {
   id: string;
   phone: string;
-  profile_type?: string; // Add profile_type to track user role
+  profile_type?: string; // Profile type from database
 }
 
 interface AuthState {
@@ -17,7 +18,6 @@ interface AuthState {
   sessionId: string | null;
   sessionExpiry: number | null;
   
-  // Auth methods
   setPhoneNumber: (phone: string) => void;
   sendOTP: (phone: string) => Promise<void>;
   verifyOTP: (phone: string, code: string) => Promise<void>;
@@ -26,7 +26,6 @@ interface AuthState {
   validateSession: () => Promise<boolean>;
 }
 
-// Define response types for API responses
 interface OTPResponse {
   success: boolean;
   message: string;
@@ -43,7 +42,6 @@ interface ValidateSessionResponse {
   phone_number: string | null;
 }
 
-// Session expiration time in milliseconds (2 hours)
 const SESSION_EXPIRY_TIME = 2 * 60 * 60 * 1000;
 
 export const useTwilioAuthStore = create<AuthState>((set, get) => ({
@@ -60,7 +58,6 @@ export const useTwilioAuthStore = create<AuthState>((set, get) => ({
   sendOTP: async (phone) => {
     set({ isLoading: true, error: null });
     try {
-      // Validate phone number format
       const e164Regex = /^\+[1-9]\d{7,14}$/;
       if (!e164Regex.test(phone)) {
         throw new Error('Please enter a valid phone number in international format (e.g., +65XXXXXXXX for Singapore)');
@@ -68,22 +65,18 @@ export const useTwilioAuthStore = create<AuthState>((set, get) => ({
       
       console.log('Attempting to send OTP to:', phone);
       
-      // Use the service function directly instead of API route
       const response = await sendOTPService(phone);
       
       if (!response.success) {
         throw new Error(response.message || 'Failed to send verification code');
       }
       
-      // Show message about development mode if present
       if (response.message.includes('Development mode')) {
         toast.info('Development mode: Using "123456" as verification code');
       } else {
-        // Show success toast
         toast.success('Verification code sent to your phone');
       }
       
-      // If successful, set isVerifying to true to show OTP input
       set({ isVerifying: true, phoneNumber: phone });
     } catch (error: any) {
       console.error('Send OTP error:', error);
@@ -97,25 +90,25 @@ export const useTwilioAuthStore = create<AuthState>((set, get) => ({
   verifyOTP: async (phone, code) => {
     set({ isLoading: true, error: null });
     try {
-      // Use the service function directly instead of API route
       const response = await verifyOTPService(phone, code);
       
       if (!response.success) {
         throw new Error(response.message || 'Failed to verify code');
       }
       
-      // If verification successful, create a user object and store session
       if (response.session_id) {
-        // Calculate expiry time (current time + 2 hours)
         const expiryTime = Date.now() + SESSION_EXPIRY_TIME;
         
-        // Store the session ID and expiry time in localStorage
         localStorage.setItem('gator_prime_session_id', response.session_id);
         localStorage.setItem('gator_prime_session_expiry', expiryTime.toString());
         
-        // Determine user profile type based on phone number (for demo purposes)
-        // In a real app, this would come from a database lookup
-        const profile_type = phone === '+6596739493' ? 'admin' : 'user';
+        let userProfile: UserProfile | null = await getUserProfileByPhone(phone);
+        
+        if (!userProfile) {
+          userProfile = await createUserProfile(phone, 'user');
+        }
+        
+        const profile_type = userProfile?.profile_type || 'user';
         
         set({
           user: {
@@ -128,7 +121,6 @@ export const useTwilioAuthStore = create<AuthState>((set, get) => ({
           isVerifying: false
         });
         
-        // Show success toast
         toast.success('Verification successful!');
       } else {
         throw new Error('No session ID received after verification');
@@ -145,15 +137,12 @@ export const useTwilioAuthStore = create<AuthState>((set, get) => ({
     const sessionId = get().sessionId || localStorage.getItem('gator_prime_session_id');
     const sessionExpiry = Number(localStorage.getItem('gator_prime_session_expiry')) || null;
     
-    // Check if session exists
     if (!sessionId) {
       set({ user: null, isLoading: false });
       return false;
     }
     
-    // Check if session has expired
     if (sessionExpiry && Date.now() > sessionExpiry) {
-      // Session expired, clear it
       localStorage.removeItem('gator_prime_session_id');
       localStorage.removeItem('gator_prime_session_expiry');
       set({ 
@@ -170,25 +159,27 @@ export const useTwilioAuthStore = create<AuthState>((set, get) => ({
     try {
       set({ isLoading: true });
       
-      // Use the service function directly instead of API route
       const response = await validateSessionService(sessionId);
       
       if (!response.valid) {
-        // Session is invalid
         localStorage.removeItem('gator_prime_session_id');
         localStorage.removeItem('gator_prime_session_expiry');
         set({ user: null, sessionId: null, sessionExpiry: null, isLoading: false });
         return false;
       } else {
-        // Determine profile type based on phone number (for demo purposes)
-        // In a real app, this would come from a database lookup
-        const profile_type = response.phone_number === '+6596739493' ? 'admin' : 'user';
+        const phone = response.phone_number;
         
-        // Session is valid
+        if (!phone) {
+          throw new Error('Phone number not found in session');
+        }
+        
+        const userProfile = await getUserProfileByPhone(phone);
+        const profile_type = userProfile?.profile_type || 'user';
+        
         set({
           user: {
             id: sessionId,
-            phone: response.phone_number,
+            phone: phone,
             profile_type: profile_type
           },
           isLoading: false
