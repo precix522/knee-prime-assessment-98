@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef } from "react";
 import { Navbar } from "../components/Navbar";
 import { Footer } from "../components/Footer";
@@ -77,8 +78,8 @@ const Index = () => {
               <Button variant="health" size="lg" onClick={() => window.location.href = '/login'}>
                 Access Your Report
               </Button>
-              <Button variant="outline" size="lg" onClick={() => window.location.href = '/manage-patients'}>
-                Sign Up
+              <Button variant="outline" size="lg" onClick={() => window.location.href = '/general-login'}>
+                Login
               </Button>
             </div>
           </div>
@@ -362,15 +363,27 @@ const Index = () => {
             Your personalized knee assessment is just a few clicks away. Secure, confidential, and invaluable for your long-term mobility.
           </p>
           
-          <Button 
-            variant="outline" 
-            size="lg" 
-            className="bg-white text-health-600 hover:bg-gray-100 border-white relative overflow-hidden group"
-            onClick={() => window.location.href = '/login'}
-          >
-            <span className="relative z-10">Access Your Report Now</span>
-            <span className="absolute inset-0 w-0 bg-gray-100 transition-all duration-300 ease-out group-hover:w-full"></span>
-          </Button>  
+          <div className="flex flex-col sm:flex-row justify-center gap-4">
+            <Button 
+              variant="outline" 
+              size="lg" 
+              className="bg-white text-health-600 hover:bg-gray-100 border-white relative overflow-hidden group"
+              onClick={() => window.location.href = '/login'}
+            >
+              <span className="relative z-10">Access Your Report</span>
+              <span className="absolute inset-0 w-0 bg-gray-100 transition-all duration-300 ease-out group-hover:w-full"></span>
+            </Button>
+            
+            <Button 
+              variant="outline" 
+              size="lg" 
+              className="border-white text-white hover:bg-white/10 relative overflow-hidden group"
+              onClick={() => window.location.href = '/general-login'}
+            >
+              <span className="relative z-10">Login</span>
+              <span className="absolute inset-0 w-0 bg-white/10 transition-all duration-300 ease-out group-hover:w-full"></span>
+            </Button>
+          </div>
         </div>
         
         {/* Decorative elements */}

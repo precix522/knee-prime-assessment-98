@@ -57,10 +57,14 @@ export default function PatientID() {
       const userPhoneNumber = user.phone;
       console.log("User phone number:", userPhoneNumber);
       
+      // Clean phone number - remove any timestamp if present
+      const cleanPhoneNumber = userPhoneNumber.split('_')[0];
+      console.log("Clean phone number:", cleanPhoneNumber);
+      
       // Try different phone number formats to check for a match
       const phoneFormats = [
-        userPhoneNumber,  // With '+' prefix
-        userPhoneNumber.replace('+', '')  // Without '+' prefix
+        cleanPhoneNumber,  // With '+' prefix
+        cleanPhoneNumber.replace('+', '')  // Without '+' prefix
       ];
       
       let patientFound = false;

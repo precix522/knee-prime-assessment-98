@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { Button } from "./Button";
 import { cn } from "../lib/utils";
 import { useTwilioAuthStore } from "../utils/twilio-auth-store";
-import { User, LogOut } from "lucide-react";
+import { User, LogOut, LogIn } from "lucide-react";
 import { useLocation } from "react-router-dom";
 
 export const Navbar = () => {
@@ -98,14 +98,24 @@ export const Navbar = () => {
                 </Button>
               </div>
             ) : (
-              <Button 
-                onClick={() => window.location.href = '/login'}
-                variant="health"
-                size="sm"
-                className="ml-4"
-              >
-                Access Report
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button 
+                  onClick={() => window.location.href = '/login'}
+                  variant="health"
+                  size="sm"
+                >
+                  Access Report
+                </Button>
+                <Button 
+                  onClick={() => window.location.href = '/general-login'}
+                  variant="outline"
+                  size="sm"
+                  className="border-health-500 text-health-600"
+                >
+                  <LogIn size={16} className="mr-1" />
+                  Login
+                </Button>
+              </div>
             )}
           </nav>
 
@@ -199,17 +209,30 @@ export const Navbar = () => {
                   </Button>
                 </div>
               ) : (
-                <Button 
-                  onClick={() => {
-                    window.location.href = '/login';
-                    setMobileMenuOpen(false);
-                  }}
-                  variant="health"
-                  size="default"
-                  className="mt-2"
-                >
-                  Access Report
-                </Button>
+                <div className="flex flex-col gap-3 px-3 py-2">
+                  <Button 
+                    onClick={() => {
+                      window.location.href = '/login';
+                      setMobileMenuOpen(false);
+                    }}
+                    variant="health"
+                    size="default"
+                  >
+                    Access Report
+                  </Button>
+                  <Button 
+                    onClick={() => {
+                      window.location.href = '/general-login';
+                      setMobileMenuOpen(false);
+                    }}
+                    variant="outline"
+                    size="default"
+                    className="border-health-500 text-health-600"
+                  >
+                    <LogIn size={16} className="mr-1" />
+                    Login
+                  </Button>
+                </div>
               )}
             </div>
           </div>
