@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { Button } from "./Button";
 import { cn } from "../lib/utils";
 import { useTwilioAuthStore } from "../utils/twilio-auth-store";
-import { User, LogOut, LogIn, UserRoundPlus } from "lucide-react";
+import { User, LogOut, LogIn, UserRoundPlus, FileText, Users } from "lucide-react";
 import { useLocation } from "react-router-dom";
 
 export const Navbar = () => {
@@ -73,18 +73,39 @@ export const Navbar = () => {
                 >
                   Benefits
                 </a>
-                {/* Only show Sign Up link for admin users */}
-                {isAdmin && (
-                  <a 
-                    href="/manage-patients"
-                    className="text-gray-700 hover:text-health-600 transition-colors duration-300 text-sm font-medium"
-                  >
-                    <span className="flex items-center">
-                      <UserRoundPlus size={16} className="mr-1" />
-                      Sign Up
-                    </span>
-                  </a>
-                )}
+              </>
+            )}
+            
+            {/* Admin-specific navigation options */}
+            {isAdmin && (
+              <>
+                <a 
+                  href="/manage-patients"
+                  className="text-gray-700 hover:text-health-600 transition-colors duration-300 text-sm font-medium"
+                >
+                  <span className="flex items-center">
+                    <UserRoundPlus size={16} className="mr-1" />
+                    Sign Up
+                  </span>
+                </a>
+                <a 
+                  href="/all-reports"
+                  className="text-gray-700 hover:text-health-600 transition-colors duration-300 text-sm font-medium"
+                >
+                  <span className="flex items-center">
+                    <FileText size={16} className="mr-1" />
+                    All Reports
+                  </span>
+                </a>
+                <a 
+                  href="/manage-users"
+                  className="text-gray-700 hover:text-health-600 transition-colors duration-300 text-sm font-medium"
+                >
+                  <span className="flex items-center">
+                    <Users size={16} className="mr-1" />
+                    Manage Users
+                  </span>
+                </a>
               </>
             )}
             
@@ -187,19 +208,42 @@ export const Navbar = () => {
                   >
                     Benefits
                   </a>
-                  {/* Only show Sign Up link for admin users in mobile menu */}
-                  {isAdmin && (
-                    <a
-                      href="/manage-patients"
-                      className="text-gray-900 hover:text-health-600 transition-colors duration-300 px-3 py-2 rounded-md text-base font-medium"
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      <span className="flex items-center">
-                        <UserRoundPlus size={16} className="mr-1" />
-                        Sign Up
-                      </span>
-                    </a>
-                  )}
+                </>
+              )}
+              
+              {/* Admin-specific mobile navigation options */}
+              {isAdmin && (
+                <>
+                  <a
+                    href="/manage-patients"
+                    className="text-gray-900 hover:text-health-600 transition-colors duration-300 px-3 py-2 rounded-md text-base font-medium"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <span className="flex items-center">
+                      <UserRoundPlus size={16} className="mr-1" />
+                      Sign Up
+                    </span>
+                  </a>
+                  <a
+                    href="/all-reports"
+                    className="text-gray-900 hover:text-health-600 transition-colors duration-300 px-3 py-2 rounded-md text-base font-medium"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <span className="flex items-center">
+                      <FileText size={16} className="mr-1" />
+                      All Reports
+                    </span>
+                  </a>
+                  <a
+                    href="/manage-users"
+                    className="text-gray-900 hover:text-health-600 transition-colors duration-300 px-3 py-2 rounded-md text-base font-medium"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <span className="flex items-center">
+                      <Users size={16} className="mr-1" />
+                      Manage Users
+                    </span>
+                  </a>
                 </>
               )}
               
