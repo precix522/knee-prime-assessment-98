@@ -4,8 +4,18 @@ import { useNavigate } from "react-router-dom";
 import { Navbar } from "../components/Navbar";
 import { Footer } from "../components/Footer";
 import { useTwilioAuthStore } from "../utils/twilio-auth-store";
-import { Users, UserPlus, Edit, Trash, Search } from "lucide-react";
+import { Users, UserPlus, Edit, Trash, Search, UserRound, Shield } from "lucide-react";
 import { Button } from "../components/Button";
+import { Input } from "@/components/ui/input";
+import { 
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { 
   Table, 
@@ -22,6 +32,8 @@ type User = {
   phone: string;
   profile_type: string;
   created_at: string;
+  name?: string;
+  email?: string;
 };
 
 export default function ManageUsers() {
@@ -29,6 +41,13 @@ export default function ManageUsers() {
   const [pageLoading, setPageLoading] = useState(true);
   const [users, setUsers] = useState<User[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [isAddUserOpen, setIsAddUserOpen] = useState(false);
+  const [newUserData, setNewUserData] = useState({
+    phone: "",
+    profile_type: "user",
+    name: "",
+    email: ""
+  });
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -46,25 +65,47 @@ export default function ManageUsers() {
         }
         
         // In a real implementation, we would fetch users from Supabase here
-        // For now, let's use dummy data
+        // For now, let's use expanded dummy data
         const dummyUsers: User[] = [
           {
             id: "usr1",
             phone: "+1234567890",
             profile_type: "admin",
-            created_at: "2023-04-01"
+            created_at: "2023-04-01",
+            name: "Admin User",
+            email: "admin@example.com"
           },
           {
             id: "usr2",
             phone: "+9876543210",
             profile_type: "user",
-            created_at: "2023-04-02"
+            created_at: "2023-04-02",
+            name: "John Smith",
+            email: "john@example.com"
           },
           {
             id: "usr3",
             phone: "+1122334455",
             profile_type: "user",
-            created_at: "2023-04-03"
+            created_at: "2023-04-03",
+            name: "Sarah Johnson",
+            email: "sarah@example.com"
+          },
+          {
+            id: "usr4",
+            phone: "+5566778899",
+            profile_type: "user",
+            created_at: "2023-04-04",
+            name: "Robert Chen",
+            email: "robert@example.com"
+          },
+          {
+            id: "usr5",
+            phone: "+1231231234",
+            profile_type: "admin",
+            created_at: "2023-04-05",
+            name: "Manager Admin",
+            email: "manager@example.com"
           }
         ];
         
@@ -81,11 +122,38 @@ export default function ManageUsers() {
 
   const filteredUsers = users.filter(user => 
     user.phone.includes(searchQuery) || 
-    user.profile_type.includes(searchQuery)
+    user.profile_type.includes(searchQuery) ||
+    (user.name?.toLowerCase().includes(searchQuery.toLowerCase()) || "") ||
+    (user.email?.toLowerCase().includes(searchQuery.toLowerCase()) || "")
   );
 
   const handleAddUser = () => {
-    toast.info("Add user feature will be implemented in the future");
+    // Validate form
+    if (!newUserData.phone || !newUserData.profile_type) {
+      toast.error("Phone number and user type are required");
+      return;
+    }
+    
+    // In a real implementation, this would create a new user in Supabase
+    const newUser: User = {
+      id: `usr${users.length + 1}`,
+      phone: newUserData.phone,
+      profile_type: newUserData.profile_type,
+      created_at: new Date().toISOString().split('T')[0],
+      name: newUserData.name,
+      email: newUserData.email
+    };
+    
+    setUsers([...users, newUser]);
+    setIsAddUserOpen(false);
+    setNewUserData({
+      phone: "",
+      profile_type: "user",
+      name: "",
+      email: ""
+    });
+    
+    toast.success(`User added successfully: ${newUserData.phone}`);
   };
 
   const handleEditUser = (userId: string) => {
@@ -93,7 +161,10 @@ export default function ManageUsers() {
   };
 
   const handleDeleteUser = (userId: string) => {
-    toast.info(`Delete user ${userId} feature will be implemented in the future`);
+    // In a real implementation, this would delete the user from Supabase
+    const filteredUsers = users.filter(user => user.id !== userId);
+    setUsers(filteredUsers);
+    toast.success("User deleted successfully");
   };
 
   if (pageLoading || isLoading) {
@@ -111,32 +182,121 @@ export default function ManageUsers() {
     <div className="flex flex-col min-h-screen">
       <Navbar />
 
-      <main className="flex-grow pt-24 pb-12">
+      <main className="flex-grow pt-24 pb-12 bg-gray-50">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-6xl mx-auto">
-            <div className="flex items-center justify-between mb-6">
-              <h1 className="text-2xl font-bold text-gray-900 flex items-center">
-                <Users className="h-6 w-6 mr-2 text-health-600" />
-                Manage Users
-              </h1>
-              <Button 
-                variant="health" 
-                onClick={handleAddUser}
-                className="flex items-center"
-              >
-                <UserPlus className="h-4 w-4 mr-2" />
-                Add User
-              </Button>
+          <div className="max-w-7xl mx-auto">
+            {/* Header */}
+            <div className="bg-gradient-to-r from-orange-500 to-orange-600 rounded-t-lg shadow-md overflow-hidden">
+              <div className="p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <h1 className="text-2xl font-bold text-white flex items-center">
+                  <Users className="h-6 w-6 mr-2 text-white" />
+                  Manage Users
+                </h1>
+                <div className="flex gap-2">
+                  <Dialog open={isAddUserOpen} onOpenChange={setIsAddUserOpen}>
+                    <DialogTrigger asChild>
+                      <Button 
+                        variant="secondary" 
+                        className="flex items-center bg-white text-orange-600 hover:bg-orange-50"
+                      >
+                        <UserPlus className="h-4 w-4 mr-2" />
+                        Add User
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-md">
+                      <DialogHeader>
+                        <DialogTitle>Add New User</DialogTitle>
+                        <DialogDescription>
+                          Create a new user account in the system.
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="space-y-4 py-4">
+                        <div className="grid grid-cols-1 gap-4">
+                          <div className="space-y-2">
+                            <label htmlFor="phone" className="text-sm font-medium text-gray-700">
+                              Phone Number
+                            </label>
+                            <Input 
+                              id="phone" 
+                              placeholder="+1234567890" 
+                              value={newUserData.phone}
+                              onChange={(e) => setNewUserData({...newUserData, phone: e.target.value})}
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <label htmlFor="name" className="text-sm font-medium text-gray-700">
+                              Name (Optional)
+                            </label>
+                            <Input 
+                              id="name" 
+                              placeholder="User Name" 
+                              value={newUserData.name}
+                              onChange={(e) => setNewUserData({...newUserData, name: e.target.value})}
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <label htmlFor="email" className="text-sm font-medium text-gray-700">
+                              Email (Optional)
+                            </label>
+                            <Input 
+                              id="email" 
+                              type="email"
+                              placeholder="user@example.com" 
+                              value={newUserData.email}
+                              onChange={(e) => setNewUserData({...newUserData, email: e.target.value})}
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <label htmlFor="userType" className="text-sm font-medium text-gray-700">
+                              User Type
+                            </label>
+                            <select
+                              id="userType"
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-health-500"
+                              value={newUserData.profile_type}
+                              onChange={(e) => setNewUserData({...newUserData, profile_type: e.target.value})}
+                            >
+                              <option value="user">Regular User</option>
+                              <option value="admin">Administrator</option>
+                            </select>
+                          </div>
+                        </div>
+                      </div>
+                      <DialogFooter>
+                        <Button 
+                          variant="outline" 
+                          onClick={() => setIsAddUserOpen(false)}
+                        >
+                          Cancel
+                        </Button>
+                        <Button 
+                          variant="health"
+                          onClick={handleAddUser}
+                        >
+                          Add User
+                        </Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
+                  <Button 
+                    variant="secondary"
+                    onClick={() => navigate('/dashboard')}
+                    className="bg-white text-orange-600 hover:bg-orange-50"
+                  >
+                    Back to Dashboard
+                  </Button>
+                </div>
+              </div>
             </div>
 
-            <div className="bg-white rounded-lg shadow-md overflow-hidden">
+            <div className="bg-white rounded-b-lg shadow-md overflow-hidden">
               <div className="p-6">
                 <div className="mb-6 relative">
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
                     <input
                       type="text"
-                      placeholder="Search users..."
+                      placeholder="Search users by phone, name, email..."
                       className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-health-500"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
@@ -145,52 +305,69 @@ export default function ManageUsers() {
                 </div>
 
                 {filteredUsers.length > 0 ? (
-                  <Table>
-                    <TableCaption>List of all users in the system</TableCaption>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Phone Number</TableHead>
-                        <TableHead>User Type</TableHead>
-                        <TableHead>Created Date</TableHead>
-                        <TableHead className="text-right">Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {filteredUsers.map((user) => (
-                        <TableRow key={user.id}>
-                          <TableCell className="font-medium">{user.phone}</TableCell>
-                          <TableCell>
-                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                              user.profile_type === 'admin' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'
-                            }`}>
-                              {user.profile_type}
-                            </span>
-                          </TableCell>
-                          <TableCell>{user.created_at}</TableCell>
-                          <TableCell className="text-right">
-                            <div className="flex justify-end gap-2">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleEditUser(user.id)}
-                              >
-                                <Edit className="h-4 w-4 mr-1" />
-                                Edit
-                              </Button>
-                              <Button
-                                variant="destructive"
-                                size="sm"
-                                onClick={() => handleDeleteUser(user.id)}
-                              >
-                                <Trash className="h-4 w-4 mr-1" />
-                                Delete
-                              </Button>
-                            </div>
-                          </TableCell>
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableCaption>List of all users in the system</TableCaption>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>User Info</TableHead>
+                          <TableHead>Phone Number</TableHead>
+                          <TableHead>User Type</TableHead>
+                          <TableHead>Created Date</TableHead>
+                          <TableHead className="text-right">Actions</TableHead>
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
+                      </TableHeader>
+                      <TableBody>
+                        {filteredUsers.map((user) => (
+                          <TableRow key={user.id} className="hover:bg-gray-50">
+                            <TableCell>
+                              <div className="flex items-center gap-3">
+                                <div className="bg-gray-100 rounded-full p-2">
+                                  {user.profile_type === 'admin' ? 
+                                    <Shield className="h-5 w-5 text-purple-500" /> : 
+                                    <UserRound className="h-5 w-5 text-blue-500" />
+                                  }
+                                </div>
+                                <div>
+                                  <div className="font-medium">{user.name || "Unknown User"}</div>
+                                  {user.email && <div className="text-xs text-gray-500">{user.email}</div>}
+                                </div>
+                              </div>
+                            </TableCell>
+                            <TableCell className="font-medium">{user.phone}</TableCell>
+                            <TableCell>
+                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                user.profile_type === 'admin' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'
+                              }`}>
+                                {user.profile_type}
+                              </span>
+                            </TableCell>
+                            <TableCell>{user.created_at}</TableCell>
+                            <TableCell className="text-right">
+                              <div className="flex justify-end gap-2">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleEditUser(user.id)}
+                                >
+                                  <Edit className="h-4 w-4 mr-1" />
+                                  Edit
+                                </Button>
+                                <Button
+                                  variant="destructive"
+                                  size="sm"
+                                  onClick={() => handleDeleteUser(user.id)}
+                                >
+                                  <Trash className="h-4 w-4 mr-1" />
+                                  Delete
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
                 ) : (
                   <div className="text-center py-8">
                     <Users className="h-12 w-12 mx-auto text-gray-400 mb-4" />

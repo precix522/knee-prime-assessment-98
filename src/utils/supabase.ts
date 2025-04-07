@@ -22,5 +22,9 @@ export { uploadPatientDocument } from './supabase/storage';
 export {
   getUserProfileByPhone,
   createUserProfile,
+  updateUserProfile,
+  deleteUserProfile, 
+  getAllUserProfiles,
+  updateUserLastLogin,
   type UserProfile
 } from './supabase/user-db';
