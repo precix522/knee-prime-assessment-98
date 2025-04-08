@@ -26,6 +26,8 @@ export default function GeneralLogin() {
     isVerifying,
     error,
     phoneNumber,
+    rememberMe,
+    setRememberMe,
     sendOTP,
     verifyOTP,
     clearError,
@@ -181,6 +183,8 @@ export default function GeneralLogin() {
                   handleSendOTP={handleSendOTP}
                   isLoading={isLoading}
                   error={error}
+                  rememberMe={rememberMe}
+                  setRememberMe={setRememberMe}
                 />
               )}
             </div>

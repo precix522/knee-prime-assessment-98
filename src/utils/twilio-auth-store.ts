@@ -1,3 +1,4 @@
+
 import { create } from 'zustand';
 import { toast } from 'sonner';
 import { sendOTP as sendOTPService, verifyOTP as verifyOTPService, validateSession as validateSessionService } from '../api/twilio-service';
@@ -17,8 +18,10 @@ interface AuthState {
   phoneNumber: string;
   sessionId: string | null;
   sessionExpiry: number | null;
+  rememberMe: boolean;
   
   setPhoneNumber: (phone: string) => void;
+  setRememberMe: (remember: boolean) => void;
   sendOTP: (phone: string) => Promise<void>;
   verifyOTP: (phone: string, code: string) => Promise<void>;
   logout: () => void;
@@ -42,7 +45,10 @@ interface ValidateSessionResponse {
   phone_number: string | null;
 }
 
-const SESSION_EXPIRY_TIME = 2 * 60 * 60 * 1000;
+// Default session duration: 2 hours
+const DEFAULT_SESSION_EXPIRY_TIME = 2 * 60 * 60 * 1000;
+// Extended session duration: 30 days
+const EXTENDED_SESSION_EXPIRY_TIME = 30 * 24 * 60 * 60 * 1000;
 
 export const useTwilioAuthStore = create<AuthState>((set, get) => ({
   user: null,
@@ -52,8 +58,14 @@ export const useTwilioAuthStore = create<AuthState>((set, get) => ({
   phoneNumber: '',
   sessionId: localStorage.getItem('gator_prime_session_id'),
   sessionExpiry: Number(localStorage.getItem('gator_prime_session_expiry')) || null,
+  rememberMe: localStorage.getItem('gator_prime_remember_me') === 'true',
   
   setPhoneNumber: (phone) => set({ phoneNumber: phone }),
+  
+  setRememberMe: (remember) => {
+    localStorage.setItem('gator_prime_remember_me', remember.toString());
+    set({ rememberMe: remember });
+  },
   
   sendOTP: async (phone) => {
     set({ isLoading: true, error: null });
@@ -97,7 +109,10 @@ export const useTwilioAuthStore = create<AuthState>((set, get) => ({
       }
       
       if (response.session_id) {
-        const expiryTime = Date.now() + SESSION_EXPIRY_TIME;
+        // Use the extended session time if rememberMe is true
+        const expiryTime = Date.now() + (get().rememberMe 
+          ? EXTENDED_SESSION_EXPIRY_TIME 
+          : DEFAULT_SESSION_EXPIRY_TIME);
         
         localStorage.setItem('gator_prime_session_id', response.session_id);
         localStorage.setItem('gator_prime_session_expiry', expiryTime.toString());
@@ -121,7 +136,12 @@ export const useTwilioAuthStore = create<AuthState>((set, get) => ({
           isVerifying: false
         });
         
-        toast.success('Verification successful!');
+        // Show different toast messages based on session length
+        if (get().rememberMe) {
+          toast.success('Logged in for 30 days!');
+        } else {
+          toast.success('Verification successful!');
+        }
       } else {
         throw new Error('No session ID received after verification');
       }
@@ -198,6 +218,7 @@ export const useTwilioAuthStore = create<AuthState>((set, get) => ({
   logout: () => {
     localStorage.removeItem('gator_prime_session_id');
     localStorage.removeItem('gator_prime_session_expiry');
+    // Don't remove the rememberMe preference when logging out
     set({ user: null, sessionId: null, sessionExpiry: null, isVerifying: false });
     toast.success('Logged out successfully');
   },
