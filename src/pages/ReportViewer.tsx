@@ -377,7 +377,7 @@ export default function ReportViewer() {
               
               <div className="border border-gray-200 rounded-md p-8 mb-6 bg-gray-50">
                 <p className="text-center text-lg">
-                  Ready to discuss your GATOR PRIME report with a specialist?
+                 Looking to schedule a follow-up assessment to monitor your knee function and track your progress?
                 </p>
                 <p className="text-center text-gray-600 mt-2">
                   Click the button below to schedule an assessment.
