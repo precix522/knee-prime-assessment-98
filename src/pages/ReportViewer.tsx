@@ -380,7 +380,7 @@ export default function ReportViewer() {
                   Ready to discuss your GATOR PRIME report with a specialist?
                 </p>
                 <p className="text-center text-gray-600 mt-2">
-                  Click the button below to schedule a consultation with our medical team.
+                  Click the button below to schedule an assessment.
                 </p>
                 
                 <div className="mt-8 text-center">
