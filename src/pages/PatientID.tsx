@@ -18,17 +18,24 @@ export default function PatientID() {
   // Get auth state from store
   const { user, validateSession } = useTwilioAuthStore();
   
-  // Redirect to login if not authenticated
+  // Check authentication and redirect if not logged in
   useEffect(() => {
     const checkAuth = async () => {
       try {
+        setIsLoading(true);
         const isValid = await validateSession();
         if (!isValid) {
+          console.log("Session not valid, redirecting to login");
+          toast.error("Session expired. Please log in again.");
           navigate("/login");
+          return;
         }
       } catch (err) {
         console.error("Session validation error:", err);
+        toast.error("Authentication error. Please log in again.");
         navigate("/login");
+      } finally {
+        setIsLoading(false);
       }
     };
     
@@ -131,6 +138,20 @@ export default function PatientID() {
       setIsLoading(false);
     }
   };
+  
+  if (isLoading && !user) {
+    return (
+      <div className="min-h-screen flex flex-col bg-gray-50">
+        <Navbar />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <div className="w-16 h-16 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-gray-600">Checking authentication...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
   
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
