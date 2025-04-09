@@ -1,9 +1,11 @@
+
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "../components/Button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
+import { toast as sonnerToast } from "sonner";
 import { useTwilioAuthStore } from "../utils/twilio-auth-store";
 import { RememberMeCheckbox } from "../components/auth/RememberMeCheckbox";
 import { Phone, KeyRound, AlertCircle } from "lucide-react";
@@ -216,12 +218,12 @@ export default function GeneralLogin() {
     }
     
     if (user.profile_type === 'admin') {
-      toast.success("Welcome admin! Redirecting to dashboard...");
+      sonnerToast.success("Welcome admin! Redirecting to dashboard...");
       navigate("/dashboard");
       return;
     }
     
-    toast.success("Welcome! Redirecting to dashboard...");
+    sonnerToast.success("Welcome! Redirecting to dashboard...");
     navigate("/dashboard");
   };
 
