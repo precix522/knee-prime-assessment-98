@@ -3,9 +3,9 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Navbar } from "../components/Navbar";
 import { Footer } from "../components/Footer";
-import { Button } from "../components/Button";
+import { Button } from "@/components/ui/button";
 import { FeatureCard } from "../components/FeatureCard";
-import { FileText, User, Users, Check } from "lucide-react";
+import { FileText, User, Users, Check, ArrowRight, Info } from "lucide-react";
 
 export default function Index() {
   const navigate = useNavigate();
@@ -26,40 +26,47 @@ export default function Index() {
                 Your personalized knee health assessment and monitoring system
               </p>
               
-              {/* Login Buttons */}
+              {/* Action Buttons */}
               <div className="flex flex-col sm:flex-row justify-center gap-4 mt-8">
                 <Button
-                  variant="health"
+                  variant="default"
                   size="lg"
                   onClick={() => navigate("/login")}
-                  className="px-8 py-3 text-lg bg-orange-500 hover:bg-orange-600"
+                  className="px-8 py-3 text-lg"
                 >
                   <User className="mr-2 h-5 w-5" />
                   Patient Login
                 </Button>
                 
                 <Button
+                  variant="secondary"
+                  size="lg"
+                  onClick={() => navigate("/patient-id")}
+                  className="px-8 py-3 text-lg"
+                >
+                  <FileText className="mr-2 h-5 w-5" />
+                  Access Your Report
+                </Button>
+                
+                <Button
                   variant="outline"
                   size="lg"
-                  onClick={() => navigate("/general-login")}
-                  className="px-8 py-3 text-lg border-orange-500 text-orange-600 hover:bg-orange-50"
+                  onClick={() => document.getElementById('about-section')?.scrollIntoView({ behavior: 'smooth' })}
+                  className="px-8 py-3 text-lg"
                 >
-                  <Users className="mr-2 h-5 w-5" />
-                  Admin Login
+                  <Info className="mr-2 h-5 w-5" />
+                  Learn More
                 </Button>
               </div>
               
-              <p className="text-sm text-gray-500 mt-4">
-                Looking for your report? Enter your Patient ID
-              </p>
-              <div className="flex justify-center">
+              <div className="flex justify-center mt-4">
                 <Button
                   variant="link"
-                  onClick={() => navigate("/patient-id")}
-                  className="text-orange-600"
+                  onClick={() => navigate("/general-login")}
+                  className="text-primary"
                 >
-                  <FileText className="mr-2 h-4 w-4" />
-                  Enter Patient ID
+                  <Users className="mr-2 h-4 w-4" />
+                  Admin Login
                 </Button>
               </div>
             </div>
@@ -67,7 +74,7 @@ export default function Index() {
         </section>
         
         {/* About Section */}
-        <section className="py-16 bg-white">
+        <section id="about-section" className="py-16 bg-white">
           <div className="container mx-auto px-4">
             <div className="max-w-6xl mx-auto">
               <h2 className="text-3xl font-bold text-center mb-10 text-gray-900">
@@ -81,6 +88,14 @@ export default function Index() {
                   <p className="text-lg text-gray-700">
                     Developed by a team of orthopedic specialists and health technology experts, our system provides personalized evaluations, recommendations, and progress tracking to ensure you receive the best care for your knee health.
                   </p>
+                  <div className="mt-8">
+                    <Button
+                      variant="outline"
+                      onClick={() => navigate("/contactus")}
+                    >
+                      Contact Us <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
                 <div className="flex items-center justify-center">
                   <div className="rounded-lg overflow-hidden shadow-lg w-full max-w-md h-64 bg-gray-200">
