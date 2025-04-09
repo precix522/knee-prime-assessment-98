@@ -33,6 +33,12 @@ export const Navbar = () => {
     };
   }, [scrolled]);
 
+  // Handle redirect to home
+  const handleHomeClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    navigate("/");
+  };
+
   // Handle redirect to dashboard for admin
   const handleAdminHomeClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -59,6 +65,18 @@ export const Navbar = () => {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
+            {/* Home link always visible */}
+            <a 
+              href="/" 
+              className="text-gray-700 hover:text-health-600 transition-colors duration-300 text-sm font-medium"
+              onClick={handleHomeClick}
+            >
+              <span className="flex items-center">
+                <Home size={16} className="mr-1" />
+                Home
+              </span>
+            </a>
+            
             {/* Admin-specific navigation */}
             {isAdmin ? (
               <a 
@@ -68,7 +86,7 @@ export const Navbar = () => {
               >
                 <span className="flex items-center">
                   <Home size={16} className="mr-1" />
-                  Home
+                  Dashboard
                 </span>
               </a>
             ) : (
@@ -206,6 +224,22 @@ export const Navbar = () => {
         {mobileMenuOpen && (
           <div className="md:hidden py-4 animate-fade-in">
             <div className="flex flex-col space-y-4 px-2 pt-2 pb-3">
+              {/* Home link always visible in mobile menu */}
+              <a
+                href="/"
+                className="text-gray-900 hover:text-health-600 transition-colors duration-300 px-3 py-2 rounded-md text-base font-medium"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setMobileMenuOpen(false);
+                  navigate("/");
+                }}
+              >
+                <span className="flex items-center">
+                  <Home size={16} className="mr-1" />
+                  Home
+                </span>
+              </a>
+              
               {/* Mobile: Admin-specific navigation */}
               {isAdmin ? (
                 <a
@@ -219,7 +253,7 @@ export const Navbar = () => {
                 >
                   <span className="flex items-center">
                     <Home size={16} className="mr-1" />
-                    Home
+                    Dashboard
                   </span>
                 </a>
               ) : (
@@ -254,7 +288,7 @@ export const Navbar = () => {
               {/* Admin-specific mobile navigation options - only shown for admin users */}
               {isAdmin && (
                 <>
-                  <a
+                  <a 
                     href="/manage-patients"
                     className="text-gray-900 hover:text-health-600 transition-colors duration-300 px-3 py-2 rounded-md text-base font-medium"
                     onClick={() => setMobileMenuOpen(false)}
@@ -264,7 +298,7 @@ export const Navbar = () => {
                       Sign Up
                     </span>
                   </a>
-                  <a
+                  <a 
                     href="/all-reports"
                     className="text-gray-900 hover:text-health-600 transition-colors duration-300 px-3 py-2 rounded-md text-base font-medium"
                     onClick={() => setMobileMenuOpen(false)}
@@ -274,7 +308,7 @@ export const Navbar = () => {
                       All Reports
                     </span>
                   </a>
-                  <a
+                  <a 
                     href="/manage-users"
                     className="text-gray-900 hover:text-health-600 transition-colors duration-300 px-3 py-2 rounded-md text-base font-medium"
                     onClick={() => setMobileMenuOpen(false)}
