@@ -37,7 +37,6 @@ export default function Login() {
   useEffect(() => {
     const checkAuthAndVerify = async () => {
       try {
-        // Check if there's an active session in localStorage
         const storedSession = localStorage.getItem('twilio-auth-session');
         if (!storedSession) {
           return;
@@ -48,7 +47,6 @@ export default function Login() {
           return;
         }
         
-        // Verify session with Supabase
         const { data: verifiedSession, error: verificationError } = await supabase
           .functions.invoke('verify-session', {
             body: { phone: session.user.phone, token: session.token },
@@ -60,18 +58,15 @@ export default function Login() {
         }
         
         if (verifiedSession?.verified) {
-          // If user is already verified
           const userProfile = verifiedSession.user;
           
           if (userProfile) {
             setLoginUser(userProfile);
             setSessionVerified(true);
             
-            // If user is an admin, redirect to dashboard instead of report-viewer
             if (userProfile.profile_type === 'admin') {
               navigate("/dashboard");
             } else {
-              // For regular users, navigate to report-viewer if patient ID is available
               if (patientID) {
                 navigate(`/report-viewer?patientId=${encodeURIComponent(patientID)}`);
               } else {
@@ -145,7 +140,6 @@ export default function Login() {
       } else {
         console.log("OTP verification successful:", data);
         
-        // Fetch user profile from Supabase
         const userProfile = await getUserProfileByPhone(phone);
         
         if (!userProfile) {
@@ -155,10 +149,8 @@ export default function Login() {
           return;
         }
         
-        // Call success handler with user profile and patient ID
         handleOTPSuccess(userProfile, patientID);
         
-        // Store phone number if rememberMe is checked
         if (rememberMe) {
           localStorage.setItem('rememberedPhone', phone);
         } else {
@@ -175,13 +167,11 @@ export default function Login() {
   };
   
   const handleOTPSuccess = (user: any, patientId?: string) => {
-    // If the user is an admin, always redirect to dashboard
     if (user.profile_type === 'admin') {
       navigate("/dashboard");
       return;
     }
     
-    // For regular users, continue with existing logic
     if (patientId) {
       navigate(`/report-viewer?patientId=${encodeURIComponent(patientId)}`);
     } else {

@@ -1,4 +1,3 @@
-
 import { create } from 'zustand';
 import { toast } from 'sonner';
 import { sendOTP as sendOTPService, verifyOTP as verifyOTPService, validateSession as validateSessionService } from '../api/twilio-service';
@@ -27,6 +26,9 @@ interface AuthState {
   logout: () => void;
   clearError: () => void;
   validateSession: () => Promise<boolean>;
+  
+  setLoginUser: (user: any) => void;
+  setAuthUser: (user: any) => void;
 }
 
 interface OTPResponse {
@@ -223,5 +225,27 @@ export const useTwilioAuthStore = create<AuthState>((set, get) => ({
     toast.success('Logged out successfully');
   },
   
-  clearError: () => set({ error: null })
+  clearError: () => set({ error: null }),
+  
+  setLoginUser: (user) => {
+    set({
+      user: {
+        id: user.id || '',
+        phone: user.phone || '',
+        profile_type: user.profile_type || 'user'
+      },
+      isVerifying: false
+    });
+  },
+  
+  setAuthUser: (user) => {
+    set({
+      user: {
+        id: user.id || '',
+        phone: user.phone || '',
+        profile_type: user.profile_type || 'user'
+      },
+      isVerifying: false
+    });
+  }
 }));

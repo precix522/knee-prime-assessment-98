@@ -90,16 +90,11 @@ export default function GeneralLogin() {
       }
       
       if (data?.success) {
-        // Fetch user profile from Supabase
         const userProfile = await getUserProfileByPhone(`+${phone}`);
         
         if (userProfile) {
-          // Set user in store
           setLoginUser(userProfile);
-          
-          // Handle OTP verification success
           handleOTPSuccess(userProfile);
-          
           toast({
             title: "Success",
             description: "OTP verified successfully.",
@@ -131,13 +126,11 @@ export default function GeneralLogin() {
   };
   
   const handleOTPSuccess = (user: any) => {
-    // If the user is an admin, redirect to dashboard
     if (user.profile_type === 'admin') {
       navigate("/dashboard");
       return;
     }
     
-    // For regular users, continue with the default logic
     navigate("/dashboard");
   };
 
