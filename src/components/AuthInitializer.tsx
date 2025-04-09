@@ -13,13 +13,32 @@ export function AuthInitializer() {
   useEffect(() => {
     // Check for an existing session on component mount
     async function checkSession() {
-      const isValid = await validateSession();
-      console.log('Session validation result:', isValid, 'User:', user);
-      
-      // If on report-viewer or patient-id page and session is invalid, redirect to login
-      if (!isValid && (location.pathname === '/report-viewer' || location.pathname === '/patient-id')) {
-        toast.error('Your session has expired. Please log in again.');
-        navigate('/login');
+      try {
+        const isValid = await validateSession();
+        console.log('Session validation result:', isValid, 'User:', user);
+        
+        // Get protected routes
+        const protectedRoutes = ['/report-viewer', '/patient-id', '/dashboard'];
+        const isProtectedRoute = protectedRoutes.includes(location.pathname);
+        
+        // If on a protected page and session is invalid, redirect to login
+        if (!isValid && isProtectedRoute) {
+          toast.error('Your session has expired. Please log in again.');
+          navigate('/login');
+          return;
+        }
+        
+        // If successfully authenticated on login page, redirect based on user type
+        if (isValid && user && location.pathname === '/login') {
+          if (user.profile_type === 'admin') {
+            navigate('/dashboard');
+          } else {
+            // For patients or other user types
+            navigate('/dashboard');
+          }
+        }
+      } catch (err) {
+        console.error("Session validation error:", err);
       }
     }
     

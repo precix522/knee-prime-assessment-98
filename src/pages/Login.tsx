@@ -39,53 +39,34 @@ export default function Login() {
   }, []);
 
   useEffect(() => {
-    const checkAuthAndVerify = async () => {
-      try {
-        const storedSession = localStorage.getItem('twilio-auth-session');
-        if (!storedSession) {
-          return;
-        }
-        
-        const session = JSON.parse(storedSession);
-        if (!session?.user?.phone) {
-          return;
-        }
-        
-        const { data: verifiedSession, error: verificationError } = await supabase
-          .functions.invoke('verify-session', {
-            body: { phone: session.user.phone, token: session.token },
-          });
-          
-        if (verificationError) {
-          console.error("Session verification error:", verificationError);
-          return;
-        }
-        
-        if (verifiedSession?.verified) {
-          const userProfile = verifiedSession.user;
-          
-          if (userProfile) {
-            setLoginUser(userProfile);
-            setSessionVerified(true);
-            
-            if (userProfile.profile_type === 'admin') {
-              navigate("/dashboard");
-            } else {
-              if (patientID) {
-                navigate(`/report-viewer?patientId=${encodeURIComponent(patientID)}`);
-              } else {
-                navigate("/dashboard");
-              }
-            }
-          }
-        }
-      } catch (error) {
-        console.error("Error during session verification:", error);
+    const checkAuthStatus = async () => {
+      const { validateSession, user } = useTwilioAuthStore.getState();
+      const isValid = await validateSession();
+      
+      console.log('Initial auth check:', isValid, user);
+      
+      if (isValid && user) {
+        handleRedirectBasedOnRole(user);
       }
     };
-
-    checkAuthAndVerify();
+    
+    checkAuthStatus();
   }, [navigate, patientID]);
+
+  const handleRedirectBasedOnRole = (user) => {
+    console.log('Redirecting based on role:', user.profile_type);
+    
+    if (user.profile_type === 'admin') {
+      toast.success("Welcome admin! Redirecting to dashboard...");
+      navigate("/dashboard");
+    } else if (patientID) {
+      toast.success("Welcome! Redirecting to your report...");
+      navigate(`/report-viewer?patientId=${encodeURIComponent(patientID)}`);
+    } else {
+      toast.success("Welcome! Redirecting to your dashboard...");
+      navigate("/dashboard");
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -255,23 +236,9 @@ export default function Login() {
     }
   };
   
-  const handleOTPSuccess = (user: any, patientId?: string) => {
+  const handleOTPSuccess = (user: any, patientId?: string | null) => {
     console.log("OTP success with user:", user);
-    
-    if (user.profile_type === 'admin') {
-      toast.success("Welcome admin! Redirecting to dashboard...");
-      navigate("/dashboard");
-      return;
-    }
-    
-    if (patientId) {
-      toast.success("Welcome! Redirecting to your report...");
-      navigate(`/report-viewer?patientId=${encodeURIComponent(patientId)}`);
-      return;
-    }
-    
-    toast.success("Welcome! Redirecting to your dashboard...");
-    navigate("/dashboard");
+    handleRedirectBasedOnRole(user);
   };
 
   const toggleDevMode = () => {

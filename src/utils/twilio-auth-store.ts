@@ -133,23 +133,21 @@ export const useTwilioAuthStore = create<AuthState>((set, get) => ({
         const profile_type = userProfile?.profile_type || 'user';
         console.log('User profile type:', profile_type);
         
+        const user = {
+          id: userProfile?.id || response.session_id,
+          phone: phone,
+          profile_type: profile_type
+        };
+        
         set({
-          user: {
-            id: userProfile?.id || response.session_id,
-            phone: phone,
-            profile_type: profile_type
-          },
+          user,
           sessionId: response.session_id,
           sessionExpiry: expiryTime,
           isVerifying: false
         });
         
-        // Show different toast messages based on session length
-        if (get().rememberMe) {
-          toast.success('Logged in for 30 days!');
-        } else {
-          toast.success('Verification successful!');
-        }
+        // Immediately return the user for the caller to use
+        return user;
       } else {
         throw new Error('No session ID received after verification');
       }
@@ -157,6 +155,7 @@ export const useTwilioAuthStore = create<AuthState>((set, get) => ({
       console.error('Verification error:', error);
       set({ error: error.message || 'Failed to verify code' });
       toast.error(error.message || 'Failed to verify code');
+      return null;
     } finally {
       set({ isLoading: false });
     }
@@ -188,6 +187,12 @@ export const useTwilioAuthStore = create<AuthState>((set, get) => ({
     try {
       set({ isLoading: true });
       
+      // Skip the external validation in development mode if we have a user
+      if (process.env.NODE_ENV === 'development' && get().user) {
+        set({ isLoading: false });
+        return true;
+      }
+      
       const response = await validateSessionService(sessionId);
       
       if (!response.valid) {
@@ -207,7 +212,7 @@ export const useTwilioAuthStore = create<AuthState>((set, get) => ({
         
         set({
           user: {
-            id: sessionId,
+            id: userProfile?.id || sessionId,
             phone: phone,
             profile_type: profile_type
           },
@@ -217,10 +222,10 @@ export const useTwilioAuthStore = create<AuthState>((set, get) => ({
       }
     } catch (error) {
       console.error('Session validation error:', error);
-      localStorage.removeItem('gator_prime_session_id');
-      localStorage.removeItem('gator_prime_session_expiry');
-      set({ user: null, sessionId: null, sessionExpiry: null, isLoading: false, error: 'Session expired. Please log in again.' });
-      return false;
+      // Don't clear the session on error, just return false
+      // This prevents unnecessary logouts during transient errors
+      set({ isLoading: false });
+      return get().user !== null; // If we have a user, consider the session valid
     }
   },
   

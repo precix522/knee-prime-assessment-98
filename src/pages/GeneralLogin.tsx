@@ -211,6 +211,17 @@ export default function GeneralLogin() {
   };
   
   const handleOTPSuccess = (user: any) => {
+    console.log("Redirecting after successful login:", user);
+    
+    if (!user) {
+      toast({
+        title: "Error",
+        description: "User profile not found.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     if (user.profile_type === 'admin') {
       navigate("/dashboard");
       return;
