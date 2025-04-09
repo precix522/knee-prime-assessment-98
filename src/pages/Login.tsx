@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useTwilioAuthStore } from "../utils/twilio-auth-store";
@@ -257,16 +256,22 @@ export default function Login() {
   };
   
   const handleOTPSuccess = (user: any, patientId?: string) => {
+    console.log("OTP success with user:", user);
+    
     if (user.profile_type === 'admin') {
+      toast.success("Welcome admin! Redirecting to dashboard...");
       navigate("/dashboard");
       return;
     }
     
     if (patientId) {
+      toast.success("Welcome! Redirecting to your report...");
       navigate(`/report-viewer?patientId=${encodeURIComponent(patientId)}`);
-    } else {
-      navigate("/dashboard");
+      return;
     }
+    
+    toast.success("Welcome! Redirecting to your dashboard...");
+    navigate("/dashboard");
   };
 
   const toggleDevMode = () => {

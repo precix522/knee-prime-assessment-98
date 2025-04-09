@@ -1,3 +1,4 @@
+
 import { supabase } from './client';
 
 // Interface for user profile data from database
@@ -16,25 +17,33 @@ export interface UserProfile {
  */
 export const getUserProfileByPhone = async (phone: string): Promise<UserProfile | null> => {
   try {
+    console.log('Fetching user profile for phone:', phone);
+    
     const { data, error } = await supabase
       .from('patient')
       .select('*')
       .eq('phone', phone)
-      .single();
+      .order('last_modified_tm', { ascending: false })
+      .limit(1);
     
     if (error) {
       console.error('Error fetching user profile:', error);
       return null;
     }
     
+    if (!data || data.length === 0) {
+      console.log('No user profile found for phone:', phone);
+      return null;
+    }
+    
     // Map the patient record to UserProfile format
     return {
-      id: data.id || data.Patient_ID,
-      phone: data.phone,
-      profile_type: data.profile_type || 'user', // Default to user if not specified
-      created_at: data.created_at || data.last_modified_tm,
-      name: data.patient_name || data.name,
-      email: data.email
+      id: data[0].id || data[0].Patient_ID,
+      phone: data[0].phone,
+      profile_type: data[0].profile_type || 'user', // Default to user if not specified
+      created_at: data[0].created_at || data[0].last_modified_tm,
+      name: data[0].patient_name || data[0].name,
+      email: data[0].email
     } as UserProfile;
   } catch (error) {
     console.error('Exception fetching user profile:', error);

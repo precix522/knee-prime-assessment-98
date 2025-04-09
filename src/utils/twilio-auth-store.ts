@@ -119,17 +119,23 @@ export const useTwilioAuthStore = create<AuthState>((set, get) => ({
         localStorage.setItem('gator_prime_session_id', response.session_id);
         localStorage.setItem('gator_prime_session_expiry', expiryTime.toString());
         
+        console.log('Fetching user profile for phone:', phone);
         let userProfile: UserProfile | null = await getUserProfileByPhone(phone);
         
+        console.log('User profile from database:', userProfile);
+        
         if (!userProfile) {
+          console.log('Creating new user profile for phone:', phone);
           userProfile = await createUserProfile(phone, 'user');
+          console.log('Created new user profile:', userProfile);
         }
         
         const profile_type = userProfile?.profile_type || 'user';
+        console.log('User profile type:', profile_type);
         
         set({
           user: {
-            id: response.session_id,
+            id: userProfile?.id || response.session_id,
             phone: phone,
             profile_type: profile_type
           },
@@ -148,6 +154,7 @@ export const useTwilioAuthStore = create<AuthState>((set, get) => ({
         throw new Error('No session ID received after verification');
       }
     } catch (error: any) {
+      console.error('Verification error:', error);
       set({ error: error.message || 'Failed to verify code' });
       toast.error(error.message || 'Failed to verify code');
     } finally {
