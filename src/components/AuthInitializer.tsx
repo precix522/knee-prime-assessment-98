@@ -18,8 +18,8 @@ export function AuthInitializer() {
         console.log('Session validation result:', isValid, 'User:', user);
         
         // Get protected routes
-        const protectedRoutes = ['/report-viewer', '/patient-id', '/dashboard', '/manage-patients', '/all-reports', '/manage-users'];
-        const publicRoutes = ['/', '/login', '/general-login', '/contactus', '/privacy-policy'];
+        const protectedRoutes = ['/report-viewer', '/patient-id', '/dashboard', '/manage-users', '/all-reports'];
+        const publicRoutes = ['/', '/login', '/general-login', '/contactus', '/privacy-policy', '/manage-patients'];
         const currentPath = location.pathname;
         const isProtectedRoute = protectedRoutes.includes(currentPath);
         const isPublicRoute = publicRoutes.includes(currentPath);

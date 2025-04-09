@@ -5,7 +5,7 @@ import { Navbar } from "../components/Navbar";
 import { Footer } from "../components/Footer";
 import { Button } from "@/components/ui/button";
 import { FeatureCard } from "../components/FeatureCard";
-import { FileText, User, Users, Check, ArrowRight, Info } from "lucide-react";
+import { FileText, User, Users, Check, ArrowRight, Info, UserRoundPlus } from "lucide-react";
 
 export default function Index() {
   const navigate = useNavigate();
@@ -51,11 +51,11 @@ export default function Index() {
                 <Button
                   variant="outline"
                   size="lg"
-                  onClick={() => document.getElementById('about-section')?.scrollIntoView({ behavior: 'smooth' })}
+                  onClick={() => navigate("/manage-patients")}
                   className="px-8 py-3 text-lg"
                 >
-                  <Info className="mr-2 h-5 w-5" />
-                  Learn More
+                  <UserRoundPlus className="mr-2 h-5 w-5" />
+                  Sign Up
                 </Button>
               </div>
               
@@ -67,6 +67,14 @@ export default function Index() {
                 >
                   <Users className="mr-2 h-4 w-4" />
                   Admin Login
+                </Button>
+                <Button
+                  variant="link"
+                  onClick={() => document.getElementById('about-section')?.scrollIntoView({ behavior: 'smooth' })}
+                  className="text-primary"
+                >
+                  <Info className="mr-2 h-4 w-4" />
+                  Learn More
                 </Button>
               </div>
             </div>

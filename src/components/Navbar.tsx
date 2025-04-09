@@ -45,6 +45,13 @@ export const Navbar = () => {
     navigate("/dashboard");
   };
 
+  // Handle redirect to signup form
+  const handleSignUpClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    navigate("/manage-patients");
+    setMobileMenuOpen(false);
+  };
+
   return (
     <header
       className={cn(
@@ -121,6 +128,7 @@ export const Navbar = () => {
                 <a 
                   href="/manage-patients"
                   className="text-gray-700 hover:text-health-600 transition-colors duration-300 text-sm font-medium"
+                  onClick={handleSignUpClick}
                 >
                   <span className="flex items-center">
                     <UserRoundPlus size={16} className="mr-1" />
@@ -291,7 +299,11 @@ export const Navbar = () => {
                   <a 
                     href="/manage-patients"
                     className="text-gray-900 hover:text-health-600 transition-colors duration-300 px-3 py-2 rounded-md text-base font-medium"
-                    onClick={() => setMobileMenuOpen(false)}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setMobileMenuOpen(false);
+                      navigate("/manage-patients");
+                    }}
                   >
                     <span className="flex items-center">
                       <UserRoundPlus size={16} className="mr-1" />
@@ -300,7 +312,7 @@ export const Navbar = () => {
                   </a>
                   <a 
                     href="/all-reports"
-                    className="text-gray-900 hover:text-health-600 transition-colors duration-300 px-3 py-2 rounded-md text-base font-medium"
+                    className="text-gray-700 hover:text-health-600 transition-colors duration-300 px-3 py-2 rounded-md text-base font-medium"
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     <span className="flex items-center">
@@ -310,7 +322,7 @@ export const Navbar = () => {
                   </a>
                   <a 
                     href="/manage-users"
-                    className="text-gray-900 hover:text-health-600 transition-colors duration-300 px-3 py-2 rounded-md text-base font-medium"
+                    className="text-gray-700 hover:text-health-600 transition-colors duration-300 px-3 py-2 rounded-md text-base font-medium"
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     <span className="flex items-center">
