@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "./Button";
 import { cn } from "../lib/utils";
@@ -49,6 +50,20 @@ export const Navbar = () => {
   const handleSignUpClick = (e: React.MouseEvent) => {
     e.preventDefault();
     navigate("/manage-patients");
+    setMobileMenuOpen(false);
+  };
+
+  // Handle redirect to all reports
+  const handleAllReportsClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    navigate("/all-reports");
+    setMobileMenuOpen(false);
+  };
+
+  // Handle redirect to manage users
+  const handleManageUsersClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    navigate("/manage-users");
     setMobileMenuOpen(false);
   };
 
@@ -138,6 +153,7 @@ export const Navbar = () => {
                 <a 
                   href="/all-reports"
                   className="text-gray-700 hover:text-health-600 transition-colors duration-300 text-sm font-medium"
+                  onClick={handleAllReportsClick}
                 >
                   <span className="flex items-center">
                     <FileText size={16} className="mr-1" />
@@ -147,6 +163,7 @@ export const Navbar = () => {
                 <a 
                   href="/manage-users"
                   className="text-gray-700 hover:text-health-600 transition-colors duration-300 text-sm font-medium"
+                  onClick={handleManageUsersClick}
                 >
                   <span className="flex items-center">
                     <Users size={16} className="mr-1" />
@@ -313,7 +330,11 @@ export const Navbar = () => {
                   <a 
                     href="/all-reports"
                     className="text-gray-700 hover:text-health-600 transition-colors duration-300 px-3 py-2 rounded-md text-base font-medium"
-                    onClick={() => setMobileMenuOpen(false)}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setMobileMenuOpen(false);
+                      navigate("/all-reports");
+                    }}
                   >
                     <span className="flex items-center">
                       <FileText size={16} className="mr-1" />
@@ -323,7 +344,11 @@ export const Navbar = () => {
                   <a 
                     href="/manage-users"
                     className="text-gray-700 hover:text-health-600 transition-colors duration-300 px-3 py-2 rounded-md text-base font-medium"
-                    onClick={() => setMobileMenuOpen(false)}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setMobileMenuOpen(false);
+                      navigate("/manage-users");
+                    }}
                   >
                     <span className="flex items-center">
                       <Users size={16} className="mr-1" />

@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "../components/Button";
@@ -31,6 +30,7 @@ interface PatientData {
 }
 
 export default function Dashboard() {
+  
   const { user, logout, isLoading } = useTwilioAuthStore();
   const [pageLoading, setPageLoading] = useState(true);
   const [downloadLoading, setDownloadLoading] = useState(false);
