@@ -11,6 +11,7 @@ import { supabase } from "../utils/supabase";
 import { getUserProfileByPhone } from "../utils/supabase/user-db";
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { Navbar } from "../components/Navbar";
 
 export default function GeneralLogin() {
   const [phone, setPhone] = useState("");
@@ -229,102 +230,105 @@ export default function GeneralLogin() {
   };
 
   return (
-    <div className="flex items-center justify-center h-screen bg-gray-50">
-      <div className="bg-white shadow-md rounded-md p-8 w-full max-w-md">
-        <h2 className="text-2xl font-bold text-gray-800 text-center mb-6">
-          Login with OTP
-        </h2>
-        
-        {devMode && (
-          <Alert variant="default" className="bg-amber-50 border-amber-200 mb-4">
-            <AlertCircle className="h-4 w-4 text-amber-600" />
-            <AlertTitle className="text-amber-800">Developer Mode Active</AlertTitle>
-            <AlertDescription className="text-amber-700">
-              OTP verification is bypassed. Any code will work, and a mock user will be created if needed.
-            </AlertDescription>
-          </Alert>
-        )}
-        
-        {!otpSent ? (
-          <>
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="phone" className="text-gray-700">
-                  Phone Number
-                </Label>
-                <div className="relative">
-                  <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                  <Input
-                    type="tel"
-                    id="phone"
-                    placeholder="Enter your phone number"
-                    className="pl-10"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                  />
+    <div className="flex flex-col min-h-screen bg-gray-50">
+      <Navbar />
+      <div className="flex items-center justify-center flex-grow">
+        <div className="bg-white shadow-md rounded-md p-8 w-full max-w-md">
+          <h2 className="text-2xl font-bold text-gray-800 text-center mb-6">
+            Login with OTP
+          </h2>
+          
+          {devMode && (
+            <Alert variant="default" className="bg-amber-50 border-amber-200 mb-4">
+              <AlertCircle className="h-4 w-4 text-amber-600" />
+              <AlertTitle className="text-amber-800">Developer Mode Active</AlertTitle>
+              <AlertDescription className="text-amber-700">
+                OTP verification is bypassed. Any code will work, and a mock user will be created if needed.
+              </AlertDescription>
+            </Alert>
+          )}
+          
+          {!otpSent ? (
+            <>
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="phone" className="text-gray-700">
+                    Phone Number
+                  </Label>
+                  <div className="relative">
+                    <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                    <Input
+                      type="tel"
+                      id="phone"
+                      placeholder="Enter your phone number"
+                      className="pl-10"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                    />
+                  </div>
                 </div>
               </div>
-            </div>
-            <Button
-              className="w-full mt-6"
-              onClick={handleSendOTP}
-              disabled={loading}
-            >
-              {loading ? "Sending OTP..." : "Send OTP"}
-            </Button>
-            
-            <Separator className="my-4" />
-            
-            <div className="flex items-center justify-between mt-4">
-              <span className="text-sm text-gray-500">Developer Mode</span>
-              <button
-                type="button"
-                onClick={toggleDevMode}
-                className={`px-3 py-1 text-xs rounded-full ${
-                  devMode 
-                    ? "bg-green-500 text-white" 
-                    : "bg-gray-200 text-gray-600"
-                }`}
+              <Button
+                className="w-full mt-6"
+                onClick={handleSendOTP}
+                disabled={loading}
               >
-                {devMode ? "Enabled" : "Disabled"}
-              </button>
-            </div>
-          </>
-        ) : (
-          <>
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="otp" className="text-gray-700">
-                  OTP Code
-                </Label>
-                <div className="relative">
-                  <KeyRound className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                  <Input
-                    type="text"
-                    id="otp"
-                    placeholder="Enter OTP code"
-                    className="pl-10"
-                    value={otp}
-                    onChange={(e) => setOtp(e.target.value)}
-                  />
+                {loading ? "Sending OTP..." : "Send OTP"}
+              </Button>
+              
+              <Separator className="my-4" />
+              
+              <div className="flex items-center justify-between mt-4">
+                <span className="text-sm text-gray-500">Developer Mode</span>
+                <button
+                  type="button"
+                  onClick={toggleDevMode}
+                  className={`px-3 py-1 text-xs rounded-full ${
+                    devMode 
+                      ? "bg-green-500 text-white" 
+                      : "bg-gray-200 text-gray-600"
+                  }`}
+                >
+                  {devMode ? "Enabled" : "Disabled"}
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="otp" className="text-gray-700">
+                    OTP Code
+                  </Label>
+                  <div className="relative">
+                    <KeyRound className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                    <Input
+                      type="text"
+                      id="otp"
+                      placeholder="Enter OTP code"
+                      className="pl-10"
+                      value={otp}
+                      onChange={(e) => setOtp(e.target.value)}
+                    />
+                  </div>
                 </div>
               </div>
-            </div>
-            <Button
-              className="w-full mt-6"
-              onClick={handleOTPSubmit}
-              disabled={loading}
-            >
-              {loading ? "Verifying OTP..." : "Verify OTP"}
-            </Button>
-            
-            {devMode && (
-              <p className="text-sm text-center mt-4 text-green-600">
-                Developer mode: Enter any code to log in
-              </p>
-            )}
-          </>
-        )}
+              <Button
+                className="w-full mt-6"
+                onClick={handleOTPSubmit}
+                disabled={loading}
+              >
+                {loading ? "Verifying OTP..." : "Verify OTP"}
+              </Button>
+              
+              {devMode && (
+                <p className="text-sm text-center mt-4 text-green-600">
+                  Developer mode: Enter any code to log in
+                </p>
+              )}
+            </>
+          )}
+        </div>
       </div>
     </div>
   );
