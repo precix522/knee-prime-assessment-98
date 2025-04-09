@@ -1,8 +1,9 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "./Button";
 import { cn } from "../lib/utils";
 import { useTwilioAuthStore } from "../utils/twilio-auth-store";
-import { User, LogOut, LogIn, UserRoundPlus, FileText, Users } from "lucide-react";
+import { User, LogOut, LogIn, UserRoundPlus, FileText, Users, Home } from "lucide-react";
 import { useLocation } from "react-router-dom";
 
 export const Navbar = () => {
@@ -52,27 +53,41 @@ export const Navbar = () => {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
-            {!isAuthenticatedPage && (
-              <>
-                <a 
-                  href="#about" 
-                  className="text-gray-700 hover:text-health-600 transition-colors duration-300 text-sm font-medium"
-                >
-                  About
-                </a>
-                <a 
-                  href="#how-it-works" 
-                  className="text-gray-700 hover:text-health-600 transition-colors duration-300 text-sm font-medium"
-                >
-                  How It Works
-                </a>
-                <a 
-                  href="#benefits" 
-                  className="text-gray-700 hover:text-health-600 transition-colors duration-300 text-sm font-medium"
-                >
-                  Benefits
-                </a>
-              </>
+            {/* Admin-specific navigation */}
+            {isAdmin ? (
+              <a 
+                href="/dashboard" 
+                className="text-gray-700 hover:text-health-600 transition-colors duration-300 text-sm font-medium"
+              >
+                <span className="flex items-center">
+                  <Home size={16} className="mr-1" />
+                  Home
+                </span>
+              </a>
+            ) : (
+              // Regular user navigation - only show these links when not on authenticated pages
+              !isAuthenticatedPage && (
+                <>
+                  <a 
+                    href="#about" 
+                    className="text-gray-700 hover:text-health-600 transition-colors duration-300 text-sm font-medium"
+                  >
+                    About
+                  </a>
+                  <a 
+                    href="#how-it-works" 
+                    className="text-gray-700 hover:text-health-600 transition-colors duration-300 text-sm font-medium"
+                  >
+                    How It Works
+                  </a>
+                  <a 
+                    href="#benefits" 
+                    className="text-gray-700 hover:text-health-600 transition-colors duration-300 text-sm font-medium"
+                  >
+                    Benefits
+                  </a>
+                </>
+              )
             )}
             
             {/* Admin-specific navigation options - only shown for admin users */}
@@ -184,30 +199,45 @@ export const Navbar = () => {
         {mobileMenuOpen && (
           <div className="md:hidden py-4 animate-fade-in">
             <div className="flex flex-col space-y-4 px-2 pt-2 pb-3">
-              {!isAuthenticatedPage && (
-                <>
-                  <a
-                    href="#about"
-                    className="text-gray-900 hover:text-health-600 transition-colors duration-300 px-3 py-2 rounded-md text-base font-medium"
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    About
-                  </a>
-                  <a
-                    href="#how-it-works"
-                    className="text-gray-900 hover:text-health-600 transition-colors duration-300 px-3 py-2 rounded-md text-base font-medium"
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    How It Works
-                  </a>
-                  <a
-                    href="#benefits"
-                    className="text-gray-900 hover:text-health-600 transition-colors duration-300 px-3 py-2 rounded-md text-base font-medium"
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    Benefits
-                  </a>
-                </>
+              {/* Mobile: Admin-specific navigation */}
+              {isAdmin ? (
+                <a
+                  href="/dashboard"
+                  className="text-gray-900 hover:text-health-600 transition-colors duration-300 px-3 py-2 rounded-md text-base font-medium"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <span className="flex items-center">
+                    <Home size={16} className="mr-1" />
+                    Home
+                  </span>
+                </a>
+              ) : (
+                // Mobile: Regular user navigation - only show these links when not on authenticated pages
+                !isAuthenticatedPage && (
+                  <>
+                    <a
+                      href="#about"
+                      className="text-gray-900 hover:text-health-600 transition-colors duration-300 px-3 py-2 rounded-md text-base font-medium"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      About
+                    </a>
+                    <a
+                      href="#how-it-works"
+                      className="text-gray-900 hover:text-health-600 transition-colors duration-300 px-3 py-2 rounded-md text-base font-medium"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      How It Works
+                    </a>
+                    <a
+                      href="#benefits"
+                      className="text-gray-900 hover:text-health-600 transition-colors duration-300 px-3 py-2 rounded-md text-base font-medium"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      Benefits
+                    </a>
+                  </>
+                )
               )}
               
               {/* Admin-specific mobile navigation options - only shown for admin users */}
