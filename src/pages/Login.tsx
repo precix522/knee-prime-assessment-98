@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useTwilioAuthStore } from "../utils/twilio-auth-store";
@@ -10,8 +9,10 @@ import { toast } from "sonner";
 import { Icons } from "../components/Icons";
 import { Separator } from "@/components/ui/separator";
 import { supabase } from "../utils/supabase";
-import { getUserProfileByPhone } from "../utils/supabase/user-db";
+import { getUserProfileByPhone, createUserProfile } from "../utils/supabase/user-db";
 import { RememberMeCheckbox } from "../components/auth/RememberMeCheckbox";
+import { AlertCircle } from "lucide-react";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 
 export default function Login() {
   const [phone, setPhone] = useState("");
@@ -139,18 +140,44 @@ export default function Login() {
 
     try {
       if (devMode) {
-        // In dev mode, accept any code or specifically 123456
+        // In dev mode, accept any code and create a mock user if db table doesn't exist
         console.log("Dev mode: Simulating OTP verification for", phone);
         
-        const userProfile = await getUserProfileByPhone(phone);
-        
-        if (!userProfile) {
-          setError("User profile not found. Please contact support.");
-          toast.error("User profile not found. Please contact support.");
-          setLoading(false);
-          return;
+        let userProfile;
+        try {
+          userProfile = await getUserProfileByPhone(phone);
+        } catch (profileError) {
+          console.error("Error fetching user profile:", profileError);
+          // Create a mock user for development if the table doesn't exist
+          userProfile = {
+            id: "dev-user-id",
+            phone: phone,
+            profile_type: "admin",
+            created_at: new Date().toISOString(),
+            name: "Dev User",
+            email: "dev@example.com"
+          };
         }
         
+        if (!userProfile) {
+          try {
+            // Try to create a user profile if the table exists
+            userProfile = await createUserProfile(phone, "admin");
+          } catch (createError) {
+            console.error("Error creating user profile:", createError);
+            // Use the mock user if creation fails
+            userProfile = {
+              id: "dev-user-id",
+              phone: phone,
+              profile_type: "admin",
+              created_at: new Date().toISOString(),
+              name: "Dev User", 
+              email: "dev@example.com"
+            };
+          }
+        }
+        
+        setAuthUser(userProfile);
         handleOTPSuccess(userProfile, patientID);
         
         if (rememberMe) {
@@ -158,6 +185,8 @@ export default function Login() {
         } else {
           localStorage.removeItem('rememberedPhone');
         }
+        
+        toast.success("Dev mode: Login successful");
       } else {
         const { data, error } = await supabase.functions.invoke('verify-otp', {
           body: { phone, otp },
@@ -233,6 +262,16 @@ export default function Login() {
           </CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4">
+          {devMode && (
+            <Alert variant="default" className="bg-amber-50 border-amber-200">
+              <AlertCircle className="h-4 w-4 text-amber-600" />
+              <AlertTitle className="text-amber-800">Developer Mode Active</AlertTitle>
+              <AlertDescription className="text-amber-700">
+                OTP verification is bypassed. Any code will work, and a mock user will be created if needed.
+              </AlertDescription>
+            </Alert>
+          )}
+          
           <div className="grid gap-2">
             <Label htmlFor="phone">Phone Number</Label>
             <Input

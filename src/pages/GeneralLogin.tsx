@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "../components/Button";
@@ -7,10 +6,11 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import { useTwilioAuthStore } from "../utils/twilio-auth-store";
 import { RememberMeCheckbox } from "../components/auth/RememberMeCheckbox";
-import { Phone, KeyRound } from "lucide-react";
+import { Phone, KeyRound, AlertCircle } from "lucide-react";
 import { supabase } from "../utils/supabase";
 import { getUserProfileByPhone } from "../utils/supabase/user-db";
 import { Separator } from "@/components/ui/separator";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 
 export default function GeneralLogin() {
   const [phone, setPhone] = useState("");
@@ -36,7 +36,6 @@ export default function GeneralLogin() {
     setLoading(true);
     try {
       if (devMode) {
-        // In dev mode, skip the actual OTP sending
         console.log("Dev mode: Simulating OTP sent to", phone);
         setOtpSent(true);
         toast({
@@ -89,10 +88,22 @@ export default function GeneralLogin() {
     setLoading(true);
     try {
       if (devMode) {
-        // In dev mode, accept any code
         console.log("Dev mode: Simulating OTP verification for", phone);
         
-        const userProfile = await getUserProfileByPhone(`+${phone}`);
+        let userProfile;
+        try {
+          userProfile = await getUserProfileByPhone(`+${phone}`);
+        } catch (profileError) {
+          console.error("Error fetching user profile:", profileError);
+          userProfile = {
+            id: "dev-user-id",
+            phone: `+${phone}`,
+            profile_type: "admin",
+            created_at: new Date().toISOString(),
+            name: "Dev User",
+            email: "dev@example.com"
+          };
+        }
         
         if (userProfile) {
           setLoginUser(userProfile);
@@ -102,10 +113,19 @@ export default function GeneralLogin() {
             description: "Dev mode: OTP verified successfully.",
           });
         } else {
+          const mockUser = {
+            id: "dev-user-id",
+            phone: `+${phone}`,
+            profile_type: "admin",
+            created_at: new Date().toISOString(),
+            name: "Dev User",
+            email: "dev@example.com"
+          };
+          setLoginUser(mockUser);
+          handleOTPSuccess(mockUser);
           toast({
-            title: "Error",
-            description: "User profile not found.",
-            variant: "destructive",
+            title: "Success",
+            description: "Dev mode: Created mock user and verified successfully.",
           });
         }
       } else {
@@ -185,6 +205,17 @@ export default function GeneralLogin() {
         <h2 className="text-2xl font-bold text-gray-800 text-center mb-6">
           Login with OTP
         </h2>
+        
+        {devMode && (
+          <Alert variant="default" className="bg-amber-50 border-amber-200 mb-4">
+            <AlertCircle className="h-4 w-4 text-amber-600" />
+            <AlertTitle className="text-amber-800">Developer Mode Active</AlertTitle>
+            <AlertDescription className="text-amber-700">
+              OTP verification is bypassed. Any code will work, and a mock user will be created if needed.
+            </AlertDescription>
+          </Alert>
+        )}
+        
         {!otpSent ? (
           <>
             <div className="space-y-4">
