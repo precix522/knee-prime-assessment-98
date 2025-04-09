@@ -1,3 +1,4 @@
+
 import { create } from 'zustand';
 import { toast } from 'sonner';
 import { sendOTP as sendOTPService, verifyOTP as verifyOTPService, validateSession as validateSessionService } from '../api/twilio-service';
@@ -22,7 +23,7 @@ interface AuthState {
   setPhoneNumber: (phone: string) => void;
   setRememberMe: (remember: boolean) => void;
   sendOTP: (phone: string) => Promise<void>;
-  verifyOTP: (phone: string, code: string) => Promise<void>;
+  verifyOTP: (phone: string, code: string) => Promise<User | null>; // Updated return type
   logout: () => void;
   clearError: () => void;
   validateSession: () => Promise<boolean>;
@@ -143,21 +144,20 @@ export const useTwilioAuthStore = create<AuthState>((set, get) => ({
           user,
           sessionId: response.session_id,
           sessionExpiry: expiryTime,
-          isVerifying: false
+          isVerifying: false,
+          isLoading: false
         });
         
-        // Immediately return the user for the caller to use
+        // Return the user object so the caller can use it
         return user;
       } else {
         throw new Error('No session ID received after verification');
       }
     } catch (error: any) {
       console.error('Verification error:', error);
-      set({ error: error.message || 'Failed to verify code' });
+      set({ error: error.message || 'Failed to verify code', isLoading: false });
       toast.error(error.message || 'Failed to verify code');
       return null;
-    } finally {
-      set({ isLoading: false });
     }
   },
   

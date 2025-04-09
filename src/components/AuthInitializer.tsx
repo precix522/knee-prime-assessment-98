@@ -18,22 +18,28 @@ export function AuthInitializer() {
         console.log('Session validation result:', isValid, 'User:', user);
         
         // Get protected routes
-        const protectedRoutes = ['/report-viewer', '/patient-id', '/dashboard'];
-        const isProtectedRoute = protectedRoutes.includes(location.pathname);
+        const protectedRoutes = ['/report-viewer', '/patient-id', '/dashboard', '/manage-patients', '/all-reports', '/manage-users'];
+        const publicRoutes = ['/', '/login', '/general-login', '/contactus', '/privacy-policy'];
+        const currentPath = location.pathname;
+        const isProtectedRoute = protectedRoutes.includes(currentPath);
+        const isPublicRoute = publicRoutes.includes(currentPath);
         
         // If on a protected page and session is invalid, redirect to login
         if (!isValid && isProtectedRoute) {
+          console.log('Not authenticated, redirecting from protected route to login');
           toast.error('Your session has expired. Please log in again.');
           navigate('/login');
           return;
         }
         
         // If successfully authenticated on login page, redirect based on user type
-        if (isValid && user && location.pathname === '/login') {
+        if (isValid && user && (currentPath === '/login' || currentPath === '/general-login')) {
+          console.log('Already authenticated on login page, redirecting based on role:', user.profile_type);
           if (user.profile_type === 'admin') {
+            toast.success('Welcome back, admin!');
             navigate('/dashboard');
           } else {
-            // For patients or other user types
+            toast.success('Welcome back!');
             navigate('/dashboard');
           }
         }

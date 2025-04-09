@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "../components/Button";
 import { Input } from "@/components/ui/input";
@@ -20,9 +20,23 @@ export default function GeneralLogin() {
   const [loading, setLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [devMode, setDevMode] = useState(false);
-  const { setLoginUser } = useTwilioAuthStore();
+  const { verifyOTP, validateSession, setLoginUser } = useTwilioAuthStore();
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  useEffect(() => {
+    const checkSession = async () => {
+      const isValid = await validateSession();
+      const { user } = useTwilioAuthStore.getState();
+      
+      if (isValid && user) {
+        console.log("Already authenticated:", user);
+        handleOTPSuccess(user);
+      }
+    };
+    
+    checkSession();
+  }, [navigate]);
 
   const handleSendOTP = async () => {
     if (!phone) {
@@ -159,44 +173,23 @@ export default function GeneralLogin() {
           });
         }
       } else {
-        const { data, error } = await supabase.functions.invoke('verify-otp', {
-          body: { phone: `+${phone}`, otp: otp },
-        });
-
-        if (error) {
-          console.error("Error verifying OTP:", error);
+        const user = await verifyOTP(`+${phone}`, otp);
+        
+        if (!user) {
           toast({
             title: "Error",
             description: "Failed to verify OTP. Please try again.",
             variant: "destructive",
           });
+          setLoading(false);
           return;
         }
         
-        if (data?.success) {
-          const userProfile = await getUserProfileByPhone(`+${phone}`);
-          
-          if (userProfile) {
-            setLoginUser(userProfile);
-            handleOTPSuccess(userProfile);
-            toast({
-              title: "Success",
-              description: "OTP verified successfully.",
-            });
-          } else {
-            toast({
-              title: "Error",
-              description: "User profile not found.",
-              variant: "destructive",
-            });
-          }
-        } else {
-          toast({
-            title: "Error",
-            description: "Invalid OTP. Please try again.",
-            variant: "destructive",
-          });
-        }
+        handleOTPSuccess(user);
+        toast({
+          title: "Success",
+          description: "OTP verified successfully.",
+        });
       }
     } catch (error) {
       console.error("Error verifying OTP:", error);
@@ -223,10 +216,12 @@ export default function GeneralLogin() {
     }
     
     if (user.profile_type === 'admin') {
+      toast.success("Welcome admin! Redirecting to dashboard...");
       navigate("/dashboard");
       return;
     }
     
+    toast.success("Welcome! Redirecting to dashboard...");
     navigate("/dashboard");
   };
 

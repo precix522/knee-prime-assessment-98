@@ -21,11 +21,10 @@ export default function Login() {
   const [otpSent, setOtpSent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [loginUser, setLoginUser] = useState<any>(null);
   const [sessionVerified, setSessionVerified] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [devMode, setDevMode] = useState(false);
-  const { setAuthUser } = useTwilioAuthStore();
+  const { verifyOTP, validateSession, setAuthUser } = useTwilioAuthStore();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const patientID = searchParams.get("patientId");
@@ -40,18 +39,22 @@ export default function Login() {
 
   useEffect(() => {
     const checkAuthStatus = async () => {
-      const { validateSession, user } = useTwilioAuthStore.getState();
-      const isValid = await validateSession();
-      
-      console.log('Initial auth check:', isValid, user);
-      
-      if (isValid && user) {
-        handleRedirectBasedOnRole(user);
+      try {
+        const isValid = await validateSession();
+        const { user } = useTwilioAuthStore.getState();
+        
+        console.log('Initial auth check:', isValid, user);
+        
+        if (isValid && user) {
+          handleRedirectBasedOnRole(user);
+        }
+      } catch (error) {
+        console.error("Error checking auth status:", error);
       }
     };
     
     checkAuthStatus();
-  }, [navigate, patientID]);
+  }, [navigate, patientID, validateSession]);
 
   const handleRedirectBasedOnRole = (user) => {
     console.log('Redirecting based on role:', user.profile_type);
@@ -188,7 +191,7 @@ export default function Login() {
         }
         
         setAuthUser(userProfile);
-        handleOTPSuccess(userProfile, patientID);
+        handleOTPSuccess(userProfile);
         
         if (rememberMe) {
           localStorage.setItem('rememberedPhone', phone);
@@ -198,45 +201,33 @@ export default function Login() {
         
         toast.success("Dev mode: Login successful");
       } else {
-        const { data, error } = await supabase.functions.invoke('verify-otp', {
-          body: { phone, otp },
-        });
-
-        if (error) {
-          console.error("Error verifying OTP:", error);
+        const user = await verifyOTP(phone, otp);
+        
+        if (!user) {
           setError("Failed to verify OTP. Please try again.");
           toast.error("Failed to verify OTP. Please try again.");
-        } else {
-          console.log("OTP verification successful:", data);
-          
-          const userProfile = await getUserProfileByPhone(phone);
-          
-          if (!userProfile) {
-            setError("User profile not found. Please contact support.");
-            toast.error("User profile not found. Please contact support.");
-            setLoading(false);
-            return;
-          }
-          
-          handleOTPSuccess(userProfile, patientID);
-          
-          if (rememberMe) {
-            localStorage.setItem('rememberedPhone', phone);
-          } else {
-            localStorage.removeItem('rememberedPhone');
-          }
+          setLoading(false);
+          return;
         }
+        
+        if (rememberMe) {
+          localStorage.setItem('rememberedPhone', phone);
+        } else {
+          localStorage.removeItem('rememberedPhone');
+        }
+        
+        handleOTPSuccess(user);
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("Error verifying OTP:", err);
-      setError("An unexpected error occurred. Please try again.");
-      toast.error("An unexpected error occurred. Please try again.");
+      setError(err.message || "An unexpected error occurred. Please try again.");
+      toast.error(err.message || "An unexpected error occurred. Please try again.");
     } finally {
       setLoading(false);
     }
   };
   
-  const handleOTPSuccess = (user: any, patientId?: string | null) => {
+  const handleOTPSuccess = (user: any) => {
     console.log("OTP success with user:", user);
     handleRedirectBasedOnRole(user);
   };
