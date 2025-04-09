@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useTwilioAuthStore } from "../utils/twilio-auth-store";
@@ -61,6 +62,9 @@ export default function Login() {
     
     if (user.profile_type === 'admin') {
       toast.success("Welcome admin! Redirecting to dashboard...");
+      navigate("/dashboard");
+    } else if (user.profile_type === 'patient') {
+      toast.success("Welcome patient! Redirecting to dashboard...");
       navigate("/dashboard");
     } else if (patientID) {
       toast.success("Welcome! Redirecting to your report...");
@@ -128,7 +132,17 @@ export default function Login() {
         
         let userProfile;
         try {
-          userProfile = await getUserProfileByPhone(phone);
+          // Ensure we're using the correct phone format
+          const formattedPhone = phone.startsWith('+') ? phone : `+${phone}`;
+          userProfile = await getUserProfileByPhone(formattedPhone);
+          console.log("Retrieved user profile in dev mode:", userProfile);
+          
+          if (!userProfile) {
+            // Try alternative format
+            const altPhone = phone.startsWith('+') ? phone.substring(1) : `+${phone}`;
+            userProfile = await getUserProfileByPhone(altPhone);
+            console.log("Retrieved user profile with alt format:", userProfile);
+          }
         } catch (profileError) {
           console.error("Error fetching user profile:", profileError);
           try {
@@ -136,9 +150,9 @@ export default function Login() {
               .from('patient')
               .insert([{
                 Patient_ID: `dev-user-${Date.now()}`,
-                phone: phone,
-                profile_type: "admin",
-                patient_name: "Dev User",
+                phone: phone.startsWith('+') ? phone : `+${phone}`,
+                profile_type: "patient",
+                patient_name: "Dev Patient",
                 last_modified_tm: new Date().toLocaleString()
               }])
               .select();
@@ -154,38 +168,38 @@ export default function Login() {
             } else {
               userProfile = {
                 id: "dev-user-id",
-                phone: phone,
-                profile_type: "admin",
+                phone: phone.startsWith('+') ? phone : `+${phone}`,
+                profile_type: "patient",
                 created_at: new Date().toISOString(),
-                name: "Dev User",
-                email: "dev@example.com"
+                name: "Dev Patient",
+                email: "patient@example.com"
               };
             }
           } catch (createError) {
             console.error("Error creating user in patient table:", createError);
             userProfile = {
               id: "dev-user-id",
-              phone: phone,
-              profile_type: "admin",
+              phone: phone.startsWith('+') ? phone : `+${phone}`,
+              profile_type: "patient",
               created_at: new Date().toISOString(),
-              name: "Dev User",
-              email: "dev@example.com"
+              name: "Dev Patient",
+              email: "patient@example.com"
             };
           }
         }
         
         if (!userProfile) {
           try {
-            userProfile = await createUserProfile(phone, "admin");
+            userProfile = await createUserProfile(phone, "patient");
           } catch (createError) {
             console.error("Error creating user profile:", createError);
             userProfile = {
               id: "dev-user-id",
-              phone: phone,
-              profile_type: "admin",
+              phone: phone.startsWith('+') ? phone : `+${phone}`,
+              profile_type: "patient",
               created_at: new Date().toISOString(),
-              name: "Dev User", 
-              email: "dev@example.com"
+              name: "Dev Patient", 
+              email: "patient@example.com"
             };
           }
         }
@@ -199,9 +213,19 @@ export default function Login() {
           localStorage.removeItem('rememberedPhone');
         }
         
+        // Ensure session data is saved to localStorage for persistence
+        if (!localStorage.getItem('gator_prime_session_id')) {
+          const sessionId = `session_${Date.now()}`;
+          const expiryTime = Date.now() + (24 * 60 * 60 * 1000); // 24 hours
+          localStorage.setItem('gator_prime_session_id', sessionId);
+          localStorage.setItem('gator_prime_session_expiry', expiryTime.toString());
+        }
+        
         toast.success("Dev mode: Login successful");
       } else {
-        const user = await verifyOTP(phone, otp);
+        // Ensure we're using the correct phone format
+        const formattedPhone = phone.startsWith('+') ? phone : `+${phone}`;
+        const user = await verifyOTP(formattedPhone, otp);
         
         if (!user) {
           setError("Failed to verify OTP. Please try again.");

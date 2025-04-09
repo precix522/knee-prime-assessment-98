@@ -38,6 +38,9 @@ export function AuthInitializer() {
           if (user.profile_type === 'admin') {
             toast.success('Welcome back, admin!');
             navigate('/dashboard');
+          } else if (user.profile_type === 'patient') {
+            toast.success(`Welcome back, patient!`);
+            navigate('/dashboard');
           } else {
             toast.success('Welcome back!');
             navigate('/dashboard');
@@ -51,13 +54,5 @@ export function AuthInitializer() {
     checkSession();
   }, [validateSession, navigate, location.pathname, user]);
 
-  // Display toast for expired session if error is returned
-  useEffect(() => {
-    if (error && error.includes('expired')) {
-      toast.info('Your session has expired. Please log in again.');
-    }
-  }, [error]);
-
-  // This component doesn't render anything
   return null;
 }

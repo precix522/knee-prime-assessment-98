@@ -23,29 +23,13 @@ interface AuthState {
   setPhoneNumber: (phone: string) => void;
   setRememberMe: (remember: boolean) => void;
   sendOTP: (phone: string) => Promise<void>;
-  verifyOTP: (phone: string, code: string) => Promise<User | null>; // Updated return type
+  verifyOTP: (phone: string, code: string) => Promise<User | null>; 
   logout: () => void;
   clearError: () => void;
   validateSession: () => Promise<boolean>;
   
   setLoginUser: (user: any) => void;
   setAuthUser: (user: any) => void;
-}
-
-interface OTPResponse {
-  success: boolean;
-  message: string;
-}
-
-interface VerifyOTPResponse {
-  success: boolean;
-  message: string;
-  session_id: string;
-}
-
-interface ValidateSessionResponse {
-  valid: boolean;
-  phone_number: string | null;
 }
 
 // Default session duration: 2 hours
@@ -148,7 +132,6 @@ export const useTwilioAuthStore = create<AuthState>((set, get) => ({
           isLoading: false
         });
         
-        // Return the user object so the caller can use it
         return user;
       } else {
         throw new Error('No session ID received after verification');
@@ -164,6 +147,13 @@ export const useTwilioAuthStore = create<AuthState>((set, get) => ({
   validateSession: async () => {
     const sessionId = get().sessionId || localStorage.getItem('gator_prime_session_id');
     const sessionExpiry = Number(localStorage.getItem('gator_prime_session_expiry')) || null;
+    const currentUser = get().user;
+    
+    // If we already have a user in state, consider the session valid
+    if (currentUser) {
+      set({ isLoading: false });
+      return true;
+    }
     
     if (!sessionId) {
       set({ user: null, isLoading: false });
@@ -187,10 +177,21 @@ export const useTwilioAuthStore = create<AuthState>((set, get) => ({
     try {
       set({ isLoading: true });
       
-      // Skip the external validation in development mode if we have a user
-      if (process.env.NODE_ENV === 'development' && get().user) {
-        set({ isLoading: false });
-        return true;
+      // Skip the external validation in development mode if we have a session ID
+      if (process.env.NODE_ENV === 'development' && sessionId) {
+        const storedPhone = localStorage.getItem('authenticatedPhone');
+        if (storedPhone) {
+          const userProfile = await getUserProfileByPhone(storedPhone);
+          if (userProfile) {
+            const user = {
+              id: userProfile.id,
+              phone: storedPhone,
+              profile_type: userProfile.profile_type || 'user'
+            };
+            set({ user, isLoading: false });
+            return true;
+          }
+        }
       }
       
       const response = await validateSessionService(sessionId);
@@ -206,6 +207,9 @@ export const useTwilioAuthStore = create<AuthState>((set, get) => ({
         if (!phone) {
           throw new Error('Phone number not found in session');
         }
+        
+        // Store the authenticated phone for dev mode
+        localStorage.setItem('authenticatedPhone', phone);
         
         const userProfile = await getUserProfileByPhone(phone);
         const profile_type = userProfile?.profile_type || 'user';
@@ -223,15 +227,15 @@ export const useTwilioAuthStore = create<AuthState>((set, get) => ({
     } catch (error) {
       console.error('Session validation error:', error);
       // Don't clear the session on error, just return false
-      // This prevents unnecessary logouts during transient errors
       set({ isLoading: false });
-      return get().user !== null; // If we have a user, consider the session valid
+      return false;
     }
   },
   
   logout: () => {
     localStorage.removeItem('gator_prime_session_id');
     localStorage.removeItem('gator_prime_session_expiry');
+    localStorage.removeItem('authenticatedPhone');
     // Don't remove the rememberMe preference when logging out
     set({ user: null, sessionId: null, sessionExpiry: null, isVerifying: false });
     toast.success('Logged out successfully');
@@ -240,10 +244,17 @@ export const useTwilioAuthStore = create<AuthState>((set, get) => ({
   clearError: () => set({ error: null }),
   
   setLoginUser: (user) => {
+    const phone = user.phone || '';
+    
+    // Store the authenticated phone for dev mode
+    if (phone) {
+      localStorage.setItem('authenticatedPhone', phone);
+    }
+    
     set({
       user: {
         id: user.id || '',
-        phone: user.phone || '',
+        phone: phone,
         profile_type: user.profile_type || 'user'
       },
       isVerifying: false
@@ -251,10 +262,17 @@ export const useTwilioAuthStore = create<AuthState>((set, get) => ({
   },
   
   setAuthUser: (user) => {
+    const phone = user.phone || '';
+    
+    // Store the authenticated phone for dev mode
+    if (phone) {
+      localStorage.setItem('authenticatedPhone', phone);
+    }
+    
     set({
       user: {
         id: user.id || '',
-        phone: user.phone || '',
+        phone: phone,
         profile_type: user.profile_type || 'user'
       },
       isVerifying: false

@@ -28,12 +28,16 @@ export default function GeneralLogin() {
 
   useEffect(() => {
     const checkSession = async () => {
-      const isValid = await validateSession();
-      const { user } = useTwilioAuthStore.getState();
-      
-      if (isValid && user) {
-        console.log("Already authenticated:", user);
-        handleOTPSuccess(user);
+      try {
+        const isValid = await validateSession();
+        const { user } = useTwilioAuthStore.getState();
+        
+        if (isValid && user) {
+          console.log("Already authenticated:", user);
+          handleOTPSuccess(user);
+        }
+      } catch (error) {
+        console.error("Session check error:", error);
       }
     };
     
@@ -109,17 +113,29 @@ export default function GeneralLogin() {
         
         let userProfile;
         try {
-          userProfile = await getUserProfileByPhone(`+${phone}`);
+          // Ensure we're passing the correctly formatted phone number
+          const formattedPhone = phone.startsWith('+') ? phone : `+${phone}`;
+          userProfile = await getUserProfileByPhone(formattedPhone);
+          
+          console.log("Retrieved user profile in dev mode:", userProfile);
+          
+          if (!userProfile) {
+            // Try alternative formats
+            const altPhone = phone.startsWith('+') ? phone.substring(1) : `+${phone}`;
+            userProfile = await getUserProfileByPhone(altPhone);
+            console.log("Retrieved user profile with alt format:", userProfile);
+          }
         } catch (profileError) {
           console.error("Error fetching user profile:", profileError);
           
+          // Create a mock user for dev mode
           const mockUser = {
             id: "dev-user-id",
-            phone: `+${phone}`,
-            profile_type: "admin",
+            phone: phone.startsWith('+') ? phone : `+${phone}`,
+            profile_type: "patient", // Default to patient to test patient flow
             created_at: new Date().toISOString(),
-            name: "Dev User",
-            email: "dev@example.com"
+            name: "Dev Patient",
+            email: "patient@example.com"
           };
           
           try {
@@ -161,11 +177,11 @@ export default function GeneralLogin() {
         } else {
           const mockUser = {
             id: "dev-user-id",
-            phone: `+${phone}`,
-            profile_type: "admin",
+            phone: phone.startsWith('+') ? phone : `+${phone}`,
+            profile_type: "patient",
             created_at: new Date().toISOString(),
-            name: "Dev User",
-            email: "dev@example.com"
+            name: "Dev Patient",
+            email: "patient@example.com"
           };
           setLoginUser(mockUser);
           handleOTPSuccess(mockUser);
@@ -175,7 +191,9 @@ export default function GeneralLogin() {
           });
         }
       } else {
-        const user = await verifyOTP(`+${phone}`, otp);
+        // Ensure we're passing the correctly formatted phone number
+        const formattedPhone = phone.startsWith('+') ? phone : `+${phone}`;
+        const user = await verifyOTP(formattedPhone, otp);
         
         if (!user) {
           toast({
@@ -206,7 +224,7 @@ export default function GeneralLogin() {
   };
   
   const handleOTPSuccess = (user: any) => {
-    console.log("Redirecting after successful login:", user);
+    console.log("OTP success with user:", user);
     
     if (!user) {
       toast({
@@ -217,8 +235,20 @@ export default function GeneralLogin() {
       return;
     }
     
+    // Ensure session data is saved to localStorage for persistence
+    if (!localStorage.getItem('gator_prime_session_id')) {
+      const sessionId = `session_${Date.now()}`;
+      const expiryTime = Date.now() + (24 * 60 * 60 * 1000); // 24 hours
+      localStorage.setItem('gator_prime_session_id', sessionId);
+      localStorage.setItem('gator_prime_session_expiry', expiryTime.toString());
+    }
+    
     if (user.profile_type === 'admin') {
       sonnerToast.success("Welcome admin! Redirecting to dashboard...");
+      navigate("/dashboard");
+      return;
+    } else if (user.profile_type === 'patient') {
+      sonnerToast.success("Welcome patient! Redirecting to dashboard...");
       navigate("/dashboard");
       return;
     }
