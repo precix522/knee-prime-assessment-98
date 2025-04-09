@@ -1,198 +1,210 @@
-
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Navbar } from "../components/Navbar";
-import { Footer } from "../components/Footer";
+import { Button } from "../components/Button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/components/ui/use-toast";
 import { useTwilioAuthStore } from "../utils/twilio-auth-store";
-import { toast } from "sonner";
-import { PhoneForm } from "../components/auth/PhoneForm";
-import { OTPForm } from "../components/auth/OTPForm";
-import { LoadingSpinner } from "../components/auth/LoadingSpinner";
-import { formatPhoneNumber, validatePhoneNumber } from "../components/auth/AuthUtils";
+import { RememberMeCheckbox } from "../components/auth/RememberMeCheckbox";
+import { Phone, KeyRound } from "lucide-react";
+import { supabase } from "../utils/supabase";
+import { getUserProfileByPhone } from "../utils/supabase/user-db";
 
 export default function GeneralLogin() {
-  // Page loading state - shows while checking auth status
-  const [pageLoading, setPageLoading] = useState(true);
-  const [phoneInput, setPhoneInput] = useState("");
-  const [otpCode, setOtpCode] = useState("");
-  const [formattedPhone, setFormattedPhone] = useState("");
-  const [countdown, setCountdown] = useState(0);
+  const [phone, setPhone] = useState("");
+  const [otp, setOtp] = useState("");
+  const [otpSent, setOtpSent] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
+  const { setLoginUser } = useTwilioAuthStore();
   const navigate = useNavigate();
-  
-  // Auth store state and methods
-  const {
-    user,
-    isLoading,
-    isVerifying,
-    error,
-    phoneNumber,
-    rememberMe,
-    setRememberMe,
-    sendOTP,
-    verifyOTP,
-    clearError,
-    validateSession
-  } = useTwilioAuthStore();
-  
-  // Initialize auth session and redirect if already logged in
-  useEffect(() => {
-    setPageLoading(true);
-    
-    // Check for existing session using Twilio auth
-    const checkSession = async () => {
-      try {
-        // Check if we have a valid session
-        const isValid = await validateSession();
-        
-        if (isValid) {
-          // User is logged in, redirect to dashboard
-          navigate("/dashboard");
-        } else {
-          // No active session
-          setPageLoading(false);
-        }
-      } catch (error) {
-        console.error('Error checking session:', error);
-        setPageLoading(false);
-      }
-    };
-    
-    checkSession();
-  }, [navigate, validateSession]);
-  
-  // Countdown timer for resending OTP
-  useEffect(() => {
-    let timer: NodeJS.Timeout;
-    if (countdown > 0) {
-      timer = setTimeout(() => setCountdown(countdown - 1), 1000);
-    }
-    return () => clearTimeout(timer);
-  }, [countdown]);
-  
-  // Handle phone submission
-  const handleSendOTP = async (e: React.FormEvent) => {
-    e.preventDefault();
-    clearError();
-    
-    // Format and validate phone number
-    const formattedNumber = formatPhoneNumber(phoneInput);
-    setFormattedPhone(formattedNumber);
-    
-    // Enhanced validation
-    if (!validatePhoneNumber(formattedNumber)) {
-      useTwilioAuthStore.setState({ 
-        error: "Please enter a valid phone number in international format (e.g., +65XXXXXXXX for Singapore)" 
+  const { toast } = useToast();
+
+  const handleSendOTP = async () => {
+    if (!phone) {
+      toast({
+        title: "Error",
+        description: "Please enter your phone number.",
+        variant: "destructive",
       });
       return;
     }
-    
+
+    setLoading(true);
     try {
-      // Send OTP to the phone number
-      await sendOTP(formattedNumber);
-      
-      // Start countdown for resend (60 seconds)
-      setCountdown(60);
-    } catch (err) {
-      console.error("Error in handleSendOTP:", err);
+      const { data, error } = await supabase.functions.invoke('send-sms', {
+        body: { phone: `+${phone}` },
+      });
+
+      if (error) {
+        console.error("Error sending OTP:", error);
+        toast({
+          title: "Error",
+          description: "Failed to send OTP. Please try again.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      setOtpSent(true);
+      toast({
+        title: "Success",
+        description: "OTP sent to your phone number.",
+      });
+    } catch (error) {
+      console.error("Error sending OTP:", error);
+      toast({
+        title: "Error",
+        description: "Failed to send OTP. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
     }
   };
-  
-  // Handle OTP verification
-  const handleVerifyOTP = async (e: React.FormEvent) => {
-    e.preventDefault();
-    clearError();
-    
-    // Basic validation
-    if (!otpCode || otpCode.length < 6) {
-      useTwilioAuthStore.setState({
-        error: "Please enter the 6-digit verification code"
+
+  const handleOTPSubmit = async () => {
+    if (!otp) {
+      toast({
+        title: "Error",
+        description: "Please enter the OTP.",
+        variant: "destructive",
       });
       return;
     }
-    
-    // Call the verification function
+
+    setLoading(true);
     try {
-      if (formattedPhone || phoneNumber) {
-        // Twilio verifyOTP requires both phone and code
-        await verifyOTP(formattedPhone || phoneNumber, otpCode);
+      const { data, error } = await supabase.functions.invoke('verify-otp', {
+        body: { phone: `+${phone}`, otp: otp },
+      });
+
+      if (error) {
+        console.error("Error verifying OTP:", error);
+        toast({
+          title: "Error",
+          description: "Failed to verify OTP. Please try again.",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      if (data?.success) {
+        // Fetch user profile from Supabase
+        const userProfile = await getUserProfileByPhone(`+${phone}`);
         
-        // After successful verification, navigate to dashboard
-        toast.success("Login successful!");
-        navigate('/dashboard');
+        if (userProfile) {
+          // Set user in store
+          setLoginUser(userProfile);
+          
+          // Handle OTP verification success
+          handleOTPSuccess(userProfile);
+          
+          toast({
+            title: "Success",
+            description: "OTP verified successfully.",
+          });
+        } else {
+          toast({
+            title: "Error",
+            description: "User profile not found.",
+            variant: "destructive",
+          });
+        }
       } else {
-        useTwilioAuthStore.setState({
-          error: "Phone number is missing. Please restart the verification process."
+        toast({
+          title: "Error",
+          description: "Invalid OTP. Please try again.",
+          variant: "destructive",
         });
       }
     } catch (error) {
-      console.error('Error verifying OTP:', error);
+      console.error("Error verifying OTP:", error);
+      toast({
+        title: "Error",
+        description: "Failed to verify OTP. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
     }
   };
-
-  // Handle resend OTP
-  const handleResendOTP = () => {
-    sendOTP(formattedPhone || phoneNumber);
-    setCountdown(60);
+  
+  const handleOTPSuccess = (user: any) => {
+    // If the user is an admin, redirect to dashboard
+    if (user.profile_type === 'admin') {
+      navigate("/dashboard");
+      return;
+    }
+    
+    // For regular users, continue with the default logic
+    navigate("/dashboard");
   };
 
-  // Handle going back to phone input
-  const handleBackToPhone = () => {
-    clearError();
-    useTwilioAuthStore.setState({ isVerifying: false });
-  };
-  
-  // Show loading spinner while checking auth status
-  if (pageLoading) {
-    return <LoadingSpinner />;
-  }
-  
   return (
-    <div className="flex flex-col min-h-screen">
-      <Navbar />
-      
-      <main className="flex-grow py-12 bg-gray-50">
-        <div className="container mx-auto px-4">
-          <div className="max-w-md mx-auto bg-white rounded-lg shadow-md overflow-hidden">
-            <div className="p-6 sm:p-8">
-              <div className="text-center mb-8">
-                <h1 className="text-2xl font-bold text-gray-900">Login to GATOR PRIME</h1>
-                <p className="mt-2 text-gray-600">
-                  {isVerifying 
-                    ? "Enter the verification code sent to your phone" 
-                    : "Enter your phone number to login"}
-                </p>
+    <div className="flex items-center justify-center h-screen bg-gray-50">
+      <div className="bg-white shadow-md rounded-md p-8 w-full max-w-md">
+        <h2 className="text-2xl font-bold text-gray-800 text-center mb-6">
+          Login with OTP
+        </h2>
+        {!otpSent ? (
+          <>
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="phone" className="text-gray-700">
+                  Phone Number
+                </Label>
+                <div className="relative">
+                  <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                  <Input
+                    type="tel"
+                    id="phone"
+                    placeholder="Enter your phone number"
+                    className="pl-10"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                  />
+                </div>
               </div>
-              
-              {isVerifying ? (
-                <OTPForm 
-                  otpCode={otpCode}
-                  setOtpCode={setOtpCode}
-                  handleVerifyOTP={handleVerifyOTP}
-                  isLoading={isLoading}
-                  error={error}
-                  formattedPhone={formattedPhone}
-                  phoneNumber={phoneNumber}
-                  countdown={countdown}
-                  onResendOTP={handleResendOTP}
-                  onBackToPhone={handleBackToPhone}
-                />
-              ) : (
-                <PhoneForm
-                  phoneInput={phoneInput}
-                  setPhoneInput={setPhoneInput}
-                  handleSendOTP={handleSendOTP}
-                  isLoading={isLoading}
-                  error={error}
-                  rememberMe={rememberMe}
-                  setRememberMe={setRememberMe}
-                />
-              )}
             </div>
-          </div>
-        </div>
-      </main>
-      
-      <Footer />
+            <Button
+              className="w-full mt-6"
+              onClick={handleSendOTP}
+              disabled={loading}
+            >
+              {loading ? "Sending OTP..." : "Send OTP"}
+            </Button>
+          </>
+        ) : (
+          <>
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="otp" className="text-gray-700">
+                  OTP Code
+                </Label>
+                <div className="relative">
+                  <KeyRound className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                  <Input
+                    type="text"
+                    id="otp"
+                    placeholder="Enter OTP code"
+                    className="pl-10"
+                    value={otp}
+                    onChange={(e) => setOtp(e.target.value)}
+                  />
+                </div>
+              </div>
+            </div>
+            <Button
+              className="w-full mt-6"
+              onClick={handleOTPSubmit}
+              disabled={loading}
+            >
+              {loading ? "Verifying OTP..." : "Verify OTP"}
+            </Button>
+          </>
+        )}
+      </div>
     </div>
   );
 }

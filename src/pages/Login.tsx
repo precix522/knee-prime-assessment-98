@@ -1,198 +1,251 @@
-
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { Navbar } from "../components/Navbar";
-import { Footer } from "../components/Footer";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useTwilioAuthStore } from "../utils/twilio-auth-store";
+import { Button } from "../components/Button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { PhoneForm } from "../components/auth/PhoneForm";
-import { OTPForm } from "../components/auth/OTPForm";
-import { LoadingSpinner } from "../components/auth/LoadingSpinner";
-import { formatPhoneNumber, validatePhoneNumber } from "../components/auth/AuthUtils";
+import { Icons } from "../components/Icons";
+import { Separator } from "@/components/ui/separator";
+import { supabase } from "../utils/supabase";
+import { getUserProfileByPhone } from "../utils/supabase/user-db";
+import { RememberMeCheckbox } from "../components/auth/RememberMeCheckbox";
 
 export default function Login() {
-  // Page loading state - shows while checking auth status
-  const [pageLoading, setPageLoading] = useState(true);
-  const [phoneInput, setPhoneInput] = useState("");
-  const [otpCode, setOtpCode] = useState("");
-  const [formattedPhone, setFormattedPhone] = useState("");
-  const [countdown, setCountdown] = useState(0);
+  const [phone, setPhone] = useState("");
+  const [otp, setOtp] = useState("");
+  const [otpSent, setOtpSent] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [loginUser, setLoginUser] = useState<any>(null);
+  const [sessionVerified, setSessionVerified] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
+  const { setAuthUser } = useTwilioAuthStore();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const patientID = searchParams.get("patientId");
   
-  // Auth store state and methods
-  const {
-    user,
-    isLoading,
-    isVerifying,
-    error,
-    phoneNumber,
-    rememberMe,
-    setRememberMe,
-    sendOTP,
-    verifyOTP,
-    clearError,
-    validateSession
-  } = useTwilioAuthStore();
-  
-  // Initialize auth session and redirect if already logged in
   useEffect(() => {
-    setPageLoading(true);
-    
-    // Check for existing session using Twilio auth
-    const checkSession = async () => {
+    const storedPhone = localStorage.getItem('rememberedPhone');
+    if (storedPhone) {
+      setPhone(storedPhone);
+      setRememberMe(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    const checkAuthAndVerify = async () => {
       try {
-        // Check if we have a valid session
-        const isValid = await validateSession();
+        // Check if there's an active session in localStorage
+        const storedSession = localStorage.getItem('twilio-auth-session');
+        if (!storedSession) {
+          return;
+        }
         
-        if (isValid) {
-          // User is logged in, redirect to dashboard
-          navigate("/dashboard");
-        } else {
-          // No active session
-          setPageLoading(false);
+        const session = JSON.parse(storedSession);
+        if (!session?.user?.phone) {
+          return;
+        }
+        
+        // Verify session with Supabase
+        const { data: verifiedSession, error: verificationError } = await supabase
+          .functions.invoke('verify-session', {
+            body: { phone: session.user.phone, token: session.token },
+          });
+          
+        if (verificationError) {
+          console.error("Session verification error:", verificationError);
+          return;
+        }
+        
+        if (verifiedSession?.verified) {
+          // If user is already verified
+          const userProfile = verifiedSession.user;
+          
+          if (userProfile) {
+            setLoginUser(userProfile);
+            setSessionVerified(true);
+            
+            // If user is an admin, redirect to dashboard instead of report-viewer
+            if (userProfile.profile_type === 'admin') {
+              navigate("/dashboard");
+            } else {
+              // For regular users, navigate to report-viewer if patient ID is available
+              if (patientID) {
+                navigate(`/report-viewer?patientId=${encodeURIComponent(patientID)}`);
+              } else {
+                navigate("/dashboard");
+              }
+            }
+          }
         }
       } catch (error) {
-        console.error('Error checking session:', error);
-        setPageLoading(false);
+        console.error("Error during session verification:", error);
       }
     };
-    
-    checkSession();
-  }, [navigate, validateSession]);
-  
-  // Countdown timer for resending OTP
-  useEffect(() => {
-    let timer: NodeJS.Timeout;
-    if (countdown > 0) {
-      timer = setTimeout(() => setCountdown(countdown - 1), 1000);
-    }
-    return () => clearTimeout(timer);
-  }, [countdown]);
-  
-  // Handle phone submission
-  const handleSendOTP = async (e: React.FormEvent) => {
+
+    checkAuthAndVerify();
+  }, [navigate, patientID]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    clearError();
-    
-    // Format and validate phone number
-    const formattedNumber = formatPhoneNumber(phoneInput);
-    setFormattedPhone(formattedNumber);
-    
-    // Enhanced validation
-    if (!validatePhoneNumber(formattedNumber)) {
-      useTwilioAuthStore.setState({ 
-        error: "Please enter a valid phone number in international format (e.g., +65XXXXXXXX for Singapore)" 
-      });
+    setLoading(true);
+    setError("");
+
+    if (!phone) {
+      setError("Phone number is required.");
+      setLoading(false);
       return;
     }
-    
+
     try {
-      // Send OTP to the phone number
-      await sendOTP(formattedNumber);
-      
-      // Start countdown for resend (60 seconds)
-      setCountdown(60);
-    } catch (err) {
-      console.error("Error in handleSendOTP:", err);
-    }
-  };
-  
-  // Handle OTP verification
-  const handleVerifyOTP = async (e: React.FormEvent) => {
-    e.preventDefault();
-    clearError();
-    
-    // Basic validation
-    if (!otpCode || otpCode.length < 6) {
-      useTwilioAuthStore.setState({
-        error: "Please enter the 6-digit verification code"
+      const { data, error } = await supabase.functions.invoke('send-otp', {
+        body: { phone },
       });
-      return;
-    }
-    
-    // Call the verification function
-    try {
-      if (formattedPhone || phoneNumber) {
-        // Twilio verifyOTP requires both phone and code
-        await verifyOTP(formattedPhone || phoneNumber, otpCode);
-        
-        // After successful verification, navigate to patient ID page
-        toast.success("Verification successful!");
-        navigate('/patient-id');
+
+      if (error) {
+        console.error("Error sending OTP:", error);
+        setError("Failed to send OTP. Please try again.");
+        toast.error("Failed to send OTP. Please try again.");
       } else {
-        useTwilioAuthStore.setState({
-          error: "Phone number is missing. Please restart the verification process."
-        });
+        console.log("OTP sent successfully:", data);
+        setOtpSent(true);
+        toast.success("OTP sent successfully!");
       }
-    } catch (error) {
-      console.error('Error verifying OTP:', error);
+    } catch (err) {
+      console.error("Error sending OTP:", err);
+      setError("An unexpected error occurred. Please try again.");
+      toast.error("An unexpected error occurred. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Handle resend OTP
-  const handleResendOTP = () => {
-    sendOTP(formattedPhone || phoneNumber);
-    setCountdown(60);
+  const handleOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+
+    if (!otp) {
+      setError("OTP is required.");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase.functions.invoke('verify-otp', {
+        body: { phone, otp },
+      });
+
+      if (error) {
+        console.error("Error verifying OTP:", error);
+        setError("Failed to verify OTP. Please try again.");
+        toast.error("Failed to verify OTP. Please try again.");
+      } else {
+        console.log("OTP verification successful:", data);
+        
+        // Fetch user profile from Supabase
+        const userProfile = await getUserProfileByPhone(phone);
+        
+        if (!userProfile) {
+          setError("User profile not found. Please contact support.");
+          toast.error("User profile not found. Please contact support.");
+          setLoading(false);
+          return;
+        }
+        
+        // Call success handler with user profile and patient ID
+        handleOTPSuccess(userProfile, patientID);
+        
+        // Store phone number if rememberMe is checked
+        if (rememberMe) {
+          localStorage.setItem('rememberedPhone', phone);
+        } else {
+          localStorage.removeItem('rememberedPhone');
+        }
+      }
+    } catch (err) {
+      console.error("Error verifying OTP:", err);
+      setError("An unexpected error occurred. Please try again.");
+      toast.error("An unexpected error occurred. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  const handleOTPSuccess = (user: any, patientId?: string) => {
+    // If the user is an admin, always redirect to dashboard
+    if (user.profile_type === 'admin') {
+      navigate("/dashboard");
+      return;
+    }
+    
+    // For regular users, continue with existing logic
+    if (patientId) {
+      navigate(`/report-viewer?patientId=${encodeURIComponent(patientId)}`);
+    } else {
+      navigate("/dashboard");
+    }
   };
 
-  // Handle going back to phone input
-  const handleBackToPhone = () => {
-    clearError();
-    useTwilioAuthStore.setState({ isVerifying: false });
-  };
-  
-  // Show loading spinner while checking auth status
-  if (pageLoading) {
-    return <LoadingSpinner />;
-  }
-  
   return (
-    <div className="flex flex-col min-h-screen">
-      <Navbar />
-      
-      <main className="flex-grow py-12 bg-gray-50">
-        <div className="container mx-auto px-4">
-          <div className="max-w-md mx-auto bg-white rounded-lg shadow-md overflow-hidden">
-            <div className="p-6 sm:p-8">
-              <div className="text-center mb-8">
-                <h1 className="text-2xl font-bold text-gray-900">Access Your PRIME Report</h1>
-                <p className="mt-2 text-gray-600">
-                  {isVerifying 
-                    ? "Enter the verification code sent to your phone" 
-                    : "Enter your phone number to access your personalized knee health report"}
-                </p>
-              </div>
-              
-              {isVerifying ? (
-                <OTPForm 
-                  otpCode={otpCode}
-                  setOtpCode={setOtpCode}
-                  handleVerifyOTP={handleVerifyOTP}
-                  isLoading={isLoading}
-                  error={error}
-                  formattedPhone={formattedPhone}
-                  phoneNumber={phoneNumber}
-                  countdown={countdown}
-                  onResendOTP={handleResendOTP}
-                  onBackToPhone={handleBackToPhone}
-                />
-              ) : (
-                <PhoneForm
-                  phoneInput={phoneInput}
-                  setPhoneInput={setPhoneInput}
-                  handleSendOTP={handleSendOTP}
-                  isLoading={isLoading}
-                  error={error}
-                  rememberMe={rememberMe}
-                  setRememberMe={setRememberMe}
-                />
-              )}
-            </div>
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50">
+      <Card className="w-full max-w-md space-y-4 p-4">
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-2xl text-center">
+            {otpSent ? "Verify OTP" : "Login"}
+          </CardTitle>
+          <CardDescription className="text-center">
+            {otpSent
+              ? "Enter the verification code we sent to your phone."
+              : "Enter your phone number to receive a verification code."}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-4">
+          <div className="grid gap-2">
+            <Label htmlFor="phone">Phone Number</Label>
+            <Input
+              id="phone"
+              placeholder="+1234567890"
+              type="tel"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              disabled={otpSent}
+            />
           </div>
-        </div>
-      </main>
-      
-      <Footer />
+          {otpSent && (
+            <div className="grid gap-2">
+              <Label htmlFor="otp">OTP Code</Label>
+              <Input
+                id="otp"
+                placeholder="123456"
+                type="text"
+                value={otp}
+                onChange={(e) => setOtp(e.target.value)}
+              />
+            </div>
+          )}
+          {!otpSent && (
+            <RememberMeCheckbox 
+              checked={rememberMe}
+              onCheckedChange={(checked) => setRememberMe(checked)}
+            />
+          )}
+          {error && <p className="text-red-500 text-sm">{error}</p>}
+          {otpSent ? (
+            <Button onClick={handleOtp} disabled={loading} className="w-full">
+              {loading && <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />}
+              Verify OTP
+            </Button>
+          ) : (
+            <Button onClick={handleSubmit} disabled={loading} className="w-full">
+              {loading && <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />}
+              Send OTP
+            </Button>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }
