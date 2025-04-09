@@ -95,7 +95,8 @@ export default function GeneralLogin() {
           userProfile = await getUserProfileByPhone(`+${phone}`);
         } catch (profileError) {
           console.error("Error fetching user profile:", profileError);
-          userProfile = {
+          
+          const mockUser = {
             id: "dev-user-id",
             phone: `+${phone}`,
             profile_type: "admin",
@@ -103,6 +104,34 @@ export default function GeneralLogin() {
             name: "Dev User",
             email: "dev@example.com"
           };
+          
+          try {
+            const { data, error } = await supabase
+              .from('patient')
+              .insert([{
+                Patient_ID: mockUser.id,
+                phone: mockUser.phone,
+                profile_type: mockUser.profile_type,
+                patient_name: mockUser.name,
+                last_modified_tm: new Date().toLocaleString()
+              }])
+              .select();
+              
+            if (!error && data) {
+              userProfile = {
+                id: data[0].Patient_ID,
+                phone: data[0].phone,
+                profile_type: data[0].profile_type,
+                created_at: data[0].last_modified_tm,
+                name: data[0].patient_name
+              };
+            } else {
+              userProfile = mockUser;
+            }
+          } catch (createError) {
+            console.error("Error creating mock user in patient table:", createError);
+            userProfile = mockUser;
+          }
         }
         
         if (userProfile) {

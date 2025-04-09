@@ -99,7 +99,6 @@ export default function Login() {
 
     try {
       if (devMode) {
-        // In dev mode, skip the actual OTP sending
         console.log("Dev mode: Simulating OTP sent to", phone);
         setOtpSent(true);
         toast.success("Dev mode: OTP code is 123456");
@@ -140,7 +139,6 @@ export default function Login() {
 
     try {
       if (devMode) {
-        // In dev mode, accept any code and create a mock user if db table doesn't exist
         console.log("Dev mode: Simulating OTP verification for", phone);
         
         let userProfile;
@@ -148,24 +146,54 @@ export default function Login() {
           userProfile = await getUserProfileByPhone(phone);
         } catch (profileError) {
           console.error("Error fetching user profile:", profileError);
-          // Create a mock user for development if the table doesn't exist
-          userProfile = {
-            id: "dev-user-id",
-            phone: phone,
-            profile_type: "admin",
-            created_at: new Date().toISOString(),
-            name: "Dev User",
-            email: "dev@example.com"
-          };
+          try {
+            const { data, error } = await supabase
+              .from('patient')
+              .insert([{
+                Patient_ID: `dev-user-${Date.now()}`,
+                phone: phone,
+                profile_type: "admin",
+                patient_name: "Dev User",
+                last_modified_tm: new Date().toLocaleString()
+              }])
+              .select();
+              
+            if (!error && data) {
+              userProfile = {
+                id: data[0].Patient_ID,
+                phone: data[0].phone,
+                profile_type: data[0].profile_type,
+                created_at: data[0].last_modified_tm,
+                name: data[0].patient_name
+              };
+            } else {
+              userProfile = {
+                id: "dev-user-id",
+                phone: phone,
+                profile_type: "admin",
+                created_at: new Date().toISOString(),
+                name: "Dev User",
+                email: "dev@example.com"
+              };
+            }
+          } catch (createError) {
+            console.error("Error creating user in patient table:", createError);
+            userProfile = {
+              id: "dev-user-id",
+              phone: phone,
+              profile_type: "admin",
+              created_at: new Date().toISOString(),
+              name: "Dev User",
+              email: "dev@example.com"
+            };
+          }
         }
         
         if (!userProfile) {
           try {
-            // Try to create a user profile if the table exists
             userProfile = await createUserProfile(phone, "admin");
           } catch (createError) {
             console.error("Error creating user profile:", createError);
-            // Use the mock user if creation fails
             userProfile = {
               id: "dev-user-id",
               phone: phone,

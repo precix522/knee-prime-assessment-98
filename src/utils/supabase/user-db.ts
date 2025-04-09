@@ -1,4 +1,3 @@
-
 import { supabase } from './client';
 
 // Interface for user profile data from database
@@ -18,7 +17,7 @@ export interface UserProfile {
 export const getUserProfileByPhone = async (phone: string): Promise<UserProfile | null> => {
   try {
     const { data, error } = await supabase
-      .from('user_profiles')
+      .from('patient')
       .select('*')
       .eq('phone', phone)
       .single();
@@ -28,7 +27,15 @@ export const getUserProfileByPhone = async (phone: string): Promise<UserProfile 
       return null;
     }
     
-    return data as UserProfile;
+    // Map the patient record to UserProfile format
+    return {
+      id: data.id || data.Patient_ID,
+      phone: data.phone,
+      profile_type: data.profile_type || 'user', // Default to user if not specified
+      created_at: data.created_at || data.last_modified_tm,
+      name: data.patient_name || data.name,
+      email: data.email
+    } as UserProfile;
   } catch (error) {
     console.error('Exception fetching user profile:', error);
     return null;
@@ -46,16 +53,30 @@ export const createUserProfile = async (phone: string, profile_type: string = 'u
       return existingUser;
     }
     
+    // Format the date in MM/DD/YYYY, hh:mm:ss AM/PM format
+    const now = new Date();
+    const formattedDate = now.toLocaleDateString('en-US', {
+      month: '2-digit',
+      day: '2-digit',
+      year: 'numeric',
+    }) + ' ' + now.toLocaleTimeString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: true
+    });
+    
     // Create new user profile with any additional data provided
     const userData = {
+      Patient_ID: `user_${Date.now()}`, // Generate a unique Patient_ID
       phone,
       profile_type,
-      ...additionalData,
-      last_login: new Date().toISOString()
+      patient_name: additionalData.name || 'User',
+      last_modified_tm: formattedDate
     };
     
     const { data, error } = await supabase
-      .from('user_profiles')
+      .from('patient')
       .insert([userData])
       .select()
       .single();
@@ -65,7 +86,14 @@ export const createUserProfile = async (phone: string, profile_type: string = 'u
       return null;
     }
     
-    return data as UserProfile;
+    // Map the patient record to UserProfile format
+    return {
+      id: data.Patient_ID,
+      phone: data.phone,
+      profile_type: data.profile_type || 'user',
+      created_at: data.last_modified_tm,
+      name: data.patient_name,
+    } as UserProfile;
   } catch (error) {
     console.error('Exception creating user profile:', error);
     return null;
@@ -78,7 +106,7 @@ export const createUserProfile = async (phone: string, profile_type: string = 'u
 export const updateUserProfile = async (id: string, updateData: Partial<UserProfile>): Promise<UserProfile | null> => {
   try {
     const { data, error } = await supabase
-      .from('user_profiles')
+      .from('patient')
       .update(updateData)
       .eq('id', id)
       .select()
@@ -102,7 +130,7 @@ export const updateUserProfile = async (id: string, updateData: Partial<UserProf
 export const deleteUserProfile = async (id: string): Promise<boolean> => {
   try {
     const { error } = await supabase
-      .from('user_profiles')
+      .from('patient')
       .delete()
       .eq('id', id);
     
@@ -124,7 +152,7 @@ export const deleteUserProfile = async (id: string): Promise<boolean> => {
 export const getAllUserProfiles = async (): Promise<UserProfile[]> => {
   try {
     const { data, error } = await supabase
-      .from('user_profiles')
+      .from('patient')
       .select('*')
       .order('created_at', { ascending: false });
     
@@ -146,8 +174,8 @@ export const getAllUserProfiles = async (): Promise<UserProfile[]> => {
 export const updateUserLastLogin = async (id: string): Promise<boolean> => {
   try {
     const { error } = await supabase
-      .from('user_profiles')
-      .update({ last_login: new Date().toISOString() })
+      .from('patient')
+      .update({ last_modified_tm: new Date().toISOString() })
       .eq('id', id);
     
     if (error) {
