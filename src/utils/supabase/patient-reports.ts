@@ -42,49 +42,54 @@ export const getPatientReport = async (patientId: string) => {
     }
     
     // Transform the result to include all reports
-    const patientReports = patientData.map(record => {
-      // Get the report URL from the patient data
-      let reportUrl = record.report_url;
-      
-      if (!reportUrl || typeof reportUrl !== 'string') {
-        return null;
-      }
-      
-      // Handle case where report_url contains multiple URLs separated by comma
-      if (reportUrl.includes(',')) {
-        // Extract the first URL (main report)
-        reportUrl = reportUrl.split(',')[0].trim();
-      }
-      
-      // Extract file name for display purposes
-      const fileName = reportUrl.split('/').pop() || 'patient-report.pdf';
-      
-      // Format the timestamp if it exists
-      let formattedTimestamp = '';
-      if (record.last_modified_tm) {
-        try {
-          const date = new Date(record.last_modified_tm);
-          formattedTimestamp = date.toLocaleString('en-US', {
-            month: '2-digit',
-            day: '2-digit',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit',
-            hour12: true
-          });
-        } catch (e) {
-          formattedTimestamp = record.last_modified_tm || '';
+    const patientReports = patientData
+      .map(record => {
+        // Get the report URL from the patient data
+        let reportUrl = record.report_url;
+        
+        if (!reportUrl || typeof reportUrl !== 'string') {
+          console.log('Invalid report URL for record:', record);
+          return null;
         }
-      }
-      
-      return { 
-        fileUrl: reportUrl, 
-        fileName,
-        timestamp: formattedTimestamp,
-        assessmentId: record.assessment_id
-      };
-    }).filter(Boolean);
+        
+        // Handle case where report_url contains multiple URLs separated by comma
+        if (reportUrl.includes(',')) {
+          // Extract the first URL (main report)
+          reportUrl = reportUrl.split(',')[0].trim();
+        }
+        
+        // Extract file name for display purposes
+        const fileName = reportUrl.split('/').pop() || 'patient-report.pdf';
+        
+        // Format the timestamp if it exists
+        let formattedTimestamp = '';
+        if (record.last_modified_tm) {
+          try {
+            const date = new Date(record.last_modified_tm);
+            formattedTimestamp = date.toLocaleString('en-US', {
+              month: '2-digit',
+              day: '2-digit',
+              year: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit',
+              second: '2-digit',
+              hour12: true
+            });
+          } catch (e) {
+            formattedTimestamp = record.last_modified_tm || '';
+          }
+        }
+        
+        return { 
+          fileUrl: reportUrl, 
+          fileName,
+          timestamp: formattedTimestamp,
+          assessmentId: record.assessment_id
+        };
+      })
+      .filter(Boolean);
+    
+    console.log('Processed patient reports:', patientReports);
     
     if (patientReports.length === 0) {
       throw new Error('No valid reports found for this patient ID');
