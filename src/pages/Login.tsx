@@ -22,6 +22,7 @@ export default function Login() {
   const [loginUser, setLoginUser] = useState<any>(null);
   const [sessionVerified, setSessionVerified] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const [devMode, setDevMode] = useState(false);
   const { setAuthUser } = useTwilioAuthStore();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -96,18 +97,25 @@ export default function Login() {
     }
 
     try {
-      const { data, error } = await supabase.functions.invoke('send-otp', {
-        body: { phone },
-      });
-
-      if (error) {
-        console.error("Error sending OTP:", error);
-        setError("Failed to send OTP. Please try again.");
-        toast.error("Failed to send OTP. Please try again.");
-      } else {
-        console.log("OTP sent successfully:", data);
+      if (devMode) {
+        // In dev mode, skip the actual OTP sending
+        console.log("Dev mode: Simulating OTP sent to", phone);
         setOtpSent(true);
-        toast.success("OTP sent successfully!");
+        toast.success("Dev mode: OTP code is 123456");
+      } else {
+        const { data, error } = await supabase.functions.invoke('send-otp', {
+          body: { phone },
+        });
+
+        if (error) {
+          console.error("Error sending OTP:", error);
+          setError("Failed to send OTP. Please try again.");
+          toast.error("Failed to send OTP. Please try again.");
+        } else {
+          console.log("OTP sent successfully:", data);
+          setOtpSent(true);
+          toast.success("OTP sent successfully!");
+        }
       }
     } catch (err) {
       console.error("Error sending OTP:", err);
@@ -130,16 +138,9 @@ export default function Login() {
     }
 
     try {
-      const { data, error } = await supabase.functions.invoke('verify-otp', {
-        body: { phone, otp },
-      });
-
-      if (error) {
-        console.error("Error verifying OTP:", error);
-        setError("Failed to verify OTP. Please try again.");
-        toast.error("Failed to verify OTP. Please try again.");
-      } else {
-        console.log("OTP verification successful:", data);
+      if (devMode) {
+        // In dev mode, accept any code or specifically 123456
+        console.log("Dev mode: Simulating OTP verification for", phone);
         
         const userProfile = await getUserProfileByPhone(phone);
         
@@ -156,6 +157,35 @@ export default function Login() {
           localStorage.setItem('rememberedPhone', phone);
         } else {
           localStorage.removeItem('rememberedPhone');
+        }
+      } else {
+        const { data, error } = await supabase.functions.invoke('verify-otp', {
+          body: { phone, otp },
+        });
+
+        if (error) {
+          console.error("Error verifying OTP:", error);
+          setError("Failed to verify OTP. Please try again.");
+          toast.error("Failed to verify OTP. Please try again.");
+        } else {
+          console.log("OTP verification successful:", data);
+          
+          const userProfile = await getUserProfileByPhone(phone);
+          
+          if (!userProfile) {
+            setError("User profile not found. Please contact support.");
+            toast.error("User profile not found. Please contact support.");
+            setLoading(false);
+            return;
+          }
+          
+          handleOTPSuccess(userProfile, patientID);
+          
+          if (rememberMe) {
+            localStorage.setItem('rememberedPhone', phone);
+          } else {
+            localStorage.removeItem('rememberedPhone');
+          }
         }
       }
     } catch (err) {
@@ -177,6 +207,15 @@ export default function Login() {
       navigate(`/report-viewer?patientId=${encodeURIComponent(patientId)}`);
     } else {
       navigate("/dashboard");
+    }
+  };
+
+  const toggleDevMode = () => {
+    setDevMode(!devMode);
+    if (!devMode) {
+      toast.info("Developer mode enabled. OTP verification will be bypassed.");
+    } else {
+      toast.info("Developer mode disabled.");
     }
   };
 
@@ -235,6 +274,23 @@ export default function Login() {
               Send OTP
             </Button>
           )}
+          
+          <Separator className="my-2" />
+          
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-gray-500">Developer Mode</span>
+            <button
+              type="button"
+              onClick={toggleDevMode}
+              className={`px-3 py-1 text-xs rounded-full ${
+                devMode 
+                  ? "bg-green-500 text-white" 
+                  : "bg-gray-200 text-gray-600"
+              }`}
+            >
+              {devMode ? "Enabled" : "Disabled"}
+            </button>
+          </div>
         </CardContent>
       </Card>
     </div>

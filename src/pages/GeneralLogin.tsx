@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "../components/Button";
@@ -9,6 +10,7 @@ import { RememberMeCheckbox } from "../components/auth/RememberMeCheckbox";
 import { Phone, KeyRound } from "lucide-react";
 import { supabase } from "../utils/supabase";
 import { getUserProfileByPhone } from "../utils/supabase/user-db";
+import { Separator } from "@/components/ui/separator";
 
 export default function GeneralLogin() {
   const [phone, setPhone] = useState("");
@@ -16,6 +18,7 @@ export default function GeneralLogin() {
   const [otpSent, setOtpSent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const [devMode, setDevMode] = useState(false);
   const { setLoginUser } = useTwilioAuthStore();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -32,25 +35,35 @@ export default function GeneralLogin() {
 
     setLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke('send-sms', {
-        body: { phone: `+${phone}` },
-      });
-
-      if (error) {
-        console.error("Error sending OTP:", error);
+      if (devMode) {
+        // In dev mode, skip the actual OTP sending
+        console.log("Dev mode: Simulating OTP sent to", phone);
+        setOtpSent(true);
         toast({
-          title: "Error",
-          description: "Failed to send OTP. Please try again.",
-          variant: "destructive",
+          title: "Success",
+          description: "Dev mode: OTP code is 123456",
         });
-        return;
-      }
+      } else {
+        const { data, error } = await supabase.functions.invoke('send-sms', {
+          body: { phone: `+${phone}` },
+        });
 
-      setOtpSent(true);
-      toast({
-        title: "Success",
-        description: "OTP sent to your phone number.",
-      });
+        if (error) {
+          console.error("Error sending OTP:", error);
+          toast({
+            title: "Error",
+            description: "Failed to send OTP. Please try again.",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        setOtpSent(true);
+        toast({
+          title: "Success",
+          description: "OTP sent to your phone number.",
+        });
+      }
     } catch (error) {
       console.error("Error sending OTP:", error);
       toast({
@@ -75,21 +88,10 @@ export default function GeneralLogin() {
 
     setLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke('verify-otp', {
-        body: { phone: `+${phone}`, otp: otp },
-      });
-
-      if (error) {
-        console.error("Error verifying OTP:", error);
-        toast({
-          title: "Error",
-          description: "Failed to verify OTP. Please try again.",
-          variant: "destructive",
-        });
-        return;
-      }
-      
-      if (data?.success) {
+      if (devMode) {
+        // In dev mode, accept any code
+        console.log("Dev mode: Simulating OTP verification for", phone);
+        
         const userProfile = await getUserProfileByPhone(`+${phone}`);
         
         if (userProfile) {
@@ -97,7 +99,7 @@ export default function GeneralLogin() {
           handleOTPSuccess(userProfile);
           toast({
             title: "Success",
-            description: "OTP verified successfully.",
+            description: "Dev mode: OTP verified successfully.",
           });
         } else {
           toast({
@@ -107,11 +109,44 @@ export default function GeneralLogin() {
           });
         }
       } else {
-        toast({
-          title: "Error",
-          description: "Invalid OTP. Please try again.",
-          variant: "destructive",
+        const { data, error } = await supabase.functions.invoke('verify-otp', {
+          body: { phone: `+${phone}`, otp: otp },
         });
+
+        if (error) {
+          console.error("Error verifying OTP:", error);
+          toast({
+            title: "Error",
+            description: "Failed to verify OTP. Please try again.",
+            variant: "destructive",
+          });
+          return;
+        }
+        
+        if (data?.success) {
+          const userProfile = await getUserProfileByPhone(`+${phone}`);
+          
+          if (userProfile) {
+            setLoginUser(userProfile);
+            handleOTPSuccess(userProfile);
+            toast({
+              title: "Success",
+              description: "OTP verified successfully.",
+            });
+          } else {
+            toast({
+              title: "Error",
+              description: "User profile not found.",
+              variant: "destructive",
+            });
+          }
+        } else {
+          toast({
+            title: "Error",
+            description: "Invalid OTP. Please try again.",
+            variant: "destructive",
+          });
+        }
       }
     } catch (error) {
       console.error("Error verifying OTP:", error);
@@ -132,6 +167,16 @@ export default function GeneralLogin() {
     }
     
     navigate("/dashboard");
+  };
+
+  const toggleDevMode = () => {
+    setDevMode(!devMode);
+    toast({
+      title: devMode ? "Developer Mode Disabled" : "Developer Mode Enabled",
+      description: devMode 
+        ? "Normal OTP verification will be used." 
+        : "OTP verification will be bypassed.",
+    });
   };
 
   return (
@@ -167,6 +212,23 @@ export default function GeneralLogin() {
             >
               {loading ? "Sending OTP..." : "Send OTP"}
             </Button>
+            
+            <Separator className="my-4" />
+            
+            <div className="flex items-center justify-between mt-4">
+              <span className="text-sm text-gray-500">Developer Mode</span>
+              <button
+                type="button"
+                onClick={toggleDevMode}
+                className={`px-3 py-1 text-xs rounded-full ${
+                  devMode 
+                    ? "bg-green-500 text-white" 
+                    : "bg-gray-200 text-gray-600"
+                }`}
+              >
+                {devMode ? "Enabled" : "Disabled"}
+              </button>
+            </div>
           </>
         ) : (
           <>
@@ -195,6 +257,12 @@ export default function GeneralLogin() {
             >
               {loading ? "Verifying OTP..." : "Verify OTP"}
             </Button>
+            
+            {devMode && (
+              <p className="text-sm text-center mt-4 text-green-600">
+                Developer mode: Enter any code to log in
+              </p>
+            )}
           </>
         )}
       </div>
