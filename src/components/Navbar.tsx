@@ -1,16 +1,16 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "./Button";
 import { cn } from "../lib/utils";
 import { useTwilioAuthStore } from "../utils/twilio-auth-store";
 import { User, LogOut, LogIn, UserRoundPlus, FileText, Users, Home } from "lucide-react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 export const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { user } = useTwilioAuthStore();
   const location = useLocation();
+  const navigate = useNavigate();
   
   // Check if user is on dashboard or other authenticated pages
   const isAuthenticatedPage = location.pathname === "/dashboard" || 
@@ -32,6 +32,12 @@ export const Navbar = () => {
       window.removeEventListener("scroll", handleScroll);
     };
   }, [scrolled]);
+
+  // Handle redirect to dashboard for admin
+  const handleAdminHomeClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    navigate("/dashboard");
+  };
 
   return (
     <header
@@ -58,6 +64,7 @@ export const Navbar = () => {
               <a 
                 href="/dashboard" 
                 className="text-gray-700 hover:text-health-600 transition-colors duration-300 text-sm font-medium"
+                onClick={handleAdminHomeClick}
               >
                 <span className="flex items-center">
                   <Home size={16} className="mr-1" />
@@ -204,7 +211,11 @@ export const Navbar = () => {
                 <a
                   href="/dashboard"
                   className="text-gray-900 hover:text-health-600 transition-colors duration-300 px-3 py-2 rounded-md text-base font-medium"
-                  onClick={() => setMobileMenuOpen(false)}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setMobileMenuOpen(false);
+                    navigate("/dashboard");
+                  }}
                 >
                   <span className="flex items-center">
                     <Home size={16} className="mr-1" />
