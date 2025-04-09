@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Navbar } from "../components/Navbar";
@@ -8,6 +7,7 @@ import { FileText, Download, Eye, Search, Filter, ArrowUpDown } from "lucide-rea
 import { Button } from "../components/Button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
+import { supabase } from "../utils/supabase";
 import { 
   Table, 
   TableBody, 
@@ -50,69 +50,7 @@ export default function AllReports() {
           return;
         }
         
-        // In a real implementation, we would fetch reports from Supabase here
-        // For now, let's use expanded dummy data
-        const dummyReports: Report[] = [
-          {
-            patientId: "PAT12345",
-            patientName: "John Smith",
-            timestamp: "2023-04-07",
-            fileName: "report-12345.pdf",
-            fileUrl: "#",
-            assessmentId: "A12345"
-          },
-          {
-            patientId: "PAT67890",
-            patientName: "Sarah Johnson",
-            timestamp: "2023-04-06",
-            fileName: "report-67890.pdf",
-            fileUrl: "#",
-            assessmentId: "A67890"
-          },
-          {
-            patientId: "PAT54321",
-            patientName: "Robert Chen",
-            timestamp: "2023-04-05",
-            fileName: "report-54321.pdf",
-            fileUrl: "#",
-            assessmentId: "A54321"
-          },
-          {
-            patientId: "PAT34567",
-            patientName: "Maria Garcia",
-            timestamp: "2023-04-04",
-            fileName: "report-34567.pdf",
-            fileUrl: "#",
-            assessmentId: "A34567"
-          },
-          {
-            patientId: "PAT98765",
-            patientName: "David Wilson",
-            timestamp: "2023-04-03",
-            fileName: "report-98765.pdf",
-            fileUrl: "#",
-            assessmentId: "A98765"
-          },
-          {
-            patientId: "PAT45678",
-            patientName: "Jennifer Lee",
-            timestamp: "2023-04-02",
-            fileName: "report-45678.pdf",
-            fileUrl: "#",
-            assessmentId: "A45678"
-          },
-          {
-            patientId: "PAT87654",
-            patientName: "Michael Brown",
-            timestamp: "2023-04-01",
-            fileName: "report-87654.pdf",
-            fileUrl: "#",
-            assessmentId: "A87654"
-          }
-        ];
-        
-        setReports(dummyReports);
-        setPageLoading(false);
+        await fetchPatientReports();
       } catch (error) {
         console.error("Error checking authentication:", error);
         navigate("/login");
@@ -122,7 +60,73 @@ export default function AllReports() {
     checkAuth();
   }, [user, navigate]);
 
-  // Search and sort functionality
+  const fetchPatientReports = async () => {
+    try {
+      setPageLoading(true);
+      
+      const { data, error } = await supabase
+        .from('patient')
+        .select('Patient_ID, patient_name, report_url, last_modified_tm, assessment_id')
+        .order('last_modified_tm', { ascending: false });
+      
+      if (error) {
+        console.error("Error fetching patient reports:", error);
+        toast.error("Failed to load patient reports");
+        setPageLoading(false);
+        return;
+      }
+      
+      const transformedReports: Report[] = data.map(patient => {
+        let reportUrl = patient.report_url || "";
+        if (reportUrl.includes(',')) {
+          reportUrl = reportUrl.split(',')[0].trim();
+        }
+        
+        const fileName = reportUrl ? reportUrl.split('/').pop() || 'report.pdf' : 'report.pdf';
+        
+        let formattedTimestamp = '';
+        if (patient.last_modified_tm) {
+          try {
+            if (typeof patient.last_modified_tm === 'string') {
+              formattedTimestamp = patient.last_modified_tm;
+            } else {
+              const date = new Date(patient.last_modified_tm);
+              formattedTimestamp = date.toLocaleDateString('en-US', {
+                month: '2-digit',
+                day: '2-digit',
+                year: 'numeric'
+              });
+            }
+          } catch (e) {
+            formattedTimestamp = String(patient.last_modified_tm || '');
+          }
+        }
+        
+        return {
+          patientId: patient.Patient_ID || '',
+          patientName: patient.patient_name || 'Unknown',
+          timestamp: formattedTimestamp,
+          fileName: fileName,
+          fileUrl: reportUrl || '#',
+          assessmentId: patient.assessment_id || undefined
+        };
+      });
+      
+      setReports(transformedReports);
+      setPageLoading(false);
+      
+      if (transformedReports.length === 0) {
+        toast.info("No patient reports found in the database");
+      } else {
+        toast.success(`Loaded ${transformedReports.length} patient reports`);
+      }
+    } catch (error) {
+      console.error("Error in fetchPatientReports:", error);
+      toast.error("An error occurred while loading reports");
+      setPageLoading(false);
+    }
+  };
+
   const filteredReports = reports
     .filter(report => 
       report.patientId.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -150,6 +154,10 @@ export default function AllReports() {
     }
   };
 
+  const handleRefresh = () => {
+    fetchPatientReports();
+  };
+
   if (pageLoading || isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -166,13 +174,17 @@ export default function AllReports() {
   };
 
   const handleDownloadReport = (fileUrl: string, fileName: string) => {
-    // In a real implementation, this would download the report
-    toast.info(`Downloading ${fileName}...`);
-    
-    // Simulate download success
-    setTimeout(() => {
-      toast.success(`Download complete: ${fileName}`);
-    }, 1500);
+    if (fileUrl && fileUrl !== '#') {
+      const link = document.createElement('a');
+      link.href = fileUrl;
+      link.download = fileName || 'patient-report.pdf';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      toast.success(`Downloading ${fileName}`);
+    } else {
+      toast.error("No report file available to download");
+    }
   };
 
   return (
@@ -183,24 +195,31 @@ export default function AllReports() {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-7xl mx-auto">
             <div className="bg-white rounded-lg shadow-md overflow-hidden">
-              {/* Header Section */}
               <div className="bg-gradient-to-r from-orange-500 to-orange-600 p-6">
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                   <h1 className="text-2xl font-bold text-white flex items-center">
                     <FileText className="h-6 w-6 mr-2 text-white" />
                     All Patient Reports
                   </h1>
-                  <Button 
-                    variant="secondary"
-                    onClick={() => navigate('/dashboard')}
-                    className="bg-white text-orange-600 hover:bg-orange-50"
-                  >
-                    Back to Dashboard
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button 
+                      variant="secondary"
+                      onClick={handleRefresh}
+                      className="bg-white text-orange-600 hover:bg-orange-50"
+                    >
+                      Refresh
+                    </Button>
+                    <Button 
+                      variant="secondary"
+                      onClick={() => navigate('/dashboard')}
+                      className="bg-white text-orange-600 hover:bg-orange-50"
+                    >
+                      Back to Dashboard
+                    </Button>
+                  </div>
                 </div>
               </div>
 
-              {/* Search and Filter Section */}
               <div className="p-6 border-b border-gray-200 bg-gray-50">
                 <div className="flex flex-col md:flex-row gap-4">
                   <div className="relative flex-grow">
@@ -233,7 +252,6 @@ export default function AllReports() {
                 </div>
               </div>
 
-              {/* Reports Table */}
               <div className="p-6">
                 {filteredReports.length > 0 ? (
                   <div className="overflow-x-auto">
@@ -299,6 +317,7 @@ export default function AllReports() {
                                   variant="health"
                                   size="sm"
                                   onClick={() => handleDownloadReport(report.fileUrl, report.fileName)}
+                                  disabled={!report.fileUrl || report.fileUrl === '#'}
                                 >
                                   <Download className="h-4 w-4 mr-1" />
                                   Download
