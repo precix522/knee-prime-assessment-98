@@ -26,7 +26,7 @@ export const getPatientReport = async (patientId: string) => {
     // Fetch all reports for this patient ID from the 'patient' table
     const { data: patientData, error: patientError } = await supabase
       .from('patient')
-      .select('report_url, last_modified_tm, assessment_id')
+      .select('report_url, patient_xray_report_url, patient_mri_report_url, last_modified_tm, assessment_id')
       .eq('Patient_ID', patientId)
       .order('last_modified_tm', { ascending: false });
     
@@ -84,7 +84,9 @@ export const getPatientReport = async (patientId: string) => {
           fileUrl: reportUrl, 
           fileName,
           timestamp: formattedTimestamp,
-          assessmentId: record.assessment_id
+          assessmentId: record.assessment_id,
+          xrayReportUrl: record.patient_xray_report_url,
+          mriReportUrl: record.patient_mri_report_url
         };
       })
       .filter(Boolean);
@@ -99,7 +101,9 @@ export const getPatientReport = async (patientId: string) => {
     return { 
       allReports: patientReports,
       fileUrl: patientReports[0].fileUrl, 
-      fileName: patientReports[0].fileName 
+      fileName: patientReports[0].fileName,
+      xrayReportUrl: patientReports[0].xrayReportUrl,
+      mriReportUrl: patientReports[0].mriReportUrl
     };
   } catch (error) {
     console.error('Error fetching patient report:', error);

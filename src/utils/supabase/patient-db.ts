@@ -26,6 +26,8 @@ export const createPatientRecord = async (patientData: {
   patientName: string;
   phoneNumber: string;
   reportUrl: string | null;
+  xrayReportUrl?: string | null;
+  mriReportUrl?: string | null;
   lastModifiedTime?: string;
 }) => {
   try {
@@ -59,6 +61,8 @@ export const createPatientRecord = async (patientData: {
       patient_name: patientData.patientName,
       phone: patientData.phoneNumber,
       report_url: patientData.reportUrl,
+      patient_xray_report_url: patientData.xrayReportUrl || null,
+      patient_mri_report_url: patientData.mriReportUrl || null,
       last_modified_tm: formattedDate
     };
     

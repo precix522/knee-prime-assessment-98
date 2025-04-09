@@ -2,7 +2,7 @@
 import { supabase } from './client';
 
 // Function to upload patient document to Supabase storage
-export const uploadPatientDocument = async (file: File, patientId: string, documentType: 'main' | 'annex') => {
+export const uploadPatientDocument = async (file: File, patientId: string, documentType: 'main' | 'annex' | 'xray' | 'mri') => {
   try {
     if (!file) {
       throw new Error('No file provided');
