@@ -18,6 +18,17 @@ import {
 import { toast } from "sonner";
 import { supabase } from "../utils/supabase";
 import { getPatientReport } from "../utils/supabase";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+
+// Interface for patient data from Supabase
+interface PatientData {
+  id: string;
+  Patient_ID: string;
+  patient_name: string;
+  phone: string;
+  report_url?: string;
+  last_modified_tm?: string;
+}
 
 export default function Dashboard() {
   const { user, logout, isLoading } = useTwilioAuthStore();
@@ -25,8 +36,9 @@ export default function Dashboard() {
   const [downloadLoading, setDownloadLoading] = useState(false);
   const [downloadError, setDownloadError] = useState("");
   const [patientId, setPatientId] = useState<string | null>(null);
-  const [recentReports, setRecentReports] = useState<any[]>([]);
-  const [recentPatients, setRecentPatients] = useState<any[]>([]);
+  const [recentReports, setRecentReports] = useState<PatientData[]>([]);
+  const [recentPatients, setRecentPatients] = useState<PatientData[]>([]);
+  const [tableLoading, setTableLoading] = useState(false);
   const navigate = useNavigate();
   
   // Check if user is an admin
@@ -60,26 +72,54 @@ export default function Dashboard() {
       if (!user?.phone) return;
       
       try {
-        // For admin users, we fetch recent reports and patients instead of a specific patient ID
+        // For admin users, we fetch recent reports and patients from Supabase
         if (isAdmin) {
           try {
-            // Fetch recent reports (dummy data for now, would be replaced with actual Supabase query)
-            setRecentReports([
-              { id: 1, patientId: "PAT12345", name: "John Smith", date: "2023-04-05", status: "completed" },
-              { id: 2, patientId: "PAT67890", name: "Sarah Johnson", date: "2023-04-04", status: "completed" },
-              { id: 3, patientId: "PAT54321", name: "Robert Chen", date: "2023-04-03", status: "completed" },
-              { id: 4, patientId: "PAT34567", name: "Maria Garcia", date: "2023-04-02", status: "completed" },
-            ]);
+            setTableLoading(true);
             
-            // Fetch recent patients (dummy data for now)
-            setRecentPatients([
-              { id: 1, patientId: "PAT12345", name: "John Smith", phone: "+1234567890", reportCount: 3 },
-              { id: 2, patientId: "PAT67890", name: "Sarah Johnson", phone: "+2345678901", reportCount: 2 },
-              { id: 3, patientId: "PAT54321", name: "Robert Chen", phone: "+3456789012", reportCount: 1 },
-              { id: 4, patientId: "PAT34567", name: "Maria Garcia", phone: "+4567890123", reportCount: 4 },
-            ]);
+            // Fetch recent reports (ordered by last_modified_tm)
+            const { data: reportData, error: reportError } = await supabase
+              .from('patient')
+              .select('*')
+              .order('last_modified_tm', { ascending: false })
+              .limit(10);
+              
+            if (reportError) {
+              console.error("Error fetching recent reports:", reportError);
+              toast.error("Failed to load recent reports");
+            } else if (reportData) {
+              setRecentReports(reportData);
+            }
+            
+            // Fetch recent patients (showing unique patients ordered by last_modified_tm)
+            const { data: patientData, error: patientError } = await supabase
+              .from('patient')
+              .select('*')
+              .order('last_modified_tm', { ascending: false })
+              .limit(10);
+              
+            if (patientError) {
+              console.error("Error fetching recent patients:", patientError);
+              toast.error("Failed to load recent patients");
+            } else if (patientData) {
+              // Create a Map to store unique patients by Patient_ID
+              const uniquePatients = new Map();
+              
+              patientData.forEach(patient => {
+                if (!uniquePatients.has(patient.Patient_ID)) {
+                  uniquePatients.set(patient.Patient_ID, patient);
+                }
+              });
+              
+              // Convert Map values to array and set state
+              setRecentPatients(Array.from(uniquePatients.values()));
+            }
+            
           } catch (error) {
             console.error("Error fetching admin dashboard data:", error);
+            toast.error("Failed to load dashboard data");
+          } finally {
+            setTableLoading(false);
           }
           return;
         }
@@ -131,6 +171,37 @@ export default function Dashboard() {
       fetchPatientData();
     }
   }, [user, isAdmin]);
+
+  // Format date for display
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return "N/A";
+    
+    try {
+      // Check if dateString is already in MM/DD/YYYY, hh:mm:ss AM/PM format
+      if (dateString.includes('/') && (dateString.includes('AM') || dateString.includes('PM'))) {
+        return dateString;
+      }
+      
+      const date = new Date(dateString);
+      return date.toLocaleDateString('en-US', {
+        month: '2-digit',
+        day: '2-digit',
+        year: 'numeric',
+      }) + ' ' + date.toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true
+      });
+    } catch (error) {
+      console.error("Error formatting date:", error);
+      return dateString;
+    }
+  };
+
+  // Count reports for a patient
+  const getReportCount = (patientId: string) => {
+    return recentReports.filter(report => report.Patient_ID === patientId).length;
+  };
 
   const handleDownloadReport = async () => {
     if (!patientId && !isAdmin) {
@@ -345,60 +416,58 @@ export default function Dashboard() {
                       </div>
                     </div>
                     
-                    <div className="overflow-x-auto">
-                      <table className="min-w-full divide-y divide-gray-200">
-                        <thead className="bg-gray-50">
-                          <tr>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              Patient ID
-                            </th>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              Name
-                            </th>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              Date
-                            </th>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              Status
-                            </th>
-                            <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              Actions
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody className="bg-white divide-y divide-gray-200">
-                          {recentReports.map((report) => (
-                            <tr key={report.id} className="hover:bg-gray-50">
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="text-sm font-medium text-gray-900">{report.patientId}</div>
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="text-sm text-gray-900">{report.name}</div>
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="text-sm text-gray-500">{report.date}</div>
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                  {report.status}
-                                </span>
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => handleViewSpecificReport(report.patientId)}
-                                  className="mr-2"
-                                >
-                                  <FileText className="h-4 w-4 mr-1" />
-                                  View
-                                </Button>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
+                    {tableLoading ? (
+                      <div className="flex justify-center py-8">
+                        <div className="w-8 h-8 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+                      </div>
+                    ) : (
+                      <div className="overflow-x-auto">
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead>Patient ID</TableHead>
+                              <TableHead>Name</TableHead>
+                              <TableHead>Date</TableHead>
+                              <TableHead>Status</TableHead>
+                              <TableHead className="text-right">Actions</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {recentReports.length === 0 ? (
+                              <TableRow>
+                                <TableCell colSpan={5} className="text-center py-4 text-gray-500">
+                                  No reports found
+                                </TableCell>
+                              </TableRow>
+                            ) : (
+                              recentReports.map((report, index) => (
+                                <TableRow key={index} className="hover:bg-gray-50">
+                                  <TableCell className="font-medium">{report.Patient_ID}</TableCell>
+                                  <TableCell>{report.patient_name || 'N/A'}</TableCell>
+                                  <TableCell>{formatDate(report.last_modified_tm)}</TableCell>
+                                  <TableCell>
+                                    <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                      {report.report_url ? 'completed' : 'pending'}
+                                    </span>
+                                  </TableCell>
+                                  <TableCell className="text-right">
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => handleViewSpecificReport(report.Patient_ID)}
+                                      disabled={!report.report_url}
+                                    >
+                                      <FileText className="h-4 w-4 mr-1" />
+                                      View
+                                    </Button>
+                                  </TableCell>
+                                </TableRow>
+                              ))
+                            )}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    )}
                     
                     <div className="mt-6 text-center">
                       <Button
@@ -418,58 +487,53 @@ export default function Dashboard() {
                       <h2 className="text-xl font-bold text-gray-900">Recent Patients</h2>
                     </div>
                     
-                    <div className="overflow-x-auto">
-                      <table className="min-w-full divide-y divide-gray-200">
-                        <thead className="bg-gray-50">
-                          <tr>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              Patient ID
-                            </th>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              Name
-                            </th>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              Phone
-                            </th>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              Reports
-                            </th>
-                            <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              Actions
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody className="bg-white divide-y divide-gray-200">
-                          {recentPatients.map((patient) => (
-                            <tr key={patient.id} className="hover:bg-gray-50">
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="text-sm font-medium text-gray-900">{patient.patientId}</div>
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="text-sm text-gray-900">{patient.name}</div>
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="text-sm text-gray-500">{patient.phone}</div>
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="text-sm text-gray-500">{patient.reportCount}</div>
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => handleViewSpecificReport(patient.patientId)}
-                                  className="mr-2"
-                                >
-                                  <FileText className="h-4 w-4 mr-1" />
-                                  Reports
-                                </Button>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
+                    {tableLoading ? (
+                      <div className="flex justify-center py-8">
+                        <div className="w-8 h-8 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+                      </div>
+                    ) : (
+                      <div className="overflow-x-auto">
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead>Patient ID</TableHead>
+                              <TableHead>Name</TableHead>
+                              <TableHead>Phone</TableHead>
+                              <TableHead>Last Modified</TableHead>
+                              <TableHead className="text-right">Actions</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {recentPatients.length === 0 ? (
+                              <TableRow>
+                                <TableCell colSpan={5} className="text-center py-4 text-gray-500">
+                                  No patients found
+                                </TableCell>
+                              </TableRow>
+                            ) : (
+                              recentPatients.map((patient, index) => (
+                                <TableRow key={index} className="hover:bg-gray-50">
+                                  <TableCell className="font-medium">{patient.Patient_ID}</TableCell>
+                                  <TableCell>{patient.patient_name || 'N/A'}</TableCell>
+                                  <TableCell>{patient.phone || 'N/A'}</TableCell>
+                                  <TableCell>{formatDate(patient.last_modified_tm)}</TableCell>
+                                  <TableCell className="text-right">
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => handleViewSpecificReport(patient.Patient_ID)}
+                                    >
+                                      <FileText className="h-4 w-4 mr-1" />
+                                      Reports
+                                    </Button>
+                                  </TableCell>
+                                </TableRow>
+                              ))
+                            )}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    )}
                     
                     <div className="mt-6 text-center">
                       <Button
