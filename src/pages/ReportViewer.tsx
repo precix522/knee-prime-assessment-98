@@ -1,10 +1,11 @@
+
 import React, { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useTwilioAuthStore } from "../utils/twilio-auth-store";
 import { Button } from "../components/Button";
 import { getPatientReport, getAnnexReport, getSupportingDocument } from "../utils/supabase";
 import { toast } from "sonner";
-import { CalendarDays, FileText, BookOpen, Clock } from "lucide-react";
+import { CalendarDays, FileText, BookOpen, Clock, Upload } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "../components/ui/tabs";
 import { 
   Table, 
@@ -16,6 +17,7 @@ import {
   TableRow 
 } from "../components/ui/table";
 import Navbar from "../components/Navbar";
+import PatientDetailsForm from "../components/PatientDetailsForm";
 
 type PatientReport = {
   fileUrl: string;
@@ -40,64 +42,67 @@ export default function ReportViewer() {
   const [reportHistory, setReportHistory] = useState<PatientReport[]>([]);
   const [selectedReportIndex, setSelectedReportIndex] = useState(0);
   
-  const { validateSession } = useTwilioAuthStore();
+  const { validateSession, user } = useTwilioAuthStore();
+  
+  const fetchReports = async () => {
+    try {
+      const isValid = await validateSession();
+      if (!isValid) {
+        toast.error("Session expired. Please log in again.");
+        navigate("/login");
+        return;
+      }
+      
+      // If no patientId in URL and user is patient, get their ID
+      const currentPatientId = patientId || (user?.profile_type === 'patient' ? user?.id : null);
+      
+      if (!currentPatientId) {
+        toast.error("No patient ID provided");
+        navigate("/patient-id");
+        return;
+      }
+      
+      console.log("Fetching reports for patient ID:", currentPatientId);
+      
+      const { fileUrl, fileName, allReports } = await getPatientReport(currentPatientId);
+      
+      // Set the report history
+      if (allReports && allReports.length > 0) {
+        setReportHistory(allReports);
+      }
+      
+      setReportUrl(fileUrl);
+      setReportName(fileName);
+      
+      try {
+        const annexData = await getAnnexReport(currentPatientId);
+        setAnnexReportUrl(annexData.fileUrl);
+        setAnnexReportName(annexData.fileName);
+      } catch (annexErr: any) {
+        console.error("Error fetching annex report:", annexErr);
+        toast.error("Failed to load the annex report");
+      }
+      
+      try {
+        const supportingDocData = await getSupportingDocument();
+        setSupportingDocUrl(supportingDocData.fileUrl);
+        setSupportingDocName(supportingDocData.fileName);
+      } catch (docErr: any) {
+        console.error("Error fetching supporting document:", docErr);
+        toast.error("Failed to load the supporting document");
+      }
+      
+      setIsLoading(false);
+      toast.success("Reports loaded successfully");
+    } catch (err: any) {
+      console.error("Error fetching patient report:", err);
+      setError(err.message || "Failed to load the report");
+      toast.error("Failed to load the report");
+      setIsLoading(false);
+    }
+  };
   
   useEffect(() => {
-    const fetchReports = async () => {
-      try {
-        const isValid = await validateSession();
-        if (!isValid) {
-          toast.error("Session expired. Please log in again.");
-          navigate("/login");
-          return;
-        }
-        
-        if (!patientId) {
-          toast.error("No patient ID provided");
-          navigate("/patient-id");
-          return;
-        }
-        
-        console.log("Fetching reports for patient ID:", patientId);
-        
-        const { fileUrl, fileName, allReports } = await getPatientReport(patientId);
-        
-        // Set the report history
-        if (allReports && allReports.length > 0) {
-          setReportHistory(allReports);
-        }
-        
-        setReportUrl(fileUrl);
-        setReportName(fileName);
-        
-        try {
-          const annexData = await getAnnexReport(patientId);
-          setAnnexReportUrl(annexData.fileUrl);
-          setAnnexReportName(annexData.fileName);
-        } catch (annexErr: any) {
-          console.error("Error fetching annex report:", annexErr);
-          toast.error("Failed to load the annex report");
-        }
-        
-        try {
-          const supportingDocData = await getSupportingDocument();
-          setSupportingDocUrl(supportingDocData.fileUrl);
-          setSupportingDocName(supportingDocData.fileName);
-        } catch (docErr: any) {
-          console.error("Error fetching supporting document:", docErr);
-          toast.error("Failed to load the supporting document");
-        }
-        
-        setIsLoading(false);
-        toast.success("Reports loaded successfully");
-      } catch (err: any) {
-        console.error("Error fetching patient report:", err);
-        setError(err.message || "Failed to load the report");
-        toast.error("Failed to load the report");
-        setIsLoading(false);
-      }
-    };
-    
     fetchReports();
   }, [navigate, validateSession, patientId]);
   
@@ -159,7 +164,7 @@ export default function ReportViewer() {
                 <span className="bg-orange-600 text-white px-2 py-0.5 rounded">PRIME</span>
               </div>
               <p className="text-gray-700 font-medium">
-                Patient ID: {patientId}
+                Patient ID: {patientId || (user?.id)}
               </p>
             </div>
 
@@ -191,6 +196,13 @@ export default function ReportViewer() {
                 >
                   <BookOpen className="mr-2 h-5 w-5" />
                   <span>View Annex Report</span>
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="upload" 
+                  className="justify-start w-full mb-1 data-[state=active]:bg-orange-100 data-[state=active]:text-orange-700"
+                >
+                  <Upload className="mr-2 h-5 w-5" />
+                  <span>Upload Images</span>
                 </TabsTrigger>
                 <TabsTrigger 
                   value="appointment" 
@@ -287,7 +299,7 @@ export default function ReportViewer() {
                 {reportHistory && reportHistory.length > 0 ? (
                   <div className="flex flex-col">
                     <Table>
-                      <TableCaption>List of all reports for patient {patientId}</TableCaption>
+                      <TableCaption>List of all reports for patient {patientId || user?.id}</TableCaption>
                       <TableHeader>
                         <TableRow>
                           <TableHead>Report Date</TableHead>
@@ -376,6 +388,11 @@ export default function ReportViewer() {
                     </p>
                   </div>
                 )}
+              </TabsContent>
+              
+              <TabsContent value="upload" className="mt-0">
+                <h1 className="text-2xl font-bold text-gray-900 mb-4">Upload Medical Images</h1>
+                <PatientDetailsForm onSuccess={() => fetchReports()} />
               </TabsContent>
               
               <TabsContent value="appointment" className="mt-0">

@@ -40,7 +40,8 @@ export function AuthInitializer() {
             navigate('/dashboard');
           } else if (user.profile_type === 'patient') {
             toast.success(`Welcome back, patient!`);
-            navigate('/dashboard');
+            // Redirect patients directly to report-viewer instead of dashboard
+            navigate('/report-viewer');
           } else {
             toast.success('Welcome back!');
             navigate('/dashboard');
