@@ -27,19 +27,9 @@ export default function Index() {
               </p>
               
               {/* Action Buttons */}
-              <div className="flex flex-col sm:flex-row justify-center gap-4 mt-8">
+              <div className="flex flex-col sm:flex-row justify-center gap-4 mt-8">                
                 <Button
-                  variant="default"
-                  size="lg"
-                  onClick={() => navigate("/login")}
-                  className="px-8 py-3 text-lg"
-                >
-                  <User className="mr-2 h-5 w-5" />
-                  Patient Login
-                </Button>
-                
-                <Button
-                  variant="secondary"
+                  variant="health"
                   size="lg"
                   onClick={() => navigate("/patient-id")}
                   className="px-8 py-3 text-lg"
@@ -55,7 +45,7 @@ export default function Index() {
                   className="px-8 py-3 text-lg"
                 >
                   <UserRoundPlus className="mr-2 h-5 w-5" />
-                  Sign Up
+                  Admin Login
                 </Button>
               </div>
               
