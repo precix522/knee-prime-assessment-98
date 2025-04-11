@@ -14,8 +14,6 @@ interface PatientRecord {
   patientId: string;
   phoneNumber: string;
   reportFiles: FileList | null;
-  xrayFiles: FileList | null;
-  mriFiles: FileList | null;
 }
 
 export default function PatientRecordForm() {
@@ -24,8 +22,6 @@ export default function PatientRecordForm() {
     patientId: "",
     phoneNumber: "",
     reportFiles: null,
-    xrayFiles: null,
-    mriFiles: null,
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -36,10 +32,6 @@ export default function PatientRecordForm() {
     
     if (name === "reportFiles" && files) {
       setFormData({ ...formData, reportFiles: files });
-    } else if (name === "xrayFiles" && files) {
-      setFormData({ ...formData, xrayFiles: files });
-    } else if (name === "mriFiles" && files) {
-      setFormData({ ...formData, mriFiles: files });
     } else {
       setFormData({ ...formData, [name]: value });
     }
@@ -77,42 +69,21 @@ export default function PatientRecordForm() {
   
   const uploadFiles = async () => {
     try {
-      setUploadProgress(10);
+      setUploadProgress(20);
       const uniqueTimestamp = Date.now();
       const patientId = formData.patientId;
       let reportUrl = null;
-      let xrayUrl = null;
-      let mriUrl = null;
       
       // Upload main report file
       if (formData.reportFiles && formData.reportFiles.length > 0) {
         const file = formData.reportFiles[0];
-        setUploadProgress(20);
+        setUploadProgress(50);
         console.log('Uploading main report file...');
         reportUrl = await uploadPatientDocument(file, patientId, 'main');
-        setUploadProgress(40);
+        setUploadProgress(100);
       }
       
-      // Upload X-ray file if provided
-      if (formData.xrayFiles && formData.xrayFiles.length > 0) {
-        const file = formData.xrayFiles[0];
-        setUploadProgress(60);
-        console.log('Uploading X-ray file...');
-        xrayUrl = await uploadPatientDocument(file, patientId, 'xray');
-        setUploadProgress(70);
-      }
-      
-      // Upload MRI file if provided
-      if (formData.mriFiles && formData.mriFiles.length > 0) {
-        const file = formData.mriFiles[0];
-        setUploadProgress(80);
-        console.log('Uploading MRI file...');
-        mriUrl = await uploadPatientDocument(file, patientId, 'mri');
-        setUploadProgress(90);
-      }
-      
-      setUploadProgress(100);
-      return { reportUrl, xrayUrl, mriUrl };
+      return { reportUrl };
     } catch (error: any) {
       console.error("File upload error:", error);
       throw new Error(`File upload failed: ${error.message}`);
@@ -134,8 +105,8 @@ export default function PatientRecordForm() {
     
     try {
       // Step 1: Upload files and get the URLs
-      const { reportUrl, xrayUrl, mriUrl } = await uploadFiles();
-      console.log('Report URLs after upload:', { reportUrl, xrayUrl, mriUrl });
+      const { reportUrl } = await uploadFiles();
+      console.log('Report URL after upload:', reportUrl);
       
       // Step 2: Get current date and time in format MM/DD/YYYY, hh:mm:ss AM/PM
       const now = new Date();
@@ -158,8 +129,6 @@ export default function PatientRecordForm() {
         patientName: formData.patientName,
         phoneNumber: formData.phoneNumber,
         reportUrl: reportUrl,
-        xrayReportUrl: xrayUrl,
-        mriReportUrl: mriUrl,
         lastModifiedTime: formattedDateTime
       };
       
@@ -175,18 +144,13 @@ export default function PatientRecordForm() {
         patientId: "",
         phoneNumber: "",
         reportFiles: null,
-        xrayFiles: null,
-        mriFiles: null
       });
       
-      // Reset file inputs
-      const fileInputs = ['reportFiles', 'xrayFiles', 'mriFiles'];
-      fileInputs.forEach(inputId => {
-        const fileInput = document.getElementById(inputId) as HTMLInputElement;
-        if (fileInput) {
-          fileInput.value = '';
-        }
-      });
+      // Reset file input
+      const fileInput = document.getElementById('reportFiles') as HTMLInputElement;
+      if (fileInput) {
+        fileInput.value = '';
+      }
       
     } catch (err: any) {
       console.error("Error creating patient record:", err);
@@ -263,38 +227,6 @@ export default function PatientRecordForm() {
             />
             <p className="text-xs text-gray-500 mt-1">
               Upload main patient report (required)
-            </p>
-          </div>
-          
-          <div>
-            <Label htmlFor="xrayFiles">X-ray Report (PDF)</Label>
-            <Input 
-              id="xrayFiles" 
-              name="xrayFiles"
-              type="file"
-              onChange={handleInputChange}
-              accept=".pdf"
-              disabled={isLoading}
-              className="cursor-pointer"
-            />
-            <p className="text-xs text-gray-500 mt-1">
-              Upload patient X-ray report (optional)
-            </p>
-          </div>
-          
-          <div>
-            <Label htmlFor="mriFiles">MRI Report (PDF)</Label>
-            <Input 
-              id="mriFiles" 
-              name="mriFiles"
-              type="file"
-              onChange={handleInputChange}
-              accept=".pdf"
-              disabled={isLoading}
-              className="cursor-pointer"
-            />
-            <p className="text-xs text-gray-500 mt-1">
-              Upload patient MRI report (optional)
             </p>
           </div>
           
