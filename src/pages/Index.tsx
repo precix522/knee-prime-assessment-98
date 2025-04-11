@@ -112,11 +112,14 @@ export default function Index() {
                   </div>
                 </div>
                 <div className="flex items-center justify-center">
-                  <div className="rounded-lg overflow-hidden shadow-lg w-full max-w-md h-64 bg-gray-200">
+                  <div className="rounded-lg overflow-hidden shadow-lg w-full max-w-md h-auto bg-gray-200">
                     <img 
-                      src="/placeholder.svg" 
+                      src="/knee-health-assessment.jpg" 
                       alt="Knee health assessment" 
                       className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.currentTarget.src = "/placeholder.svg";
+                      }}
                     />
                   </div>
                 </div>
