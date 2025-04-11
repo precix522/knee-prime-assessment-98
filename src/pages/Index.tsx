@@ -93,8 +93,14 @@ export default function Index() {
                   <p className="text-lg text-gray-700 mb-6">
                     Gator Prime is an innovative knee health assessment and monitoring system designed to help patients maintain optimal joint health and mobility.
                   </p>
-                  <p className="text-lg text-gray-700">
+                  <p className="text-lg text-gray-700 mb-6">
+                    Our comprehensive platform uses advanced measurement techniques and expert analysis to evaluate your knee condition and provide personalized recommendations.
+                  </p>
+                  <p className="text-lg text-gray-700 mb-6">
                     Developed by a team of orthopedic specialists and health technology experts, our system provides personalized evaluations, recommendations, and progress tracking to ensure you receive the best care for your knee health.
+                  </p>
+                  <p className="text-lg text-gray-700">
+                    Whether you're recovering from an injury, managing a chronic condition, or simply aiming to maintain healthy knees, Gator Prime offers the tools and insights you need for long-term joint health.
                   </p>
                   <div className="mt-8">
                     <Button
