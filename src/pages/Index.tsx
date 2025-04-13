@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Navbar } from "../components/Navbar";
@@ -50,14 +49,6 @@ export default function Index() {
               </div>
               
               <div className="flex justify-center mt-4">
-                <Button
-                  variant="link"
-                  onClick={() => navigate("/general-login")}
-                  className="text-primary"
-                >
-                  <Users className="mr-2 h-4 w-4" />
-                  Admin Login
-                </Button>
                 <Button
                   variant="link"
                   onClick={() => document.getElementById('about-section')?.scrollIntoView({ behavior: 'smooth' })}

@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useTwilioAuthStore } from "../utils/twilio-auth-store";
@@ -53,7 +52,6 @@ export default function ReportViewer() {
         return;
       }
       
-      // If no patientId in URL and user is patient, get their ID
       const currentPatientId = patientId || (user?.profile_type === 'patient' ? user?.id : null);
       
       if (!currentPatientId) {
@@ -66,7 +64,6 @@ export default function ReportViewer() {
       
       const { fileUrl, fileName, allReports } = await getPatientReport(currentPatientId);
       
-      // Set the report history
       if (allReports && allReports.length > 0) {
         setReportHistory(allReports);
       }
@@ -202,7 +199,7 @@ export default function ReportViewer() {
                   className="justify-start w-full mb-1 data-[state=active]:bg-orange-100 data-[state=active]:text-orange-700"
                 >
                   <Upload className="mr-2 h-5 w-5" />
-                  <span>Upload Images</span>
+                  <span>Upload Your Documents</span>
                 </TabsTrigger>
                 <TabsTrigger 
                   value="appointment" 
@@ -391,7 +388,7 @@ export default function ReportViewer() {
               </TabsContent>
               
               <TabsContent value="upload" className="mt-0">
-                <h1 className="text-2xl font-bold text-gray-900 mb-4">Upload Medical Images</h1>
+                <h1 className="text-2xl font-bold text-gray-900 mb-4">Upload Your Documents</h1>
                 <PatientDetailsForm onSuccess={() => fetchReports()} />
               </TabsContent>
               
