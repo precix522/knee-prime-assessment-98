@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Navbar } from "../components/Navbar";
@@ -14,8 +15,20 @@ export default function Index() {
       <Navbar />
       
       <main className="flex-grow">
-        {/* Hero Section */}
-        <section className="text-center py-16 bg-gradient-to-b from-white to-gray-50">
+        {/* Hero Section with Admin Login in corner */}
+        <section className="text-center py-16 bg-gradient-to-b from-white to-gray-50 relative">
+          <div className="absolute top-4 right-4 z-10">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate("/manage-patients")}
+              className="px-4 py-2"
+            >
+              <UserRoundPlus className="mr-2 h-4 w-4" />
+              Admin Login
+            </Button>
+          </div>
+
           <div className="container mx-auto px-4">
             <div className="max-w-6xl mx-auto space-y-6">
               <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-gray-900">
@@ -25,8 +38,8 @@ export default function Index() {
                 Your personalized knee health assessment and monitoring system
               </p>
               
-              {/* Action Buttons */}
-              <div className="flex flex-col sm:flex-row justify-center gap-4 mt-8">                
+              {/* Single Main Action Button */}
+              <div className="flex justify-center mt-8">                
                 <Button
                   variant="health"
                   size="lg"
@@ -35,16 +48,6 @@ export default function Index() {
                 >
                   <FileText className="mr-2 h-5 w-5" />
                   Access Your Report
-                </Button>
-                
-                <Button
-                  variant="outline"
-                  size="lg"
-                  onClick={() => navigate("/manage-patients")}
-                  className="px-8 py-3 text-lg"
-                >
-                  <UserRoundPlus className="mr-2 h-5 w-5" />
-                  Admin Login
                 </Button>
               </div>
               
