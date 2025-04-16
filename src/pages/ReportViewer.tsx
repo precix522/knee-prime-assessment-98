@@ -359,16 +359,16 @@ export default function ReportViewer() {
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Navbar />
-      <div className="flex-1 p-6 md:px-12 md:py-12">
+      <div className="flex-1 p-8 md:px-16 md:py-14">
         <SidebarProvider defaultOpen={true}>
           <div className="flex min-h-[calc(100vh-4rem)] w-full max-w-7xl mx-auto relative">
-            <Sidebar className="border-r bg-white" style={{ width: "280px", minWidth: "280px" }}>
-              <SidebarContent className="py-8">
-                <div className="text-center mb-22 px-6 space-y-8">
+            <Sidebar className="border-r bg-white" style={{ width: "300px", minWidth: "300px" }}>
+              <SidebarContent className="py-10">
+                <div className="text-center mb-24 px-8 space-y-10">
                   <div className="flex items-center justify-center">
                     <div className="flex items-center">
                       <span className="font-bold text-2xl text-orange-600">GATOR</span>
-                      <span className="bg-orange-600 text-white px-3 py-1 rounded text-xl font-bold ml-2">PRIME</span>
+                      <span className="bg-orange-600 text-white px-4 py-2 rounded text-xl font-bold ml-4">PRIME</span>
                     </div>
                   </div>
                   <p className="text-gray-700 font-medium text-sm mt-4">
