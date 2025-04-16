@@ -184,18 +184,18 @@ export default function ReportViewer() {
                   value="history" 
                   className="justify-start w-full mb-1 data-[state=active]:bg-orange-100 data-[state=active]:text-orange-700"
                 >
-                  <Clock className="mr-2 h-5 w-5" />
-                  <span>Report History</span>
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="annex" 
-                  className="justify-start w-full mb-1 data-[state=active]:bg-orange-100 data-[state=active]:text-orange-700"
-                >
-                  <BookOpen className="mr-2 h-5 w-5" />
-                  <span>View Annex Report</span>
+                 <BookOpen className="mr-2 h-5 w-5" />
+                  <span>View Annex </span>
                 </TabsTrigger>
                 <TabsTrigger 
                   value="upload" 
+                  className="justify-start w-full mb-1 data-[state=active]:bg-orange-100 data-[state=active]:text-orange-700"
+                >
+                  <Clock className="mr-2 h-5 w-5" />
+                  <span>View Report History</span>
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="annex" 
                   className="justify-start w-full mb-1 data-[state=active]:bg-orange-100 data-[state=active]:text-orange-700"
                 >
                   <Upload className="mr-2 h-5 w-5" />
@@ -227,6 +227,12 @@ export default function ReportViewer() {
               >
                 Go to Dashboard
               </Button>
+            </div>
+            <div>
+            <p className="text-center text-sm mt-2"> Contact
+            <p>2 College Road #02-00, Singapore 169850</p>
+            <p>info@precix.io</p>
+            </p>
             </div>
           </div>
 
