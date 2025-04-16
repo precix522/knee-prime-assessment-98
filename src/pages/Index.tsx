@@ -86,15 +86,15 @@ export default function Index() {
                 </div>
               </div>
               
-              <div className="bg-health-500 rounded-lg">
-                <h2 className="text-3xl font-bold text-center pt-6 mb-4 text-white">
+              <div className="bg-health-100 rounded-lg">
+                <h2 className="text-3xl font-bold text-center pt-6 mb-4 text-gray-900">
                   Our Vision
                 </h2>
                 <div className="p-6">
-                  <p className="text-xl text-white/90 mb-4 text-justify">
+                  <p className="text-xl text-gray-700 mb-4 text-justify">
                     GATOR PRIME is a medical technology company that believes in constant growth and innovation. We invent that which has not been invented, to enhance precision in diagnosis and efficiency in recovery and rehabilitation.
                   </p>
-                  <p className="text-xl text-white/90 text-justify">
+                  <p className="text-xl text-gray-700 text-justify">
                     Our vision is to become a global leader in the development of innovative medical devices and solutions, for application within and beyond a clinical setting.
                   </p>
                 </div>
