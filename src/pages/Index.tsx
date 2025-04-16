@@ -75,49 +75,34 @@ export default function Index() {
         <section id="mission-section" className="py-16 bg-white">
           <div className="container mx-auto px-4">
             <div className="max-w-6xl mx-auto">
-              <h2 className="text-3xl font-bold text-center mb-6 text-gray-900">
-                Our Mission
-              </h2>
-              <div className="text-center mb-10">
-                <p className="text-xl text-gray-700 mb-6 text-justify">
-                  GATOR PRIME aims to be a global leader in medical technology. We continuously seek to address gaps in the medical and healthcare markets. We promise to invent novel devices and solutions to do so. We strive to deliver these inventions and technology in a universally accessible fashion.
-                </p>
-              </div>
-              
-              <h2 className="text-3xl font-bold text-center mb-6 text-gray-900">
-                Our Vision
-              </h2>
-              <div className="text-center mb-10">
-                <p className="text-xl text-gray-700 mb-6 text-justify">
-                  GATOR PRIME is a medical technology company that believes in constant growth and innovation. We invent that which has not been invented, to enhance precision in diagnosis and efficiency in recovery and rehabilitation.
-                </p>
-                <p className="text-xl text-gray-700 text-justify">
-                  Our vision is to become a global leader in the development of innovative medical devices and solutions, for application within and beyond a clinical setting.
-                </p>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-                <div>
-                  <h3 className="text-2xl font-semibold mb-4 text-gray-800">The Next Generation of Knee Health Assessment</h3>
-                  <p className="text-lg text-gray-700 mb-4 text-justify">
-                    GATOR PRIME is an innovative assessment tool developed by Precix to help patients and healthcare providers understand and manage knee health. Using advanced analytics and medical expertise, we provide personalized reports that guide treatment and prevention strategies.
-                  </p>
-                  <p className="text-lg text-gray-700 text-justify">
-                    By combining clinical data, biomechanical assessments, and lifestyle factors, GATOR PRIME delivers a comprehensive view of your knee joint health and potential risk factors.
+              <div className="bg-blue-100 rounded-lg mb-10">
+                <h2 className="text-3xl font-bold text-center pt-6 mb-4 text-gray-900">
+                  Our Mission
+                </h2>
+                <div className="p-6">
+                  <p className="text-xl text-gray-700 text-justify">
+                    GATOR PRIME aims to be a global leader in medical technology. We continuously seek to address gaps in the medical and healthcare markets. We promise to invent novel devices and solutions to do so. We strive to deliver these inventions and technology in a universally accessible fashion.
                   </p>
                 </div>
-                <div className="text-center">
-                  <img 
-                    src="/lovable-uploads/cbb9c383-12da-4b7c-9a0e-22d0bc691c2f.png" 
-                    alt="Gator Prime Medical Device" 
-                    className="mx-auto max-w-full h-auto rounded-lg shadow-md"
-                  />
+              </div>
+              
+              <div className="bg-red-900 rounded-lg">
+                <h2 className="text-3xl font-bold text-center pt-6 mb-4 text-white">
+                  Our Vision
+                </h2>
+                <div className="p-6">
+                  <p className="text-xl text-white/90 mb-4 text-justify">
+                    GATOR PRIME is a medical technology company that believes in constant growth and innovation. We invent that which has not been invented, to enhance precision in diagnosis and efficiency in recovery and rehabilitation.
+                  </p>
+                  <p className="text-xl text-white/90 text-justify">
+                    Our vision is to become a global leader in the development of innovative medical devices and solutions, for application within and beyond a clinical setting.
+                  </p>
                 </div>
               </div>
             </div>
           </div>
         </section>
-        
+
         {/* About Section */}
         <section id="about-section" className="py-16 bg-gray-50">
           <div className="container mx-auto px-4">
