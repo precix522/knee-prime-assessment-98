@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Button } from "./Button";
 import { Input } from "@/components/ui/input";
@@ -292,7 +293,7 @@ export default function PatientDetailsForm({ onSuccess }: PatientDetailsFormProp
               Upload your X-ray report (optional)
             </p>
             
-            {/* {xrayFile && (
+            {xrayFile && (
               <div className="mt-2 border border-gray-200 rounded-md p-3 bg-gray-50 flex items-center justify-between">
                 <div className="flex items-center">
                   <FileText className="h-5 w-5 text-orange-500 mr-2" />
@@ -313,7 +314,7 @@ export default function PatientDetailsForm({ onSuccess }: PatientDetailsFormProp
                   title="X-ray Report Preview"
                 />
               </div>
-            )} */}
+            )}
           </div>
           
           <div>
@@ -347,7 +348,7 @@ export default function PatientDetailsForm({ onSuccess }: PatientDetailsFormProp
               Upload your MRI report (optional)
             </p>
             
-            {/* {mriFile && (
+            {mriFile && (
               <div className="mt-2 border border-gray-200 rounded-md p-3 bg-gray-50 flex items-center justify-between">
                 <div className="flex items-center">
                   <FileText className="h-5 w-5 text-orange-500 mr-2" />
@@ -368,7 +369,7 @@ export default function PatientDetailsForm({ onSuccess }: PatientDetailsFormProp
                   title="MRI Report Preview"
                 />
               </div>
-            )} */}
+            )}
           </div>
           
           {uploadProgress > 0 && uploadProgress < 100 && (
