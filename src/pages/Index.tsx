@@ -75,7 +75,7 @@ export default function Index() {
         <section id="mission-section" className="py-16 bg-white">
           <div className="container mx-auto px-4">
             <div className="max-w-6xl mx-auto">
-              <div className="bg-blue-100 rounded-lg mb-10">
+              <div className="bg-purple-100 rounded-lg mb-10">
                 <h2 className="text-3xl font-bold text-center pt-6 mb-4 text-gray-900">
                   Our Mission
                 </h2>
@@ -86,7 +86,7 @@ export default function Index() {
                 </div>
               </div>
               
-              <div className="bg-red-900 rounded-lg">
+              <div className="bg-purple-900 rounded-lg">
                 <h2 className="text-3xl font-bold text-center pt-6 mb-4 text-white">
                   Our Vision
                 </h2>
