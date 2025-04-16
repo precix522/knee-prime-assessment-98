@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useTwilioAuthStore } from "../utils/twilio-auth-store";
@@ -364,25 +363,26 @@ export default function ReportViewer() {
         <SidebarProvider defaultOpen={true}>
           <div className="flex min-h-[calc(100vh-4rem)] w-full max-w-7xl mx-auto relative">
             <Sidebar className="border-r bg-white">
-              <SidebarContent className="py-4">
-                <div className="text-center mb-6 px-4">
-                  <div className="font-bold text-xl text-orange-600 flex items-center justify-center mb-2">
+              <SidebarContent className="py-6">
+                <div className="text-center mb-8 px-4 space-y-2">
+                  <div className="font-bold text-2xl text-orange-600 flex items-center justify-center mb-4">
                     <span className="mr-1">GATOR</span>
                     <span className="bg-orange-600 text-white px-2 py-0.5 rounded">PRIME</span>
                   </div>
-                  <p className="text-gray-700 font-medium">
+                  <p className="text-gray-700 font-medium text-sm">
                     Patient ID: {patientId || (user?.id)}
                   </p>
                 </div>
                 
-                <SidebarMenu>
+                <SidebarMenu className="space-y-2">
                   <SidebarMenuItem>
                     <SidebarMenuButton 
                       isActive={activeTab === "report"}
                       onClick={() => setActiveTab("report")}
+                      className="py-3"
                     >
-                      <FileText className="h-5 w-5 mr-3" />
-                      <span>View My Report</span>
+                      <FileText className="h-5 w-5 mr-4" />
+                      <span className="text-base">View My Report</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                   
@@ -390,9 +390,10 @@ export default function ReportViewer() {
                     <SidebarMenuButton 
                       isActive={activeTab === "annex"} 
                       onClick={() => setActiveTab("annex")}
+                      className="py-3"
                     >
-                      <BookOpen className="h-5 w-5 mr-3" />
-                      <span>View Annex</span>
+                      <BookOpen className="h-5 w-5 mr-4" />
+                      <span className="text-base">View Annex</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                   
@@ -400,9 +401,10 @@ export default function ReportViewer() {
                     <SidebarMenuButton 
                       isActive={activeTab === "history"} 
                       onClick={() => setActiveTab("history")}
+                      className="py-3"
                     >
-                      <Clock className="h-5 w-5 mr-3" />
-                      <span>View Report History</span>
+                      <Clock className="h-5 w-5 mr-4" />
+                      <span className="text-base">View Report History</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                   
@@ -410,9 +412,10 @@ export default function ReportViewer() {
                     <SidebarMenuButton 
                       isActive={activeTab === "upload"} 
                       onClick={() => setActiveTab("upload")}
+                      className="py-3"
                     >
-                      <Upload className="h-5 w-5 mr-3" />
-                      <span>Upload Your Documents</span>
+                      <Upload className="h-5 w-5 mr-4" />
+                      <span className="text-base">Upload Your Documents</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                   
@@ -420,9 +423,10 @@ export default function ReportViewer() {
                     <SidebarMenuButton 
                       isActive={activeTab === "appointment"} 
                       onClick={() => setActiveTab("appointment")}
+                      className="py-3"
                     >
-                      <CalendarDays className="h-5 w-5 mr-3" />
-                      <span>Book Appointment</span>
+                      <CalendarDays className="h-5 w-5 mr-4" />
+                      <span className="text-base">Book Appointment</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 </SidebarMenu>
