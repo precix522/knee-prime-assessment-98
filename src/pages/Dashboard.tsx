@@ -322,7 +322,7 @@ export default function Dashboard() {
                 </div>
 
                 {/* Admin Dashboard Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
                     <div className="p-6">
                       <div className="flex items-center justify-between mb-4">
@@ -378,24 +378,6 @@ export default function Dashboard() {
                         onClick={handleNavigateToManageUsers}
                       >
                         Manage Users <ChevronRight className="h-4 w-4 ml-1" />
-                      </Button>
-                    </div>
-                  </div>
-
-                  <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
-                    <div className="p-6">
-                      <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-lg font-medium text-gray-900">Statistics</h3>
-                        <div className="p-2 bg-amber-50 rounded-full">
-                          <BarChart3 className="h-6 w-6 text-amber-500" />
-                        </div>
-                      </div>
-                      <p className="text-gray-500 text-sm mt-1">System analytics</p>
-                      <Button
-                        variant="link"
-                        className="mt-4 p-0 h-auto text-amber-600"
-                      >
-                        View Statistics <ChevronRight className="h-4 w-4 ml-1" />
                       </Button>
                     </div>
                   </div>
