@@ -71,7 +71,7 @@ export default function ManagePatients() {
             <ShieldAlert className="h-16 w-16 text-health-600 mx-auto mb-4" />
             <h1 className="text-2xl font-bold text-gray-900 mb-2">Access Denied</h1>
             <p className="text-gray-600 mb-6">
-              You don't have permission to access this page. Only administrators can register new patients.
+              You don't have permission to access this page. Only administrators can add new patients.
             </p>
             <Button onClick={() => navigate('/')} variant="health">
               Back to Home
@@ -91,10 +91,10 @@ export default function ManagePatients() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h1 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">
-              Patient Registration
+              Add Patient
             </h1>
             <p className="mt-3 max-w-2xl mx-auto text-xl text-gray-500 sm:mt-4">
-              Register new patients and upload their medical reports
+              Add new patients and upload their medical reports
             </p>
             <div className="inline-flex items-center justify-center mt-2 px-3 py-1 bg-health-100 text-health-700 rounded-full text-sm">
               <span className="font-medium">Admin Access</span>
@@ -107,12 +107,12 @@ export default function ManagePatients() {
           
           <div className="mt-6 text-center">
             <Button 
-              onClick={() => navigate('/')}
+              onClick={() => navigate('/dashboard')}
               variant="ghost"
               className="text-gray-600 hover:text-gray-800 flex items-center gap-2"
             >
               <ArrowLeft className="h-4 w-4" />
-              Back to Home
+              Back to Dashboard
             </Button>
           </div>
         </div>

@@ -47,8 +47,8 @@ export const Navbar = () => {
     navigate("/dashboard");
   };
 
-  // Handle redirect to signup form
-  const handleSignUpClick = (e: React.MouseEvent) => {
+  // Handle redirect to manage patients form
+  const handleManagePatientsClick = (e: React.MouseEvent) => {
     e.preventDefault();
     navigate("/manage-patients");
     setMobileMenuOpen(false);
@@ -144,11 +144,11 @@ export const Navbar = () => {
                 <a 
                   href="/manage-patients"
                   className="text-gray-700 hover:text-health-600 transition-colors duration-300 text-sm font-medium"
-                  onClick={handleSignUpClick}
+                  onClick={handleManagePatientsClick}
                 >
                   <span className="flex items-center">
                     <UserRoundPlus size={16} className="mr-1" />
-                    Sign Up
+                    Add Patient
                   </span>
                 </a>
                 <a 
@@ -325,7 +325,7 @@ export const Navbar = () => {
                   >
                     <span className="flex items-center">
                       <UserRoundPlus size={16} className="mr-1" />
-                      Sign Up
+                      Add Patient
                     </span>
                   </a>
                   <a 
