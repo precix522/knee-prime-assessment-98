@@ -3,6 +3,7 @@ import React from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { RememberMeCheckbox } from "./RememberMeCheckbox";
+import { CaptchaVerification } from "./CaptchaVerification";
 
 interface PhoneFormProps {
   phoneInput: string;
@@ -12,6 +13,11 @@ interface PhoneFormProps {
   error: string | null;
   rememberMe?: boolean;
   setRememberMe?: (checked: boolean) => void;
+  captchaVerified?: boolean;
+  setCaptchaVerified?: (verified: boolean) => void;
+  captchaError?: string | null;
+  setCaptchaError?: (error: string | null) => void;
+  devMode?: boolean;
 }
 
 export const PhoneForm = ({
@@ -22,7 +28,32 @@ export const PhoneForm = ({
   error,
   rememberMe = false,
   setRememberMe,
+  captchaVerified,
+  setCaptchaVerified,
+  captchaError,
+  setCaptchaError,
+  devMode = false,
 }: PhoneFormProps) => {
+  
+  const handleCaptchaVerify = (token: string | null) => {
+    if (setCaptchaVerified) {
+      if (token) {
+        setCaptchaVerified(true);
+        setCaptchaError && setCaptchaError(null);
+      } else {
+        setCaptchaVerified(false);
+        setCaptchaError && setCaptchaError("Captcha verification failed. Please try again.");
+      }
+    }
+  };
+
+  const handleCaptchaExpire = () => {
+    if (setCaptchaVerified) {
+      setCaptchaVerified(false);
+      setCaptchaError && setCaptchaError("Captcha has expired. Please verify again.");
+    }
+  };
+
   return (
     <form onSubmit={handleSendOTP} className="space-y-4">
       <div className="space-y-2">
@@ -38,6 +69,16 @@ export const PhoneForm = ({
           />
         </div>
         
+        {!devMode && setCaptchaVerified && (
+          <div className="mt-4">
+            <CaptchaVerification 
+              onVerify={handleCaptchaVerify}
+              onExpire={handleCaptchaExpire}
+              error={captchaError}
+            />
+          </div>
+        )}
+        
         {setRememberMe && (
           <RememberMeCheckbox 
             checked={rememberMe} 
@@ -51,7 +92,7 @@ export const PhoneForm = ({
       <Button
         type="submit"
         className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg transition-colors"
-        disabled={isLoading}
+        disabled={isLoading || (!captchaVerified && !devMode && setCaptchaVerified !== undefined)}
       >
         {isLoading ? "Sending..." : "Send Verification Code"}
       </Button>

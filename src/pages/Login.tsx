@@ -156,13 +156,11 @@ export default function Login() {
         
         let userProfile;
         try {
-          // Ensure we're using the correct phone format
           const formattedPhone = phone.startsWith('+') ? phone : `+${phone}`;
           userProfile = await getUserProfileByPhone(formattedPhone);
           console.log("Retrieved user profile in dev mode:", userProfile);
           
           if (!userProfile) {
-            // Try alternative format
             const altPhone = phone.startsWith('+') ? phone.substring(1) : `+${phone}`;
             userProfile = await getUserProfileByPhone(altPhone);
             console.log("Retrieved user profile with alt format:", userProfile);
@@ -237,17 +235,15 @@ export default function Login() {
           localStorage.removeItem('rememberedPhone');
         }
         
-        // Ensure session data is saved to localStorage for persistence
         if (!localStorage.getItem('gator_prime_session_id')) {
           const sessionId = `session_${Date.now()}`;
-          const expiryTime = Date.now() + (24 * 60 * 60 * 1000); // 24 hours
+          const expiryTime = Date.now() + (24 * 60 * 60 * 1000);
           localStorage.setItem('gator_prime_session_id', sessionId);
           localStorage.setItem('gator_prime_session_expiry', expiryTime.toString());
         }
         
         toast.success("Dev mode: Login successful");
       } else {
-        // Ensure we're using the correct phone format
         const formattedPhone = phone.startsWith('+') ? phone : `+${phone}`;
         const user = await verifyOTP(formattedPhone, otp);
         
