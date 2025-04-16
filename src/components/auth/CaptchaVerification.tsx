@@ -4,8 +4,8 @@ import ReCAPTCHA from "react-google-recaptcha";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 
-// This is a testing site key for development, replace with actual key in production
-const RECAPTCHA_SITE_KEY = "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI";
+// Replace with your actual reCAPTCHA site key
+const RECAPTCHA_SITE_KEY = process.env.REACT_APP_RECAPTCHA_SITE_KEY || "YOUR_ACTUAL_RECAPTCHA_SITE_KEY";
 
 interface CaptchaVerificationProps {
   onVerify: (token: string | null) => void;
