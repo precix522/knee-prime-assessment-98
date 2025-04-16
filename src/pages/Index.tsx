@@ -11,6 +11,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Card, CardContent } from "@/components/ui/card";
+import { FeatureCard } from "../components/FeatureCard";
 
 export default function Index() {
   const navigate = useNavigate();
