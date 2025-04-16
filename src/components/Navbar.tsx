@@ -18,6 +18,7 @@ export const Navbar = () => {
                              location.pathname === "/report-viewer";
   
   // Check if user is an admin based on profile_type from Supabase
+  // Add null check for user object
   const isAdmin = user?.profile_type === 'admin';
 
   useEffect(() => {
@@ -178,7 +179,7 @@ export const Navbar = () => {
                 <div className="flex items-center gap-2">
                   <User size={16} className="text-health-600" />
                   <span className="text-sm font-medium">
-                    {user.phone || "User"}
+                    {user?.phone || "User"}
                     {isAdmin && <span className="ml-1 text-health-600">(Admin)</span>}
                   </span>
                 </div>
@@ -363,7 +364,7 @@ export const Navbar = () => {
                   <div className="flex items-center gap-2 mb-3">
                     <User size={16} className="text-health-600" />
                     <span className="text-sm font-medium">
-                      {user.phone || "User"}
+                      {user?.phone || "User"}
                       {isAdmin && <span className="ml-1 text-health-600">(Admin)</span>}
                     </span>
                   </div>

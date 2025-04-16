@@ -49,6 +49,8 @@ export function AuthInitializer() {
         }
       } catch (err) {
         console.error("Session validation error:", err);
+        // Don't show toast errors for validation failures
+        // This prevents error messages during normal login flow
       }
     }
     
