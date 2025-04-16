@@ -364,19 +364,13 @@ export default function ReportViewer() {
           <div className="flex min-h-[calc(100vh-4rem)] w-full max-w-7xl mx-auto relative">
             <Sidebar className="border-r bg-white" style={{ width: "300px", minWidth: "300px" }}>
               <SidebarContent className="py-10">
-                <div className="text-center mb-26 px-10 space-y-14">
-                  <div className="flex items-center justify-center">
-                    <div className="flex items-center">
-                      <span className="font-bold text-2xl text-orange-600">GATOR</span>
-                      <span className="bg-orange-600 text-white px-4 py-2 rounded text-xl font-bold ml-4">PRIME</span>
-                    </div>
-                  </div>
-                  <p className="text-gray-700 font-medium text-sm mt-4">
+                <div className="text-center mb-12 px-10 space-y-8">
+                  <p className="text-gray-700 font-medium text-sm">
                     Patient ID: {patientId || (user?.id)}
                   </p>
                 </div>
                 
-                <SidebarMenu className="space-y-4 px-4">
+                <SidebarMenu className="space-y-6 px-4">
                   <SidebarMenuItem>
                     <SidebarMenuButton 
                       isActive={activeTab === "report"}
@@ -433,11 +427,11 @@ export default function ReportViewer() {
                   </SidebarMenuItem>
                 </SidebarMenu>
 
-                <div className="mt-12 px-5">
+                <div className="mt-12 px-5 flex flex-col items-center space-y-4">
                   <Button 
                     variant="outline" 
                     onClick={() => navigate('/patient-id')}
-                    className="w-full mb-4"
+                    className="w-full"
                   >
                     Back to Patient ID
                   </Button>
