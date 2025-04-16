@@ -229,9 +229,10 @@ export default function ReportViewer() {
               </Button>
             </div>
             <div>
-            <p className="text-center text-sm mt-2"> <b>Contact</b></p>
+            <p className="text-center text-sm mt-2"> <b>Contact</b>
             <p> 2 College Road #02-00, Singapore 169850</p>
             <p> Email : info@precix.io</p>
+              </p>
             </div>
           </div>
 
