@@ -359,7 +359,7 @@ export default function ReportViewer() {
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Navbar />
-      <div className="flex-1 p-8 md:px-16 md:py-14">
+      <div className="flex-1 p-10 md:px-22 md:py-20">
         <SidebarProvider defaultOpen={true}>
           <div className="flex min-h-[calc(100vh-4rem)] w-full max-w-7xl mx-auto relative">
             <Sidebar className="border-r bg-white" style={{ width: "300px", minWidth: "300px" }}>
