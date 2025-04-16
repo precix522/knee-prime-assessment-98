@@ -3,7 +3,7 @@ import { Button } from "./Button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { AlertCircle, Loader2, FileText } from "lucide-react";
+import { AlertCircle, Loader2, FileText, X } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { uploadPatientDocument } from "../utils/supabase";
 import { supabase } from "../utils/supabase/client";
@@ -77,6 +77,30 @@ export default function PatientDetailsForm({ onSuccess }: PatientDetailsFormProp
       setMriFile(null);
       setMriPreviewUrl(null);
     }
+  };
+  
+  const clearXrayFile = () => {
+    if (xrayPreviewUrl) {
+      URL.revokeObjectURL(xrayPreviewUrl);
+    }
+    setXrayFile(null);
+    setXrayPreviewUrl(null);
+    
+    // Reset file input
+    const xrayInput = document.getElementById('xrayFile') as HTMLInputElement;
+    if (xrayInput) xrayInput.value = '';
+  };
+  
+  const clearMriFile = () => {
+    if (mriPreviewUrl) {
+      URL.revokeObjectURL(mriPreviewUrl);
+    }
+    setMriFile(null);
+    setMriPreviewUrl(null);
+    
+    // Reset file input
+    const mriInput = document.getElementById('mriFile') as HTMLInputElement;
+    if (mriInput) mriInput.value = '';
   };
   
   const validateForm = () => {
@@ -239,19 +263,36 @@ export default function PatientDetailsForm({ onSuccess }: PatientDetailsFormProp
           
           <div>
             <Label htmlFor="xrayFile">X-ray Report (PDF)</Label>
-            <Input 
-              id="xrayFile" 
-              type="file"
-              onChange={handleXrayFileChange}
-              accept=".pdf"
-              disabled={isLoading}
-              className="cursor-pointer"
-            />
+            <div className="flex items-center gap-2">
+              <div className="relative flex-1">
+                <Input 
+                  id="xrayFile" 
+                  type="file"
+                  onChange={handleXrayFileChange}
+                  accept=".pdf"
+                  disabled={isLoading}
+                  className="cursor-pointer"
+                />
+              </div>
+              {xrayFile && (
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={clearXrayFile}
+                  className="flex items-center gap-1"
+                  disabled={isLoading}
+                >
+                  <X className="h-4 w-4" />
+                  Cancel
+                </Button>
+              )}
+            </div>
             <p className="text-xs text-gray-500 mt-1">
               Upload your X-ray report (optional)
             </p>
             
-            {xrayFile && (
+            {/* {xrayFile && (
               <div className="mt-2 border border-gray-200 rounded-md p-3 bg-gray-50 flex items-center justify-between">
                 <div className="flex items-center">
                   <FileText className="h-5 w-5 text-orange-500 mr-2" />
@@ -272,24 +313,41 @@ export default function PatientDetailsForm({ onSuccess }: PatientDetailsFormProp
                   title="X-ray Report Preview"
                 />
               </div>
-            )}
+            )} */}
           </div>
           
           <div>
             <Label htmlFor="mriFile">MRI Report (PDF)</Label>
-            <Input 
-              id="mriFile" 
-              type="file"
-              onChange={handleMriFileChange}
-              accept=".pdf"
-              disabled={isLoading}
-              className="cursor-pointer"
-            />
+            <div className="flex items-center gap-2">
+              <div className="relative flex-1">
+                <Input 
+                  id="mriFile" 
+                  type="file"
+                  onChange={handleMriFileChange}
+                  accept=".pdf"
+                  disabled={isLoading}
+                  className="cursor-pointer"
+                />
+              </div>
+              {mriFile && (
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={clearMriFile}
+                  className="flex items-center gap-1"
+                  disabled={isLoading}
+                >
+                  <X className="h-4 w-4" />
+                  Cancel
+                </Button>
+              )}
+            </div>
             <p className="text-xs text-gray-500 mt-1">
               Upload your MRI report (optional)
             </p>
             
-            {mriFile && (
+            {/* {mriFile && (
               <div className="mt-2 border border-gray-200 rounded-md p-3 bg-gray-50 flex items-center justify-between">
                 <div className="flex items-center">
                   <FileText className="h-5 w-5 text-orange-500 mr-2" />
@@ -310,7 +368,7 @@ export default function PatientDetailsForm({ onSuccess }: PatientDetailsFormProp
                   title="MRI Report Preview"
                 />
               </div>
-            )}
+            )} */}
           </div>
           
           {uploadProgress > 0 && uploadProgress < 100 && (
