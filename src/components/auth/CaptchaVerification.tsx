@@ -5,7 +5,7 @@ import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 
 // Replace with your actual reCAPTCHA site key
-const RECAPTCHA_SITE_KEY = process.env.REACT_APP_RECAPTCHA_SITE_KEY || "YOUR_ACTUAL_RECAPTCHA_SITE_KEY";
+const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY || "YOUR_ACTUAL_RECAPTCHA_SITE_KEY";
 
 interface CaptchaVerificationProps {
   onVerify: (token: string | null) => void;
