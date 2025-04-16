@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useTwilioAuthStore } from "../utils/twilio-auth-store";
@@ -384,7 +383,7 @@ export default function ReportViewer() {
                       onClick={() => setActiveTab("report")}
                       className="py-3"
                     >
-                      <FileText className="h-5 w-5 mr-4" />
+                      <FileText className="h-5 w-5 min-w-[20px] mr-4" />
                       <span className="text-base">View My Report</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -395,7 +394,7 @@ export default function ReportViewer() {
                       onClick={() => setActiveTab("annex")}
                       className="py-3"
                     >
-                      <BookOpen className="h-5 w-5 mr-4" />
+                      <BookOpen className="h-5 w-5 min-w-[20px] mr-4" />
                       <span className="text-base">View Annex</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -406,7 +405,7 @@ export default function ReportViewer() {
                       onClick={() => setActiveTab("history")}
                       className="py-3"
                     >
-                      <Clock className="h-5 w-5 mr-4" />
+                      <Clock className="h-5 w-5 min-w-[20px] mr-4" />
                       <span className="text-base">View Report History</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -417,7 +416,7 @@ export default function ReportViewer() {
                       onClick={() => setActiveTab("upload")}
                       className="py-3"
                     >
-                      <Upload className="h-5 w-5 mr-4" />
+                      <Upload className="h-5 w-5 min-w-[20px] mr-4" />
                       <span className="text-base">Upload Your Documents</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -428,7 +427,7 @@ export default function ReportViewer() {
                       onClick={() => setActiveTab("appointment")}
                       className="py-3"
                     >
-                      <CalendarDays className="h-5 w-5 mr-4" />
+                      <CalendarDays className="h-5 w-5 min-w-[20px] mr-4" />
                       <span className="text-base">Book Appointment</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
