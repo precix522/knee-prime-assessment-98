@@ -359,12 +359,12 @@ export default function ReportViewer() {
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Navbar />
-      <div className="flex-1 p-20 md:px-36 md:py-30">
+      <div className="flex-1 p-16 md:px-26 md:py-20">
         <SidebarProvider defaultOpen={true}>
           <div className="flex min-h-[calc(100vh-4rem)] w-full max-w-7xl mx-auto relative">
             <Sidebar className="border-r bg-white" style={{ width: "300px", minWidth: "300px" }}>
               <SidebarContent className="py-10">
-                <div className="text-center mb-24 px-8 space-y-10">
+                <div className="text-center mb-26 px-10 space-y-14">
                   <div className="flex items-center justify-center">
                     <div className="flex items-center">
                       <span className="font-bold text-2xl text-orange-600">GATOR</span>
