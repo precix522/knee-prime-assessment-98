@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { Navbar } from "../components/Navbar";
 import { Footer } from "../components/Footer";
 import { Button } from "@/components/ui/button";
-import { FeatureCard } from "../components/FeatureCard";
 import { FileText, User, Users, Check, ArrowRight, Info, UserRoundPlus, Star, BookOpen, Activity, Clipboard, BarChart, Award } from "lucide-react";
 import {
   Accordion,
@@ -138,9 +137,9 @@ export default function Index() {
                 </div>
                 <div className="text-center">
                   <img 
-                    src="/placeholder.svg" 
-                    alt="Gator Prime Overview" 
-                    className="mx-auto max-w-full h-auto"
+                    src="/lovable-uploads/e563ca10-e5ee-4f2f-9f8a-a5aea7b352b2.png" 
+                    alt="Gator Prime Medical Devices" 
+                    className="mx-auto max-w-full h-auto rounded-lg shadow-md"
                   />
                 </div>
               </div>
