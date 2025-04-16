@@ -16,7 +16,11 @@ interface PatientRecord {
   reportFiles: FileList | null;
 }
 
-export default function PatientRecordForm() {
+interface PatientRecordFormProps {
+  onSuccess?: () => void;
+}
+
+export default function PatientRecordForm({ onSuccess }: PatientRecordFormProps) {
   const [formData, setFormData] = useState<PatientRecord>({
     patientName: "",
     patientId: "",
@@ -150,6 +154,11 @@ export default function PatientRecordForm() {
       const fileInput = document.getElementById('reportFiles') as HTMLInputElement;
       if (fileInput) {
         fileInput.value = '';
+      }
+      
+      // Call onSuccess callback if provided
+      if (onSuccess) {
+        onSuccess();
       }
       
     } catch (err: any) {
