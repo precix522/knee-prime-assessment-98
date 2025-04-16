@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useTwilioAuthStore } from "../utils/twilio-auth-store";
@@ -362,21 +363,21 @@ export default function ReportViewer() {
       <div className="flex-1 p-6 md:px-12 md:py-12">
         <SidebarProvider defaultOpen={true}>
           <div className="flex min-h-[calc(100vh-4rem)] w-full max-w-7xl mx-auto relative">
-            <Sidebar className="border-r bg-white">
+            <Sidebar className="border-r bg-white" style={{ width: "280px", minWidth: "280px" }}>
               <SidebarContent className="py-8">
-                <div className="text-center mb-44 px-12 space-y-22">
-                  <div className="flex flex-col items-center justify-center space-y-6">
-                    <div className="flex flex-col items-center">
+                <div className="text-center mb-22 px-6 space-y-8">
+                  <div className="flex items-center justify-center">
+                    <div className="flex items-center">
                       <span className="font-bold text-2xl text-orange-600">GATOR</span>
-                      <span className="bg-orange-600 text-white px-3 py-1 rounded text-xl font-bold mt-1">PRIME</span>
+                      <span className="bg-orange-600 text-white px-3 py-1 rounded text-xl font-bold ml-2">PRIME</span>
                     </div>
-                    <p className="text-gray-700 font-medium text-sm mt-4">
-                      Patient ID: {patientId || (user?.id)}
-                    </p>
                   </div>
+                  <p className="text-gray-700 font-medium text-sm mt-4">
+                    Patient ID: {patientId || (user?.id)}
+                  </p>
                 </div>
                 
-                <SidebarMenu className="space-y-4 px-2">
+                <SidebarMenu className="space-y-4 px-4">
                   <SidebarMenuItem>
                     <SidebarMenuButton 
                       isActive={activeTab === "report"}
