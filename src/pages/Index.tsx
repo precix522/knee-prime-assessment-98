@@ -1,10 +1,8 @@
-
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Navbar } from "../components/Navbar";
 import { Footer } from "../components/Footer";
 import { Button } from "@/components/ui/button";
-import { FeatureCard } from "../components/FeatureCard";
 import { FileText, User, Users, Check, ArrowRight, Info, UserRoundPlus, Star, BookOpen, Activity, Clipboard, BarChart, Award } from "lucide-react";
 import {
   Accordion,
@@ -61,7 +59,7 @@ export default function Index() {
               <div className="flex justify-center mt-4">
                 <Button
                   variant="link"
-                  onClick={() => document.getElementById('about-section')?.scrollIntoView({ behavior: 'smooth' })}
+                  onClick={() => document.getElementById('mission-section')?.scrollIntoView({ behavior: 'smooth' })}
                   className="text-primary"
                 >
                   <Info className="mr-2 h-4 w-4" />
@@ -81,7 +79,7 @@ export default function Index() {
               </h2>
               <div className="text-center mb-10">
                 <p className="text-xl text-gray-700 mb-6">
-                  About GATOR PRIME: A comprehensive assessment system designed to evaluate and protect knee joint health.
+                  A comprehensive assessment system designed to evaluate and protect knee joint health.
                 </p>
               </div>
               
@@ -95,15 +93,8 @@ export default function Index() {
                     By combining clinical data, biomechanical assessments, and lifestyle factors, GATOR PRIME delivers a comprehensive view of your knee joint health and potential risk factors.
                   </p>
                 </div>
-                <div className="rounded-lg overflow-hidden shadow-lg">
-                  <img 
-                    src="/knee-assessment-technology.jpg" 
-                    alt="Advanced knee assessment technology" 
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      e.currentTarget.src = "/placeholder.svg";
-                    }}
-                  />
+                <div className="text-center">
+                  <p className="text-gray-600 italic">Image placeholder removed as requested</p>
                 </div>
               </div>
             </div>
@@ -140,17 +131,8 @@ export default function Index() {
                     </Button>
                   </div>
                 </div>
-                <div className="flex items-center justify-center">
-                  <div className="rounded-lg overflow-hidden shadow-lg w-full max-w-md h-auto bg-gray-200">
-                    <img 
-                      src="/knee-health-assessment.jpg" 
-                      alt="Knee health assessment" 
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        e.currentTarget.src = "/placeholder.svg";
-                      }}
-                    />
-                  </div>
+                <div className="text-center">
+                  <p className="text-gray-600 italic">Image placeholder removed as requested</p>
                 </div>
               </div>
             </div>
