@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Button } from "./Button";
 import { Input } from "@/components/ui/input";
@@ -45,24 +44,38 @@ export default function PatientDetailsForm({ onSuccess }: PatientDetailsFormProp
   }, [xrayPreviewUrl, mriPreviewUrl]);
   
   const handleXrayFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
+    if (e.target.files && e.target.files.length > 0) {
       const file = e.target.files[0];
       setXrayFile(file);
       
       // Create preview URL
       const fileUrl = URL.createObjectURL(file);
       setXrayPreviewUrl(fileUrl);
+    } else {
+      // User deselected the file
+      if (xrayPreviewUrl) {
+        URL.revokeObjectURL(xrayPreviewUrl);
+      }
+      setXrayFile(null);
+      setXrayPreviewUrl(null);
     }
   };
   
   const handleMriFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
+    if (e.target.files && e.target.files.length > 0) {
       const file = e.target.files[0];
       setMriFile(file);
       
       // Create preview URL
       const fileUrl = URL.createObjectURL(file);
       setMriPreviewUrl(fileUrl);
+    } else {
+      // User deselected the file
+      if (mriPreviewUrl) {
+        URL.revokeObjectURL(mriPreviewUrl);
+      }
+      setMriFile(null);
+      setMriPreviewUrl(null);
     }
   };
   
