@@ -71,38 +71,6 @@ export default function Index() {
           </div>
         </section>
         
-        {/* Our Mission Section */}
-        <section id="mission-section" className="py-16 bg-white">
-          <div className="container mx-auto px-4">
-            <div className="max-w-6xl mx-auto">
-              <div className="bg-health-100 rounded-lg mb-10">
-                <h2 className="text-3xl font-bold text-center pt-6 mb-4 text-gray-900">
-                  Our Mission
-                </h2>
-                <div className="p-6">
-                  <p className="text-xl text-gray-700 text-justify">
-                    GATOR PRIME aims to be a global leader in medical technology. We continuously seek to address gaps in the medical and healthcare markets. We promise to invent novel devices and solutions to do so. We strive to deliver these inventions and technology in a universally accessible fashion.
-                  </p>
-                </div>
-              </div>
-              
-              <div className="bg-health-100 rounded-lg">
-                <h2 className="text-3xl font-bold text-center pt-6 mb-4 text-gray-900">
-                  Our Vision
-                </h2>
-                <div className="p-6">
-                  <p className="text-xl text-gray-700 mb-4 text-justify">
-                    GATOR PRIME is a medical technology company that believes in constant growth and innovation. We invent that which has not been invented, to enhance precision in diagnosis and efficiency in recovery and rehabilitation.
-                  </p>
-                  <p className="text-xl text-gray-700 text-justify">
-                    Our vision is to become a global leader in the development of innovative medical devices and solutions, for application within and beyond a clinical setting.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
         {/* About Section */}
         <section id="about-section" className="py-16 bg-gray-50">
           <div className="container mx-auto px-4">
@@ -136,6 +104,38 @@ export default function Index() {
                     alt="Gator Prime Medical Devices" 
                     className="mx-auto max-w-full h-auto rounded-lg shadow-md"
                   />
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Our Mission and Vision Sections */}
+        <section className="py-16 bg-white">
+          <div className="container mx-auto px-4">
+            <div className="max-w-6xl mx-auto">
+              <div className="bg-health-100 rounded-lg mb-10">
+                <h2 className="text-3xl font-bold text-center pt-6 mb-4 text-gray-900">
+                  Our Mission
+                </h2>
+                <div className="p-6">
+                  <p className="text-xl text-gray-700 text-justify">
+                    GATOR PRIME aims to be a global leader in medical technology. We continuously seek to address gaps in the medical and healthcare markets. We promise to invent novel devices and solutions to do so. We strive to deliver these inventions and technology in a universally accessible fashion.
+                  </p>
+                </div>
+              </div>
+              
+              <div className="bg-health-100 rounded-lg">
+                <h2 className="text-3xl font-bold text-center pt-6 mb-4 text-gray-900">
+                  Our Vision
+                </h2>
+                <div className="p-6">
+                  <p className="text-xl text-gray-700 mb-4 text-justify">
+                    GATOR PRIME is a medical technology company that believes in constant growth and innovation. We invent that which has not been invented, to enhance precision in diagnosis and efficiency in recovery and rehabilitation.
+                  </p>
+                  <p className="text-xl text-gray-700 text-justify">
+                    Our vision is to become a global leader in the development of innovative medical devices and solutions, for application within and beyond a clinical setting.
+                  </p>
                 </div>
               </div>
             </div>
