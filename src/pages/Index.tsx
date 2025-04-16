@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Navbar } from "../components/Navbar";
@@ -80,7 +79,7 @@ export default function Index() {
                 Our Mission
               </h2>
               <div className="text-center mb-10">
-                <p className="text-xl text-gray-700 mb-6">
+                <p className="text-xl text-gray-700 mb-6 text-justify">
                   A comprehensive assessment system designed to evaluate and protect knee joint health.
                 </p>
               </div>
@@ -88,15 +87,19 @@ export default function Index() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
                 <div>
                   <h3 className="text-2xl font-semibold mb-4 text-gray-800">The Next Generation of Knee Health Assessment</h3>
-                  <p className="text-lg text-gray-700 mb-4">
+                  <p className="text-lg text-gray-700 mb-4 text-justify">
                     GATOR PRIME is an innovative assessment tool developed by Precix to help patients and healthcare providers understand and manage knee health. Using advanced analytics and medical expertise, we provide personalized reports that guide treatment and prevention strategies.
                   </p>
-                  <p className="text-lg text-gray-700">
+                  <p className="text-lg text-gray-700 text-justify">
                     By combining clinical data, biomechanical assessments, and lifestyle factors, GATOR PRIME delivers a comprehensive view of your knee joint health and potential risk factors.
                   </p>
                 </div>
                 <div className="text-center">
-                  <p className="text-gray-600 italic">Image placeholder removed as requested</p>
+                  <img 
+                    src="/placeholder.svg" 
+                    alt="Knee Health Assessment" 
+                    className="mx-auto max-w-full h-auto"
+                  />
                 </div>
               </div>
             </div>
@@ -112,16 +115,16 @@ export default function Index() {
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div>
-                  <p className="text-lg text-gray-700 mb-6">
+                  <p className="text-lg text-gray-700 mb-6 text-justify">
                     Gator Prime is an innovative knee health assessment and monitoring system designed to help patients maintain optimal joint health and mobility.
                   </p>
-                  <p className="text-lg text-gray-700 mb-6">
+                  <p className="text-lg text-gray-700 mb-6 text-justify">
                     Our comprehensive platform uses advanced measurement techniques and expert analysis to evaluate your knee condition and provide personalized recommendations.
                   </p>
-                  <p className="text-lg text-gray-700 mb-6">
+                  <p className="text-lg text-gray-700 mb-6 text-justify">
                     Developed by a team of orthopedic specialists and health technology experts, our system provides personalized evaluations, recommendations, and progress tracking to ensure you receive the best care for your knee health.
                   </p>
-                  <p className="text-lg text-gray-700">
+                  <p className="text-lg text-gray-700 text-justify">
                     Whether you're recovering from an injury, managing a chronic condition, or simply aiming to maintain healthy knees, Gator Prime offers the tools and insights you need for long-term joint health.
                   </p>
                   <div className="mt-8">
@@ -134,7 +137,11 @@ export default function Index() {
                   </div>
                 </div>
                 <div className="text-center">
-                  <p className="text-gray-600 italic">Image placeholder removed as requested</p>
+                  <img 
+                    src="/placeholder.svg" 
+                    alt="Gator Prime Overview" 
+                    className="mx-auto max-w-full h-auto"
+                  />
                 </div>
               </div>
             </div>
