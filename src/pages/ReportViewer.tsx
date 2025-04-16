@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useTwilioAuthStore } from "../utils/twilio-auth-store";
@@ -363,20 +364,20 @@ export default function ReportViewer() {
         <SidebarProvider defaultOpen={true}>
           <div className="flex min-h-[calc(100vh-4rem)] w-full max-w-7xl mx-auto relative">
             <Sidebar className="border-r bg-white">
-              <SidebarContent className="py-6">
-                <div className="text-center mb-8 px-4 space-y-4">
-                  <div className="flex flex-col items-center justify-center space-y-2">
-                    <div className="font-bold text-2xl text-orange-600 flex items-center justify-center">
-                      <span className="mr-1">GATOR</span>
-                      <span className="bg-orange-600 text-white px-2 py-0.5 rounded">PRIME</span>
+              <SidebarContent className="py-8">
+                <div className="text-center mb-12 px-6 space-y-6">
+                  <div className="flex flex-col items-center justify-center space-y-4">
+                    <div className="flex flex-col items-center">
+                      <span className="font-bold text-2xl text-orange-600">GATOR</span>
+                      <span className="bg-orange-600 text-white px-3 py-1 rounded text-xl font-bold mt-1">PRIME</span>
                     </div>
-                    <p className="text-gray-700 font-medium text-sm">
+                    <p className="text-gray-700 font-medium text-sm mt-4">
                       Patient ID: {patientId || (user?.id)}
                     </p>
                   </div>
                 </div>
                 
-                <SidebarMenu className="space-y-2">
+                <SidebarMenu className="space-y-4 px-2">
                   <SidebarMenuItem>
                     <SidebarMenuButton 
                       isActive={activeTab === "report"}
@@ -433,11 +434,11 @@ export default function ReportViewer() {
                   </SidebarMenuItem>
                 </SidebarMenu>
 
-                <div className="mt-6 px-4">
+                <div className="mt-12 px-5">
                   <Button 
                     variant="outline" 
                     onClick={() => navigate('/patient-id')}
-                    className="w-full mb-2"
+                    className="w-full mb-4"
                   >
                     Back to Patient ID
                   </Button>
