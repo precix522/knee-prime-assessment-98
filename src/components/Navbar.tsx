@@ -77,10 +77,10 @@ export const Navbar = () => {
           : "bg-transparent py-5"
       )}
     >
-      <div className="container mx-auto px-4 sm:px-4 lg:px-4">
-        <div className="flex justify-between">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between">
           <div className="flex items-center">
-            <a href="/" className="text-gray-800 font-bold text-xl flex items-center">
+            <a href="/" className="text-gray-900 font-bold text-xl flex items-center">
               <span className="text-health-600 mr-1">GATOR</span>
               PRIME
             </a>
