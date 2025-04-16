@@ -364,7 +364,7 @@ export default function ReportViewer() {
           <div className="flex min-h-[calc(100vh-4rem)] w-full max-w-7xl mx-auto relative">
             <Sidebar className="border-r bg-white">
               <SidebarContent className="py-8">
-                <div className="text-center mb-28 px-8 space-y-12">
+                <div className="text-center mb-44 px-12 space-y-22">
                   <div className="flex flex-col items-center justify-center space-y-6">
                     <div className="flex flex-col items-center">
                       <span className="font-bold text-2xl text-orange-600">GATOR</span>
