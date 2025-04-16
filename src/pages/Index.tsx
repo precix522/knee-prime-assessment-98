@@ -116,16 +116,13 @@ export default function Index() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div>
                   <p className="text-lg text-gray-700 mb-6 text-justify">
-                    Gator Prime is an innovative knee health assessment and monitoring system designed to help patients maintain optimal joint health and mobility.
+                    GATOR Prime is an advanced kinematic knee screening tool that offers a simple and effective way to assess your knee joint movement. Whether you're concerned about mobility limitations, recovering from an injury, or just want to take control of your knee health, GATOR Prime delivers personalised insights tailored to your unique needs.
                   </p>
                   <p className="text-lg text-gray-700 mb-6 text-justify">
-                    Our comprehensive platform uses advanced measurement techniques and expert analysis to evaluate your knee condition and provide personalized recommendations.
-                  </p>
-                  <p className="text-lg text-gray-700 mb-6 text-justify">
-                    Developed by a team of orthopedic specialists and health technology experts, our system provides personalized evaluations, recommendations, and progress tracking to ensure you receive the best care for your knee health.
+                    GATOR Prime helps you protect your knee mobility. Even if you have no current symptoms, early screening can prevent future issues and help you stay active for years to come.
                   </p>
                   <p className="text-lg text-gray-700 text-justify">
-                    Whether you're recovering from an injury, managing a chronic condition, or simply aiming to maintain healthy knees, Gator Prime offers the tools and insights you need for long-term joint health.
+                    Take charge of your knee health today with GATOR Prime—ensuring your mobility, comfort and overall well-being.
                   </p>
                   <div className="mt-8">
                     <Button
