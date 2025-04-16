@@ -359,7 +359,7 @@ export default function ReportViewer() {
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Navbar />
-      <div className="flex-1 p-4 md:px-8 md:py-4">
+      <div className="flex-1 p-6 md:px-12 md:py-12">
         <SidebarProvider defaultOpen={true}>
           <div className="flex min-h-[calc(100vh-4rem)] w-full max-w-7xl mx-auto relative">
             <Sidebar className="border-r bg-white">
