@@ -96,9 +96,9 @@ export default function Index() {
                 </div>
                 <div className="text-center">
                   <img 
-                    src="/placeholder.svg" 
-                    alt="Knee Health Assessment" 
-                    className="mx-auto max-w-full h-auto"
+                    src="/lovable-uploads/cbb9c383-12da-4b7c-9a0e-22d0bc691c2f.png" 
+                    alt="Gator Prime Medical Device" 
+                    className="mx-auto max-w-full h-auto rounded-lg shadow-md"
                   />
                 </div>
               </div>
