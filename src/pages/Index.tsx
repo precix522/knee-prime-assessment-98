@@ -80,7 +80,19 @@ export default function Index() {
               </h2>
               <div className="text-center mb-10">
                 <p className="text-xl text-gray-700 mb-6 text-justify">
-                  A comprehensive assessment system designed to evaluate and protect knee joint health.
+                  GATOR PRIME aims to be a global leader in medical technology. We continuously seek to address gaps in the medical and healthcare markets. We promise to invent novel devices and solutions to do so. We strive to deliver these inventions and technology in a universally accessible fashion.
+                </p>
+              </div>
+              
+              <h2 className="text-3xl font-bold text-center mb-6 text-gray-900">
+                Our Vision
+              </h2>
+              <div className="text-center mb-10">
+                <p className="text-xl text-gray-700 mb-6 text-justify">
+                  GATOR PRIME is a medical technology company that believes in constant growth and innovation. We invent that which has not been invented, to enhance precision in diagnosis and efficiency in recovery and rehabilitation.
+                </p>
+                <p className="text-xl text-gray-700 text-justify">
+                  Our vision is to become a global leader in the development of innovative medical devices and solutions, for application within and beyond a clinical setting.
                 </p>
               </div>
               
