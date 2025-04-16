@@ -1,8 +1,10 @@
+
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Navbar } from "../components/Navbar";
 import { Footer } from "../components/Footer";
 import { Button } from "@/components/ui/button";
+import { FeatureCard } from "../components/FeatureCard";
 import { FileText, User, Users, Check, ArrowRight, Info, UserRoundPlus, Star, BookOpen, Activity, Clipboard, BarChart, Award } from "lucide-react";
 import {
   Accordion,
