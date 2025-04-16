@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "../components/Button";
@@ -9,7 +8,7 @@ import { toast as sonnerToast } from "sonner";
 import { useTwilioAuthStore } from "../utils/twilio-auth-store";
 import { RememberMeCheckbox } from "../components/auth/RememberMeCheckbox";
 import { Phone, KeyRound, AlertCircle } from "lucide-react";
-import { supabase } from "../utils/supabase";
+import { supabase } from "../utils/supabase/client";
 import { getUserProfileByPhone } from "../utils/supabase/user-db";
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
@@ -113,85 +112,52 @@ export default function GeneralLogin() {
         
         let userProfile;
         try {
-          // Ensure we're passing the correctly formatted phone number
           const formattedPhone = phone.startsWith('+') ? phone : `+${phone}`;
           userProfile = await getUserProfileByPhone(formattedPhone);
           
           console.log("Retrieved user profile in dev mode:", userProfile);
           
           if (!userProfile) {
-            // Try alternative formats
             const altPhone = phone.startsWith('+') ? phone.substring(1) : `+${phone}`;
             userProfile = await getUserProfileByPhone(altPhone);
             console.log("Retrieved user profile with alt format:", userProfile);
           }
         } catch (profileError) {
           console.error("Error fetching user profile:", profileError);
-          
-          // Create a mock user for dev mode
-          const mockUser = {
-            id: "dev-user-id",
-            phone: phone.startsWith('+') ? phone : `+${phone}`,
-            profile_type: "patient", // Default to patient to test patient flow
-            created_at: new Date().toISOString(),
-            name: "Dev Patient",
-            email: "patient@example.com"
-          };
-          
-          try {
-            const { data, error } = await supabase
-              .from('patient')
-              .insert([{
-                Patient_ID: mockUser.id,
-                phone: mockUser.phone,
-                profile_type: mockUser.profile_type,
-                patient_name: mockUser.name,
-                last_modified_tm: new Date().toLocaleString()
-              }])
-              .select();
-              
-            if (!error && data) {
-              userProfile = {
-                id: data[0].Patient_ID,
-                phone: data[0].phone,
-                profile_type: data[0].profile_type,
-                created_at: data[0].last_modified_tm,
-                name: data[0].patient_name
-              };
-            } else {
-              userProfile = mockUser;
-            }
-          } catch (createError) {
-            console.error("Error creating mock user in patient table:", createError);
-            userProfile = mockUser;
-          }
         }
         
-        if (userProfile) {
-          setLoginUser(userProfile);
-          handleOTPSuccess(userProfile);
-          toast({
-            title: "Success",
-            description: "Dev mode: OTP verified successfully.",
-          });
-        } else {
+        if (!userProfile) {
           const mockUser = {
-            id: "dev-user-id",
+            id: "dev-user-id-" + Date.now(),
             phone: phone.startsWith('+') ? phone : `+${phone}`,
             profile_type: "patient",
             created_at: new Date().toISOString(),
             name: "Dev Patient",
             email: "patient@example.com"
           };
-          setLoginUser(mockUser);
-          handleOTPSuccess(mockUser);
+          
+          console.log("Using mock user in dev mode:", mockUser);
+          if (mockUser) {
+            useTwilioAuthStore.getState().setLoginUser(mockUser);
+            handleOTPSuccess(mockUser);
+            toast({
+              title: "Success",
+              description: "Dev mode: Created mock user and verified successfully.",
+            });
+            setLoading(false);
+            return;
+          }
+        } else {
+          useTwilioAuthStore.getState().setLoginUser(userProfile);
+          handleOTPSuccess(userProfile);
           toast({
             title: "Success",
-            description: "Dev mode: Created mock user and verified successfully.",
+            description: "Dev mode: OTP verified successfully.",
           });
+          setLoading(false);
+          return;
         }
       } else {
-        // Ensure we're passing the correctly formatted phone number
         const formattedPhone = phone.startsWith('+') ? phone : `+${phone}`;
         const user = await verifyOTP(formattedPhone, otp);
         
@@ -227,6 +193,7 @@ export default function GeneralLogin() {
     console.log("OTP success with user:", user);
     
     if (!user) {
+      console.error("OTP success called with null or undefined user");
       toast({
         title: "Error",
         description: "User profile not found.",
@@ -235,7 +202,12 @@ export default function GeneralLogin() {
       return;
     }
     
-    // Ensure session data is saved to localStorage for persistence
+    const validUser = {
+      id: user.id || `temp-${Date.now()}`,
+      phone: user.phone || phone,
+      profile_type: user.profile_type || 'patient'
+    };
+    
     if (!localStorage.getItem('gator_prime_session_id')) {
       const sessionId = `session_${Date.now()}`;
       const expiryTime = Date.now() + (24 * 60 * 60 * 1000); // 24 hours
@@ -243,11 +215,13 @@ export default function GeneralLogin() {
       localStorage.setItem('gator_prime_session_expiry', expiryTime.toString());
     }
     
-    if (user.profile_type === 'admin') {
+    useTwilioAuthStore.getState().setAuthUser(validUser);
+    
+    if (validUser.profile_type === 'admin') {
       sonnerToast.success("Welcome admin! Redirecting to dashboard...");
       navigate("/dashboard");
       return;
-    } else if (user.profile_type === 'patient') {
+    } else if (validUser.profile_type === 'patient') {
       sonnerToast.success("Welcome patient! Redirecting to dashboard...");
       navigate("/dashboard");
       return;

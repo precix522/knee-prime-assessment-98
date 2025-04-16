@@ -244,6 +244,12 @@ export const useTwilioAuthStore = create<AuthState>((set, get) => ({
   clearError: () => set({ error: null }),
   
   setLoginUser: (user) => {
+    // Add null check and default values
+    if (!user) {
+      console.error('setLoginUser called with null or undefined user');
+      return;
+    }
+    
     const phone = user.phone || '';
     
     // Store the authenticated phone for dev mode
@@ -262,6 +268,12 @@ export const useTwilioAuthStore = create<AuthState>((set, get) => ({
   },
   
   setAuthUser: (user) => {
+    // Add null check and default values
+    if (!user) {
+      console.error('setAuthUser called with null or undefined user');
+      return;
+    }
+    
     const phone = user.phone || '';
     
     // Store the authenticated phone for dev mode
