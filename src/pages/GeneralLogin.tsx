@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "../components/Button";
@@ -13,6 +14,7 @@ import { getUserProfileByPhone } from "../utils/supabase/user-db";
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Navbar } from "../components/Navbar";
+import { CaptchaVerification } from "../components/auth/CaptchaVerification";
 
 export default function GeneralLogin() {
   const [phone, setPhone] = useState("");
@@ -21,6 +23,8 @@ export default function GeneralLogin() {
   const [loading, setLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [devMode, setDevMode] = useState(false);
+  const [captchaVerified, setCaptchaVerified] = useState(false);
+  const [captchaError, setCaptchaError] = useState<string | null>(null);
   const { verifyOTP, validateSession, setLoginUser } = useTwilioAuthStore();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -43,11 +47,36 @@ export default function GeneralLogin() {
     checkSession();
   }, [navigate]);
 
+  const handleCaptchaVerify = (token: string | null) => {
+    if (token) {
+      setCaptchaVerified(true);
+      setCaptchaError(null);
+    } else {
+      setCaptchaVerified(false);
+      setCaptchaError("Captcha verification failed. Please try again.");
+    }
+  };
+
+  const handleCaptchaExpire = () => {
+    setCaptchaVerified(false);
+    setCaptchaError("Captcha has expired. Please verify again.");
+  };
+
   const handleSendOTP = async () => {
     if (!phone) {
       toast({
         title: "Error",
         description: "Please enter your phone number.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!captchaVerified && !devMode) {
+      setCaptchaError("Please verify that you are human.");
+      toast({
+        title: "Error",
+        description: "Please complete the captcha verification.",
         variant: "destructive",
       });
       return;
@@ -279,6 +308,16 @@ export default function GeneralLogin() {
                     />
                   </div>
                 </div>
+                
+                {!devMode && (
+                  <div className="mt-4">
+                    <CaptchaVerification 
+                      onVerify={handleCaptchaVerify}
+                      onExpire={handleCaptchaExpire}
+                      error={captchaError}
+                    />
+                  </div>
+                )}
               </div>
               <Button
                 className="w-full mt-6"

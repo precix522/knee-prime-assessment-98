@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useTwilioAuthStore } from "../utils/twilio-auth-store";
@@ -15,6 +14,7 @@ import { RememberMeCheckbox } from "../components/auth/RememberMeCheckbox";
 import { AlertCircle } from "lucide-react";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Navbar } from "../components/Navbar";
+import { CaptchaVerification } from "../components/auth/CaptchaVerification";
 
 export default function Login() {
   const [phone, setPhone] = useState("");
@@ -25,6 +25,8 @@ export default function Login() {
   const [sessionVerified, setSessionVerified] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [devMode, setDevMode] = useState(false);
+  const [captchaVerified, setCaptchaVerified] = useState(false);
+  const [captchaError, setCaptchaError] = useState<string | null>(null);
   const { verifyOTP, validateSession, setAuthUser } = useTwilioAuthStore();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -75,6 +77,21 @@ export default function Login() {
     }
   };
 
+  const handleCaptchaVerify = (token: string | null) => {
+    if (token) {
+      setCaptchaVerified(true);
+      setCaptchaError(null);
+    } else {
+      setCaptchaVerified(false);
+      setCaptchaError("Captcha verification failed. Please try again.");
+    }
+  };
+
+  const handleCaptchaExpire = () => {
+    setCaptchaVerified(false);
+    setCaptchaError("Captcha has expired. Please verify again.");
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -82,6 +99,13 @@ export default function Login() {
 
     if (!phone) {
       setError("Phone number is required.");
+      setLoading(false);
+      return;
+    }
+
+    if (!captchaVerified && !devMode) {
+      setCaptchaError("Please verify that you are human.");
+      setError("Please complete the captcha verification.");
       setLoading(false);
       return;
     }
@@ -302,6 +326,17 @@ export default function Login() {
                 disabled={otpSent}
               />
             </div>
+            
+            {!otpSent && !devMode && (
+              <div className="mt-2">
+                <CaptchaVerification 
+                  onVerify={handleCaptchaVerify}
+                  onExpire={handleCaptchaExpire}
+                  error={captchaError}
+                />
+              </div>
+            )}
+            
             {otpSent && (
               <div className="grid gap-2">
                 <Label htmlFor="otp">OTP Code</Label>
