@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useTwilioAuthStore } from "../utils/twilio-auth-store";
@@ -474,53 +473,64 @@ export default function ReportViewer() {
                             </TableRow>
                           </TableHeader>
                           <TableBody>
-                            {/* Render a row for every found X-ray and MRI report */}
-                            {reportHistory.flatMap((report, index) => {
+                            {(() => {
+                              // For all reports, flatten X-ray and MRI rows
                               const rows: JSX.Element[] = [];
-                              if (report.xrayReportUrl) {
-                                const fileName = report.xrayReportUrl.split("/").pop() || "xray-report.pdf";
-                                rows.push(
-                                  <TableRow key={`xray-${index}`}>
-                                    <TableCell>X-ray</TableCell>
-                                    <TableCell>{report.timestamp || 'Unknown'}</TableCell>
-                                    <TableCell>
-                                      <span className="text-sm text-gray-700 break-all">{fileName}</span>
-                                    </TableCell>
-                                    <TableCell>
-                                      <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => handleDownload(report.xrayReportUrl, fileName)}
-                                      >
-                                        Download
-                                      </Button>
-                                    </TableCell>
-                                  </TableRow>
-                                );
-                              }
-                              if (report.mriReportUrl) {
-                                const fileName = report.mriReportUrl.split("/").pop() || "mri-report.pdf";
-                                rows.push(
-                                  <TableRow key={`mri-${index}`}>
-                                    <TableCell>MRI</TableCell>
-                                    <TableCell>{report.timestamp || 'Unknown'}</TableCell>
-                                    <TableCell>
-                                      <span className="text-sm text-gray-700 break-all">{fileName}</span>
-                                    </TableCell>
-                                    <TableCell>
-                                      <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => handleDownload(report.mriReportUrl, fileName)}
-                                      >
-                                        Download
-                                      </Button>
+                              reportHistory.forEach((report, index) => {
+                                if (report.xrayReportUrl) {
+                                  const fileName = typeof report.xrayReportUrl === "string" ? report.xrayReportUrl.split("/").pop() || "xray-report.pdf" : "xray-report.pdf";
+                                  rows.push(
+                                    <TableRow key={`xray-${index}`}>
+                                      <TableCell>X-ray</TableCell>
+                                      <TableCell>{report.timestamp || 'Unknown'}</TableCell>
+                                      <TableCell>
+                                        <span className="text-sm text-gray-700 break-all">{fileName}</span>
+                                      </TableCell>
+                                      <TableCell>
+                                        <Button
+                                          variant="outline"
+                                          size="sm"
+                                          onClick={() => handleDownload(report.xrayReportUrl as string, fileName)}
+                                        >
+                                          Download
+                                        </Button>
+                                      </TableCell>
+                                    </TableRow>
+                                  );
+                                }
+                                if (report.mriReportUrl) {
+                                  const fileName = typeof report.mriReportUrl === "string" ? report.mriReportUrl.split("/").pop() || "mri-report.pdf" : "mri-report.pdf";
+                                  rows.push(
+                                    <TableRow key={`mri-${index}`}>
+                                      <TableCell>MRI</TableCell>
+                                      <TableCell>{report.timestamp || 'Unknown'}</TableCell>
+                                      <TableCell>
+                                        <span className="text-sm text-gray-700 break-all">{fileName}</span>
+                                      </TableCell>
+                                      <TableCell>
+                                        <Button
+                                          variant="outline"
+                                          size="sm"
+                                          onClick={() => handleDownload(report.mriReportUrl as string, fileName)}
+                                        >
+                                          Download
+                                        </Button>
+                                      </TableCell>
+                                    </TableRow>
+                                  );
+                                }
+                              });
+                              if (rows.length === 0) {
+                                return (
+                                  <TableRow>
+                                    <TableCell colSpan={4} className="text-center text-gray-500">
+                                      No X-ray or MRI report history found.
                                     </TableCell>
                                   </TableRow>
                                 );
                               }
                               return rows;
-                            })}
+                            })()}
                           </TableBody>
                         </Table>
                       </div>
