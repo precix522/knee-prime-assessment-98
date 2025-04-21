@@ -25,14 +25,12 @@ export default function PatientDetailsForm({ onSuccess }: PatientDetailsFormProp
   const [mriPreviewUrl, setMriPreviewUrl] = useState<string | null>(null);
 
   useEffect(() => {
-    // Auto-fetch Patient ID from the authenticated user
     if (user && user.id) {
       setPatientId(user.id);
     }
   }, [user]);
 
   useEffect(() => {
-    // Clean up the object URLs when component unmounts or when files change
     return () => {
       if (xrayPreviewUrl) {
         URL.revokeObjectURL(xrayPreviewUrl);
@@ -47,7 +45,6 @@ export default function PatientDetailsForm({ onSuccess }: PatientDetailsFormProp
     if (e.target.files && e.target.files.length > 0) {
       const file = e.target.files[0];
       setXrayFile(file);
-      // Create preview URL
       const fileUrl = URL.createObjectURL(file);
       setXrayPreviewUrl(fileUrl);
     } else {
@@ -99,7 +96,6 @@ export default function PatientDetailsForm({ onSuccess }: PatientDetailsFormProp
       setError("Patient ID is required");
       return false;
     }
-    // Either MRI or X-ray is required
     if (!mriFile && !xrayFile) {
       setError("Please upload at least one medical image (X-ray or MRI)");
       return false;
@@ -121,22 +117,6 @@ export default function PatientDetailsForm({ onSuccess }: PatientDetailsFormProp
     toast.info("Uploading your medical images...");
 
     try {
-      // Upload MRI and/or X-ray if provided
-      let mriReportUrl = null;
-      let xrayReportUrl = null;
-
-      if (mriFile) {
-        setUploadProgress(25);
-        mriReportUrl = await uploadPatientDocument(mriFile, patientId, 'mri');
-        setUploadProgress(50);
-      }
-      if (xrayFile) {
-        setUploadProgress(mriFile ? 50 : 25);
-        xrayReportUrl = await uploadPatientDocument(xrayFile, patientId, 'xray');
-        setUploadProgress(75);
-      }
-
-      // Prepare timestamp and patient data for the new row
       const now = new Date();
       const formattedDateTime = now.toLocaleDateString('en-US', {
         month: '2-digit',
@@ -149,45 +129,74 @@ export default function PatientDetailsForm({ onSuccess }: PatientDetailsFormProp
         hour12: true
       });
 
-      // INSERT: add new row in patient table, including only the known data for this upload
-      const insertData: any = {
-        Patient_ID: patientId,
-        last_modified_tm: formattedDateTime,
-        profile_type: 'patient'
-      };
-      if (mriReportUrl) insertData.patient_mri_report_url = mriReportUrl;
-      if (xrayReportUrl) insertData.patient_xray_report_url = xrayReportUrl;
+      let xrayRowSuccess = false;
+      let mriRowSuccess = false;
 
-      // You may add other fields here if you have more information (name, phone, etc.)
+      if (xrayFile) {
+        setUploadProgress(25);
+        const xrayReportUrl = await uploadPatientDocument(xrayFile, patientId, 'xray');
+        setUploadProgress(50);
 
-      // Insert new patient record
-      const { error: insertError } = await supabase
-        .from('patient')
-        .insert([insertData])
-        .select();
+        const xrayInsertData: any = {
+          Patient_ID: patientId,
+          last_modified_tm: formattedDateTime,
+          profile_type: 'patient',
+          patient_xray_report_url: xrayReportUrl,
+        };
 
-      if (insertError) {
-        throw new Error(`Error inserting patient record: ${insertError.message}`);
+        const { error: insertError } = await supabase
+          .from('patient')
+          .insert([xrayInsertData])
+          .select();
+
+        if (insertError) {
+          throw new Error(`Error inserting X-ray record: ${insertError.message}`);
+        }
+        xrayRowSuccess = true;
+      }
+
+      if (mriFile) {
+        setUploadProgress(xrayFile ? 50 : 25);
+        const mriReportUrl = await uploadPatientDocument(mriFile, patientId, 'mri');
+        setUploadProgress(75);
+
+        const mriInsertData: any = {
+          Patient_ID: patientId,
+          last_modified_tm: formattedDateTime,
+          profile_type: 'patient',
+          patient_mri_report_url: mriReportUrl,
+        };
+
+        const { error: insertError } = await supabase
+          .from('patient')
+          .insert([mriInsertData])
+          .select();
+
+        if (insertError) {
+          throw new Error(`Error inserting MRI record: ${insertError.message}`);
+        }
+        mriRowSuccess = true;
       }
 
       setUploadProgress(100);
-      toast.success("Medical images uploaded and new patient record added!");
 
-      // Reset form
+      if ((xrayFile && xrayRowSuccess) || (mriFile && mriRowSuccess)) {
+        toast.success("Medical images uploaded and records added!");
+      } else {
+        throw new Error("Neither X-ray nor MRI record was successfully inserted.");
+      }
+
       setXrayFile(null);
       setMriFile(null);
       setXrayPreviewUrl(null);
       setMriPreviewUrl(null);
 
-      // Reset file inputs
       const xrayInput = document.getElementById('xrayFile') as HTMLInputElement;
       if (xrayInput) xrayInput.value = '';
       const mriInput = document.getElementById('mriFile') as HTMLInputElement;
       if (mriInput) mriInput.value = '';
 
-      // Fire success callback
       onSuccess();
-
     } catch (err: any) {
       console.error("Error inserting patient record:", err);
       setError(err.message || "An error occurred while saving your records");
