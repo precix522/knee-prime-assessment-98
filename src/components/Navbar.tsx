@@ -12,13 +12,12 @@ export const Navbar = () => {
   const { user } = useTwilioAuthStore();
   const location = useLocation();
   const navigate = useNavigate();
-  
+
   // Check if user is on dashboard or other authenticated pages
   const isAuthenticatedPage = location.pathname === "/dashboard" || 
                              location.pathname === "/report-viewer";
-  
+
   // Check if user is an admin based on profile_type from Supabase
-  // Add null check for user object
   const isAdmin = user?.profile_type === 'admin';
 
   useEffect(() => {
@@ -35,33 +34,28 @@ export const Navbar = () => {
     };
   }, [scrolled]);
 
-  // Handle redirect to home
   const handleHomeClick = (e: React.MouseEvent) => {
     e.preventDefault();
     navigate("/");
   };
 
-  // Handle redirect to dashboard for admin
   const handleAdminHomeClick = (e: React.MouseEvent) => {
     e.preventDefault();
     navigate("/dashboard");
   };
 
-  // Handle redirect to manage patients form
   const handleManagePatientsClick = (e: React.MouseEvent) => {
     e.preventDefault();
     navigate("/manage-patients");
     setMobileMenuOpen(false);
   };
 
-  // Handle redirect to all reports
   const handleAllReportsClick = (e: React.MouseEvent) => {
     e.preventDefault();
     navigate("/all-reports");
     setMobileMenuOpen(false);
   };
 
-  // Handle redirect to manage users
   const handleManageUsersClick = (e: React.MouseEvent) => {
     e.preventDefault();
     navigate("/manage-users");
@@ -88,7 +82,6 @@ export const Navbar = () => {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
-            {/* Home link always visible */}
             <a 
               href="/" 
               className="text-gray-700 hover:text-health-600 transition-colors duration-300 text-sm font-medium"
@@ -100,7 +93,6 @@ export const Navbar = () => {
               </span>
             </a>
             
-            {/* Admin-specific navigation */}
             {isAdmin ? (
               <a 
                 href="/dashboard" 
@@ -113,7 +105,6 @@ export const Navbar = () => {
                 </span>
               </a>
             ) : (
-              // Regular user navigation - only show these links when not on authenticated pages
               !isAuthenticatedPage && (
                 <>
                   <a 
@@ -137,8 +128,7 @@ export const Navbar = () => {
                 </>
               )
             )}
-            
-            {/* Admin-specific navigation options - only shown for admin users */}
+
             {isAdmin && (
               <>
                 <a 
@@ -195,6 +185,16 @@ export const Navbar = () => {
               </div>
             ) : (
               <div className="flex items-center gap-2">
+                {/* Admin Login Button Added Here */}
+                <Button
+                  onClick={() => window.location.href = '/admin-login'}
+                  variant="health"
+                  size="sm"
+                >
+                  <User size={16} className="mr-1" />
+                  Admin Login
+                </Button>
+
                 <Button 
                   onClick={() => window.location.href = '/login'}
                   variant="health"
@@ -250,7 +250,6 @@ export const Navbar = () => {
         {mobileMenuOpen && (
           <div className="md:hidden py-4 animate-fade-in">
             <div className="flex flex-col space-y-4 px-2 pt-2 pb-3">
-              {/* Home link always visible in mobile menu */}
               <a
                 href="/"
                 className="text-gray-900 hover:text-health-600 transition-colors duration-300 px-3 py-2 rounded-md text-base font-medium"
@@ -266,7 +265,6 @@ export const Navbar = () => {
                 </span>
               </a>
               
-              {/* Mobile: Admin-specific navigation */}
               {isAdmin ? (
                 <a
                   href="/dashboard"
@@ -283,7 +281,6 @@ export const Navbar = () => {
                   </span>
                 </a>
               ) : (
-                // Mobile: Regular user navigation - only show these links when not on authenticated pages
                 !isAuthenticatedPage && (
                   <>
                     <a
@@ -311,7 +308,6 @@ export const Navbar = () => {
                 )
               )}
               
-              {/* Admin-specific mobile navigation options - only shown for admin users */}
               {isAdmin && (
                 <>
                   <a 
@@ -383,6 +379,19 @@ export const Navbar = () => {
                 </div>
               ) : (
                 <div className="flex flex-col gap-3 px-3 py-2">
+                  {/* Admin Login Button added for mobile */}
+                  <Button
+                    onClick={() => {
+                      window.location.href = '/admin-login';
+                      setMobileMenuOpen(false);
+                    }}
+                    variant="health"
+                    size="default"
+                  >
+                    <User size={16} className="mr-1" />
+                    Admin Login
+                  </Button>
+
                   <Button 
                     onClick={() => {
                       window.location.href = '/login';
@@ -416,3 +425,4 @@ export const Navbar = () => {
 };
 
 export default Navbar;
+
