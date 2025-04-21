@@ -1,4 +1,3 @@
-
 import { supabase } from './client';
 
 // Function to check if bucket exists and create if not
@@ -124,7 +123,7 @@ export const uploadPatientDocument = async (file: File, patientId: string, docum
         if (uploadError.message && (
             uploadError.message.includes('row-level security policy') || 
             uploadError.message.includes('Bucket not found') ||
-            uploadError.status === 404)) {
+            false)) {
           console.warn('Upload failed due to permissions or bucket not found, using fallback URL');
           return `https://btfinmlyszedyeadqgvl.supabase.co/storage/v1/object/public/${BUCKET_NAME}/${filePath}`;
         }
@@ -144,7 +143,7 @@ export const uploadPatientDocument = async (file: File, patientId: string, docum
       // Handle specific error types with fallback URLs
       if (uploadErr.error === 'Bucket not found' || 
           uploadErr.message?.includes('Bucket not found') ||
-          (uploadErr.status && uploadErr.status === 404)) {
+          false) {
         console.warn('Bucket not found. Using fallback URL.');
         return `https://btfinmlyszedyeadqgvl.supabase.co/storage/v1/object/public/${BUCKET_NAME}/${filePath}`;
       }
@@ -158,7 +157,7 @@ export const uploadPatientDocument = async (file: File, patientId: string, docum
     if (error.message && (
         error.message.includes('row-level security policy') || 
         error.message.includes('Bucket not found') ||
-        (error.status && error.status === 404) ||
+        false ||
         error.error === 'Bucket not found')) {
       const safePatientId = patientId.replace(/[^a-zA-Z0-9]/g, '_');
       const timestamp = Date.now();
