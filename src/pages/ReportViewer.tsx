@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useTwilioAuthStore } from "../utils/twilio-auth-store";
@@ -41,7 +40,8 @@ export default function ReportViewer() {
   const [activeTab, setActiveTab] = useState("report");
   const [reportHistory, setReportHistory] = useState<PatientReport[]>([]);
   const [selectedReportIndex, setSelectedReportIndex] = useState(0);
-  
+  const [uploadSuccessMessage, setUploadSuccessMessage] = useState<string | null>(null);
+
   const { validateSession, user } = useTwilioAuthStore();
   
   const fetchReports = async () => {
@@ -104,6 +104,12 @@ export default function ReportViewer() {
     fetchReports();
   }, [navigate, validateSession, patientId]);
   
+  useEffect(() => {
+    if (activeTab !== "upload" && uploadSuccessMessage) {
+      setUploadSuccessMessage(null);
+    }
+  }, [activeTab]);  
+
   const handleDownload = (url: string | null, filename: string | null) => {
     if (url) {
       const link = document.createElement('a');
@@ -396,7 +402,61 @@ export default function ReportViewer() {
               
               <TabsContent value="upload" className="mt-0">
                 <h1 className="text-2xl font-bold text-gray-900 mb-4">Upload Your Documents</h1>
-                <PatientDetailsForm onSuccess={() => fetchReports()} />
+                {uploadSuccessMessage && (
+                  <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded text-green-800 text-center">
+                    {uploadSuccessMessage}
+                  </div>
+                )}
+                <PatientDetailsForm
+                  onSuccess={() => {
+                    setUploadSuccessMessage("Your medical images/documents have been uploaded successfully!");
+                    fetchReports();
+                  }}
+                />
+                {reportHistory && reportHistory.length > 0 && (
+                  <div className="mt-8">
+                    <h2 className="text-xl font-semibold text-gray-800 mb-3">Your Report History</h2>
+                    <Table>
+                      <TableCaption>List of all reports for patient {patientId || user?.id}</TableCaption>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Report Date</TableHead>
+                          <TableHead>Assessment ID</TableHead>
+                          <TableHead>Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {reportHistory.map((report, index) => (
+                          <TableRow key={index} className={index === selectedReportIndex ? "bg-orange-50" : ""}>
+                            <TableCell className="font-medium">{report.timestamp || 'Unknown'}</TableCell>
+                            <TableCell>{report.assessmentId || 'N/A'}</TableCell>
+                            <TableCell>
+                              <div className="flex gap-2">
+                                <Button 
+                                  variant="outline" 
+                                  size="sm"
+                                  onClick={() => {
+                                    handleReportSelect(index);
+                                    setActiveTab("report");
+                                  }}
+                                >
+                                  View
+                                </Button>
+                                <Button 
+                                  variant="outline" 
+                                  size="sm"
+                                  onClick={() => handleDownload(report.fileUrl, report.fileName)}
+                                >
+                                  Download
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                )}
               </TabsContent>
               
               <TabsContent value="appointment" className="mt-0">
