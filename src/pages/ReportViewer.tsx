@@ -389,6 +389,81 @@ export default function ReportViewer() {
                         ))}
                       </TableBody>
                     </Table>
+                    <div className="mt-8">
+                      <h2 className="text-xl font-semibold text-gray-800 mb-3">Your X-ray & MRI Report History</h2>
+                      <Table>
+                        <TableCaption>
+                          All historical uploaded X-ray and MRI documents for patient {patientId || user?.id}
+                        </TableCaption>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Type</TableHead>
+                            <TableHead>Report Date</TableHead>
+                            <TableHead>File</TableHead>
+                            <TableHead>Actions</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {(() => {
+                            const rows: JSX.Element[] = [];
+                            reportHistory.forEach((report, idx) => {
+                              if (report.xrayReportUrl && typeof report.xrayReportUrl === "string" && report.xrayReportUrl.trim() !== "") {
+                                const xrayFileName = report.xrayReportUrl.split("/").pop() || "xray-report.pdf";
+                                rows.push(
+                                  <TableRow key={`xray-${idx}`}>
+                                    <TableCell>X-ray</TableCell>
+                                    <TableCell>{report.timestamp || 'Unknown'}</TableCell>
+                                    <TableCell>
+                                      <span className="text-sm text-gray-700 break-all">{xrayFileName}</span>
+                                    </TableCell>
+                                    <TableCell>
+                                      <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => handleDownload(report.xrayReportUrl as string, xrayFileName)}
+                                      >
+                                        Download
+                                      </Button>
+                                    </TableCell>
+                                  </TableRow>
+                                );
+                              }
+                              if (report.mriReportUrl && typeof report.mriReportUrl === "string" && report.mriReportUrl.trim() !== "") {
+                                const mriFileName = report.mriReportUrl.split("/").pop() || "mri-report.pdf";
+                                rows.push(
+                                  <TableRow key={`mri-${idx}`}>
+                                    <TableCell>MRI</TableCell>
+                                    <TableCell>{report.timestamp || 'Unknown'}</TableCell>
+                                    <TableCell>
+                                      <span className="text-sm text-gray-700 break-all">{mriFileName}</span>
+                                    </TableCell>
+                                    <TableCell>
+                                      <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => handleDownload(report.mriReportUrl as string, mriFileName)}
+                                      >
+                                        Download
+                                      </Button>
+                                    </TableCell>
+                                  </TableRow>
+                                );
+                              }
+                            });
+                            if (rows.length === 0) {
+                              return (
+                                <TableRow>
+                                  <TableCell colSpan={4} className="text-center text-gray-500">
+                                    No X-ray or MRI report history found.
+                                  </TableCell>
+                                </TableRow>
+                              );
+                            }
+                            return rows;
+                          })()}
+                        </TableBody>
+                      </Table>
+                    </div>
                   </div>
                 ) : (
                   <div className="border border-gray-200 rounded-md p-8 mb-6 bg-gray-50">
@@ -457,86 +532,9 @@ export default function ReportViewer() {
                         ))}
                       </TableBody>
                     </Table>
-                      {/* X-ray & MRI report history section */}
-                      <div className="mt-8">
-                        <h2 className="text-xl font-semibold text-gray-800 mb-3">Your X-ray & MRI Report History</h2>
-                        <Table>
-                          <TableCaption>
-                            All historical uploaded X-ray and MRI documents for patient {patientId || user?.id}
-                          </TableCaption>
-                          <TableHeader>
-                            <TableRow>
-                              <TableHead>Type</TableHead>
-                              <TableHead>Report Date</TableHead>
-                              <TableHead>File</TableHead>
-                              <TableHead>Actions</TableHead>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
-                            {(() => {
-                              // For all reports, flatten X-ray and MRI rows
-                              const rows: JSX.Element[] = [];
-                              reportHistory.forEach((report, index) => {
-                                if (report.xrayReportUrl) {
-                                  const fileName = typeof report.xrayReportUrl === "string" ? report.xrayReportUrl.split("/").pop() || "xray-report.pdf" : "xray-report.pdf";
-                                  rows.push(
-                                    <TableRow key={`xray-${index}`}>
-                                      <TableCell>X-ray</TableCell>
-                                      <TableCell>{report.timestamp || 'Unknown'}</TableCell>
-                                      <TableCell>
-                                        <span className="text-sm text-gray-700 break-all">{fileName}</span>
-                                      </TableCell>
-                                      <TableCell>
-                                        <Button
-                                          variant="outline"
-                                          size="sm"
-                                          onClick={() => handleDownload(report.xrayReportUrl as string, fileName)}
-                                        >
-                                          Download
-                                        </Button>
-                                      </TableCell>
-                                    </TableRow>
-                                  );
-                                }
-                                if (report.mriReportUrl) {
-                                  const fileName = typeof report.mriReportUrl === "string" ? report.mriReportUrl.split("/").pop() || "mri-report.pdf" : "mri-report.pdf";
-                                  rows.push(
-                                    <TableRow key={`mri-${index}`}>
-                                      <TableCell>MRI</TableCell>
-                                      <TableCell>{report.timestamp || 'Unknown'}</TableCell>
-                                      <TableCell>
-                                        <span className="text-sm text-gray-700 break-all">{fileName}</span>
-                                      </TableCell>
-                                      <TableCell>
-                                        <Button
-                                          variant="outline"
-                                          size="sm"
-                                          onClick={() => handleDownload(report.mriReportUrl as string, fileName)}
-                                        >
-                                          Download
-                                        </Button>
-                                      </TableCell>
-                                    </TableRow>
-                                  );
-                                }
-                              });
-                              if (rows.length === 0) {
-                                return (
-                                  <TableRow>
-                                    <TableCell colSpan={4} className="text-center text-gray-500">
-                                      No X-ray or MRI report history found.
-                                    </TableCell>
-                                  </TableRow>
-                                );
-                              }
-                              return rows;
-                            })()}
-                          </TableBody>
-                        </Table>
-                      </div>
-                    </div>
-                  )}
-                </TabsContent>
+                  </div>
+                )}
+              </TabsContent>
               
               <TabsContent value="appointment" className="mt-0">
                 <h1 className="text-2xl font-bold text-gray-900 mb-4">Book an Appointment</h1>
