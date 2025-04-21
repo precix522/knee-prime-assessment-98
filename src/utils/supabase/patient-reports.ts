@@ -42,15 +42,13 @@ export const getPatientReport = async (patientId: string) => {
     }
     
     // Transform the result to include all reports
-    const patientReports = patientData
-      .map(record => {
-        // Get the report URL from the patient data
+    const patientReports = [];
+    
+    // Process each record
+    for (const record of patientData) {
+      // Process main report if it exists
+      if (record.report_url && typeof record.report_url === 'string' && record.report_url.trim() !== '') {
         let reportUrl = record.report_url;
-        
-        if (!reportUrl || typeof reportUrl !== 'string') {
-          console.log('Invalid report URL for record:', record);
-          return null;
-        }
         
         // Handle case where report_url contains multiple URLs separated by comma
         if (reportUrl.includes(',')) {
@@ -62,54 +60,75 @@ export const getPatientReport = async (patientId: string) => {
         const fileName = reportUrl.split('/').pop() || 'patient-report.pdf';
         
         // Format the timestamp if it exists
-        let formattedTimestamp = '';
-        if (record.last_modified_tm) {
-          try {
-            const date = new Date(record.last_modified_tm);
-            formattedTimestamp = date.toLocaleString('en-US', {
-              month: '2-digit',
-              day: '2-digit',
-              year: 'numeric',
-              hour: '2-digit',
-              minute: '2-digit',
-              second: '2-digit',
-              hour12: true
-            });
-          } catch (e) {
-            formattedTimestamp = record.last_modified_tm || '';
-          }
-        }
+        let formattedTimestamp = formatTimestamp(record.last_modified_tm);
         
-        return { 
+        patientReports.push({ 
           fileUrl: reportUrl, 
           fileName,
           timestamp: formattedTimestamp,
           assessmentId: record.assessment_id,
           xrayReportUrl: record.patient_xray_report_url,
-          mriReportUrl: record.patient_mri_report_url
-        };
-      })
-      .filter(Boolean);
+          mriReportUrl: record.patient_mri_report_url,
+          type: 'main'
+        });
+      }
+      
+      // Always add the record to patientReports if it has X-ray or MRI reports, even if main report is null
+      if (!record.report_url || record.report_url === null) {
+        // Get a unique timestamp for the record
+        const formattedTimestamp = formatTimestamp(record.last_modified_tm);
+        
+        // Create a placeholder entry with the X-ray and MRI report URLs
+        patientReports.push({
+          fileUrl: null,
+          fileName: null,
+          timestamp: formattedTimestamp,
+          assessmentId: record.assessment_id,
+          xrayReportUrl: record.patient_xray_report_url,
+          mriReportUrl: record.patient_mri_report_url,
+          type: 'imaging'
+        });
+      }
+    }
     
     console.log('Processed patient reports:', patientReports);
     
-    if (patientReports.length === 0) {
-      throw new Error('No valid reports found for this patient ID');
-    }
+    // Find a main report to return as the primary report
+    const mainReport = patientReports.find(report => report.type === 'main') || patientReports[0];
     
     // Return all reports and the main report for backward compatibility
     return { 
       allReports: patientReports,
-      fileUrl: patientReports[0].fileUrl, 
-      fileName: patientReports[0].fileName,
-      xrayReportUrl: patientReports[0].xrayReportUrl,
-      mriReportUrl: patientReports[0].mriReportUrl
+      fileUrl: mainReport?.fileUrl || null, 
+      fileName: mainReport?.fileName || null,
+      xrayReportUrl: mainReport?.xrayReportUrl || null,
+      mriReportUrl: mainReport?.mriReportUrl || null
     };
   } catch (error) {
     console.error('Error fetching patient report:', error);
     throw error;
   }
 };
+
+// Helper function to format timestamp
+function formatTimestamp(timestamp) {
+  if (!timestamp) return '';
+  
+  try {
+    const date = new Date(timestamp);
+    return date.toLocaleString('en-US', {
+      month: '2-digit',
+      day: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: true
+    });
+  } catch (e) {
+    return timestamp || '';
+  }
+}
 
 // Updated function to fetch supporting documents for the Annex view
 export const getAnnexReport = async (patientId: string) => {
