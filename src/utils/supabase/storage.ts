@@ -1,4 +1,3 @@
-
 import { supabase } from './client';
 
 // Function to check if bucket exists and create if not
@@ -84,31 +83,29 @@ export const uploadPatientDocument = async (file: File, patientId: string, docum
     if (!file) {
       throw new Error('No file provided');
     }
-    
-    // Use correct bucket name "patient-reports" as specified by user
+    // Always use correct bucket name
     const BUCKET_NAME = 'patient-reports';
-    
+
     try {
-      // Ensure bucket exists before proceeding
       await ensureBucketExists(BUCKET_NAME);
     } catch (bucketError) {
       console.warn(`Bucket check failed, but will attempt upload anyway:`, bucketError);
       // We'll continue and try to upload even if bucket check fails
       // The bucket might exist but just not be visible/modifiable by the current user
     }
-    
-    // Create folder path based on patient ID (use underscore instead of slash for patientId to avoid path issues)
-    // Clean any potential quote marks or text formatting from the patientId
-    const cleanPatientId = patientId.replace(/[^a-zA-Z0-9]/g, '_').replace(/'|::|text/g, '');
+
+    // Clean the patientId to prevent unwanted formatting
+    const cleanPatientId = patientId.replace(/'|::|text/gi, '').trim();
+
     const timestamp = Date.now();
     const folderPath = `${cleanPatientId}`;
     const fileExt = file.name.split('.').pop();
     const fileName = `${documentType}-report-${timestamp}.${fileExt}`;
     const filePath = `${folderPath}/${fileName}`;
-    
+
     console.log(`Uploading ${documentType} report for patient ${cleanPatientId} to bucket '${BUCKET_NAME}'...`);
     console.log(`File path: ${filePath}`);
-    
+
     try {
       // Upload the file
       const { data: uploadData, error: uploadError } = await supabase.storage
@@ -117,59 +114,52 @@ export const uploadPatientDocument = async (file: File, patientId: string, docum
           upsert: true,
           cacheControl: '3600'
         });
-        
+
       if (uploadError) {
-        console.error('File upload error:', uploadError);
-        
-        // If error is related to RLS policy or bucket not found, try to return a fallback URL
         if (uploadError.message && (
-            uploadError.message.includes('row-level security policy') || 
+            uploadError.message.includes('row-level security policy') ||
             uploadError.message.includes('Bucket not found'))) {
-          console.warn('Upload failed due to permissions or bucket not found, using fallback URL');
           return `https://btfinmlyszedyeadqgvl.supabase.co/storage/v1/object/public/${BUCKET_NAME}/${filePath}`;
         }
-        
         throw uploadError;
       }
-      
+
       // Get public URL for the file
       const { data: { publicUrl } } = supabase.storage
         .from(BUCKET_NAME)
         .getPublicUrl(filePath);
-        
+
       console.log(`${documentType} report uploaded successfully, URL:`, publicUrl);
-      
+
       return publicUrl;
     } catch (uploadErr: any) {
-      // Handle specific error types with fallback URLs
       if (
         uploadErr.message?.includes('Bucket not found')
       ) {
-        console.warn('Bucket not found. Using fallback URL.');
         return `https://btfinmlyszedyeadqgvl.supabase.co/storage/v1/object/public/${BUCKET_NAME}/${filePath}`;
       }
       throw uploadErr;
     }
-    
+
   } catch (error: any) {
     console.error('Error in uploadPatientDocument:', error);
-    
+
     // If we get here and error is related to RLS or bucket not found, try to construct a URL assuming the upload might have succeeded
     if (error.message && (
-        error.message.includes('row-level security policy') || 
+        error.message.includes('row-level security policy') ||
         error.message.includes('Bucket not found') ||
         error.error === 'Bucket not found')) {
       // Clean patientId again to be safe
-      const cleanPatientId = patientId.replace(/[^a-zA-Z0-9]/g, '_').replace(/'|::|text/g, '');
+      const cleanPatientId = patientId.replace(/'|::|text/gi, '').trim();
       const timestamp = Date.now();
       const fileExt = file.name.split('.').pop();
       const fileName = `${documentType}-report-${timestamp}.${fileExt}`;
       const filePath = `${cleanPatientId}/${fileName}`;
-      
+
       console.warn('Returning potential URL despite bucket error');
       return `https://btfinmlyszedyeadqgvl.supabase.co/storage/v1/object/public/patient-reports/${filePath}`;
     }
-    
+
     throw error;
   }
 };
