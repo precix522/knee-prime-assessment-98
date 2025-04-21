@@ -1,4 +1,3 @@
-
 import { supabase } from './client';
 
 // Helper to sanitize patientId (remove casts, quotes, etc.)
@@ -64,12 +63,8 @@ export const createPatientRecord = async (patientData: {
     let cleanPatientId = cleanId(patientData.patientId);
     let cleanPhone = patientData.phoneNumber.trim();
 
-    // Step 1: If Patient_ID already exists, append a timestamp as suffix
-    const exists = await checkPatientIdExists(cleanPatientId);
-    if (exists) {
-      const timestamp = Date.now();
-      cleanPatientId = `${cleanPatientId}_${timestamp}`;
-    }
+    // Step 1: NO LONGER append timestamp to patientId!
+    // We just use the cleanPatientId as is
 
     // Step 2: If phone already exists, make it unique by appending timestamp
     const phoneExists = await checkPhoneExists(cleanPhone);
@@ -78,7 +73,7 @@ export const createPatientRecord = async (patientData: {
       cleanPhone = `${cleanPhone}_${phoneTimestamp}`;
     }
 
-    // Step 3: Prepare the record object with explicit profile_type as 'patient'
+    // Step 3: Prepare the record object
     const patientRecord = {
       Patient_ID: cleanPatientId,
       patient_name: patientData.patientName.trim(),
@@ -105,4 +100,3 @@ export const createPatientRecord = async (patientData: {
     throw error;
   }
 };
-
