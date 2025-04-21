@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useTwilioAuthStore } from "../utils/twilio-auth-store";
@@ -181,21 +182,21 @@ export default function ReportViewer() {
                   <span>View My Report</span>
                 </TabsTrigger>
                 <TabsTrigger 
-                  value="history" 
+                  value="annex" 
                   className="justify-start w-full mb-1 data-[state=active]:bg-orange-100 data-[state=active]:text-orange-700"
                 >
                  <BookOpen className="mr-2 h-5 w-5" />
-                  <span>View Annex </span>
+                  <span>View Annex</span>
                 </TabsTrigger>
                 <TabsTrigger 
-                  value="upload" 
+                  value="history" 
                   className="justify-start w-full mb-1 data-[state=active]:bg-orange-100 data-[state=active]:text-orange-700"
                 >
                   <Clock className="mr-2 h-5 w-5" />
                   <span>View Report History</span>
                 </TabsTrigger>
                 <TabsTrigger 
-                  value="annex" 
+                  value="upload" 
                   className="justify-start w-full mb-1 data-[state=active]:bg-orange-100 data-[state=active]:text-orange-700"
                 >
                   <Upload className="mr-2 h-5 w-5" />
@@ -296,6 +297,46 @@ export default function ReportViewer() {
                 )}
               </TabsContent>
               
+              <TabsContent value="annex" className="mt-0">
+                <h1 className="text-2xl font-bold text-gray-900 mb-4">Annex Report</h1>
+                
+                {annexReportUrl ? (
+                  <div className="flex flex-col">
+                    <div className="border border-gray-200 rounded-md mb-6 overflow-hidden bg-gray-50 h-[600px]">
+                      <iframe 
+                        src={annexReportUrl}
+                        className="w-full h-full"
+                        title="Annex Report PDF"
+                        frameBorder="0"
+                      ></iframe>
+                    </div>
+                    <div className="mb-4">
+                      <Button 
+                        variant="health" 
+                        onClick={handleAnnexDownload}
+                        className="flex items-center gap-2"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                          <polyline points="7 10 12 15 17 10"></polyline>
+                          <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                        Download Annex Report
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="border border-gray-200 rounded-md p-8 mb-6 bg-gray-50">
+                    <p className="text-center text-lg">
+                      No annex report available.
+                    </p>
+                    <p className="text-center text-gray-600 mt-2">
+                      Please contact support if you believe this is an error.
+                    </p>
+                  </div>
+                )}
+              </TabsContent>
+              
               <TabsContent value="history" className="mt-0">
                 <h1 className="text-2xl font-bold text-gray-900 mb-4">Report History</h1>
                 
@@ -348,46 +389,6 @@ export default function ReportViewer() {
                     </p>
                     <p className="text-center text-gray-600 mt-2">
                       Please check if the patient ID is correct or contact support.
-                    </p>
-                  </div>
-                )}
-              </TabsContent>
-              
-              <TabsContent value="annex" className="mt-0">
-                <h1 className="text-2xl font-bold text-gray-900 mb-4">Annex Report</h1>
-                
-                {annexReportUrl ? (
-                  <div className="flex flex-col">
-                    <div className="border border-gray-200 rounded-md mb-6 overflow-hidden bg-gray-50 h-[600px]">
-                      <iframe 
-                        src={annexReportUrl}
-                        className="w-full h-full"
-                        title="Annex Report PDF"
-                        frameBorder="0"
-                      ></iframe>
-                    </div>
-                    <div className="mb-4">
-                      <Button 
-                        variant="health" 
-                        onClick={handleAnnexDownload}
-                        className="flex items-center gap-2"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                          <polyline points="7 10 12 15 17 10"></polyline>
-                          <line x1="12" y1="15" x2="12" y2="3"></line>
-                        </svg>
-                        Download Annex Report
-                      </Button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="border border-gray-200 rounded-md p-8 mb-6 bg-gray-50">
-                    <p className="text-center text-lg">
-                      No annex report available.
-                    </p>
-                    <p className="text-center text-gray-600 mt-2">
-                      Please contact support if you believe this is an error.
                     </p>
                   </div>
                 )}
