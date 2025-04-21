@@ -85,8 +85,8 @@ export const uploadPatientDocument = async (file: File, patientId: string, docum
       throw new Error('No file provided');
     }
     
-    // Use correct bucket name "Patient-report" as specified by user
-    const BUCKET_NAME = 'Patient-report';
+    // Use correct bucket name "patient-reports" as specified by user
+    const BUCKET_NAME = 'patient-reports';
     
     try {
       // Ensure bucket exists before proceeding
@@ -139,17 +139,18 @@ export const uploadPatientDocument = async (file: File, patientId: string, docum
       console.log(`${documentType} report uploaded successfully, URL:`, publicUrl);
       
       return publicUrl;
-    } catch (uploadErr) {
+    } catch (uploadErr: any) {
       // Handle specific error types with fallback URLs
-      if (uploadErr.error === 'Bucket not found' || 
-          uploadErr.message?.includes('Bucket not found')) {
+      if (
+        uploadErr.message?.includes('Bucket not found')
+      ) {
         console.warn('Bucket not found. Using fallback URL.');
         return `https://btfinmlyszedyeadqgvl.supabase.co/storage/v1/object/public/${BUCKET_NAME}/${filePath}`;
       }
       throw uploadErr;
     }
     
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error in uploadPatientDocument:', error);
     
     // If we get here and error is related to RLS or bucket not found, try to construct a URL assuming the upload might have succeeded
@@ -164,7 +165,7 @@ export const uploadPatientDocument = async (file: File, patientId: string, docum
       const filePath = `${safePatientId}/${fileName}`;
       
       console.warn('Returning potential URL despite bucket error');
-      return `https://btfinmlyszedyeadqgvl.supabase.co/storage/v1/object/public/Patient-report/${filePath}`;
+      return `https://btfinmlyszedyeadqgvl.supabase.co/storage/v1/object/public/patient-reports/${filePath}`;
     }
     
     throw error;
