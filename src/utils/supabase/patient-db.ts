@@ -78,7 +78,7 @@ export const createPatientRecord = async (patientData: {
       cleanPhone = `${cleanPhone}_${phoneTimestamp}`;
     }
 
-    // Step 3: Prepare the record object
+    // Step 3: Prepare the record object with explicit profile_type as 'patient'
     const patientRecord = {
       Patient_ID: cleanPatientId,
       patient_name: patientData.patientName.trim(),
@@ -87,6 +87,7 @@ export const createPatientRecord = async (patientData: {
       patient_xray_report_url: patientData.xrayReportUrl || null,
       patient_mri_report_url: patientData.mriReportUrl || null,
       last_modified_tm: formattedDate,
+      profile_type: 'patient'  // explicitly set to 'patient'
     };
 
     // Insert new record
@@ -104,3 +105,4 @@ export const createPatientRecord = async (patientData: {
     throw error;
   }
 };
+
