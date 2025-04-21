@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useTwilioAuthStore } from "../utils/twilio-auth-store";
@@ -23,6 +24,8 @@ type PatientReport = {
   fileName: string;
   timestamp: string;
   assessmentId?: number;
+  xrayReportUrl?: string | null;
+  mriReportUrl?: string | null;
 };
 
 export default function ReportViewer() {
