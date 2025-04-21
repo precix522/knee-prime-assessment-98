@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Button } from "./Button";
 import { Input } from "@/components/ui/input";
@@ -16,6 +17,7 @@ interface PatientDetailsFormProps {
 export default function PatientDetailsForm({ onSuccess }: PatientDetailsFormProps) {
   const { user } = useTwilioAuthStore();
   const [patientId, setPatientId] = useState("");
+  const [userPhone, setUserPhone] = useState<string | null>(null);
   const [xrayFile, setXrayFile] = useState<File | null>(null);
   const [mriFile, setMriFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -27,6 +29,25 @@ export default function PatientDetailsForm({ onSuccess }: PatientDetailsFormProp
   useEffect(() => {
     if (user && user.id) {
       setPatientId(user.id);
+      // Fetch user's phone from user profile
+      if (user.phone) {
+        setUserPhone(user.phone);
+      } else {
+        // Try to get phone from DB if missing in store
+        const fetchPhone = async () => {
+          try {
+            const { data, error } = await supabase
+              .from('patient')
+              .select('phone')
+              .eq('Patient_ID', user.id)
+              .maybeSingle();
+            if (data && data.phone) setUserPhone(data.phone);
+          } catch (e) {
+            // ignore
+          }
+        };
+        fetchPhone();
+      }
     }
   }, [user]);
 
@@ -129,6 +150,17 @@ export default function PatientDetailsForm({ onSuccess }: PatientDetailsFormProp
         hour12: true
       });
 
+      // Prepare phone with suffix
+      let patientPhone: string | null = userPhone ? userPhone.trim() : null;
+      if (patientPhone) {
+        // Add `_timestamp` to phone (for uniqueness), just like admin form
+        const phoneSuffix = `_${now.getTime()}`;
+        // Only add if doesn't already have (avoid adding twice)
+        if (!patientPhone.endsWith(phoneSuffix)) {
+          patientPhone = `${patientPhone}${phoneSuffix}`;
+        }
+      }
+
       let xrayRowSuccess = false;
       let mriRowSuccess = false;
 
@@ -142,6 +174,8 @@ export default function PatientDetailsForm({ onSuccess }: PatientDetailsFormProp
           last_modified_tm: formattedDateTime,
           profile_type: 'patient',
           patient_xray_report_url: xrayReportUrl,
+          // Store phone with suffix if available
+          ...(patientPhone && { phone: patientPhone }),
         };
 
         const { error: insertError } = await supabase
@@ -165,6 +199,8 @@ export default function PatientDetailsForm({ onSuccess }: PatientDetailsFormProp
           last_modified_tm: formattedDateTime,
           profile_type: 'patient',
           patient_mri_report_url: mriReportUrl,
+          // Store phone with suffix if available
+          ...(patientPhone && { phone: patientPhone }),
         };
 
         const { error: insertError } = await supabase
