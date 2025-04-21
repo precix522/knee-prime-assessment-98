@@ -58,9 +58,12 @@ export const createPatientRecord = async (patientData: {
     
     console.log('Formatted date for database:', formattedDate);
     
+    // Ensure patientId is a plain string without any text casting
+    const cleanPatientId = patientData.patientId.replace(/'|::|text/g, '');
+    
     // Prepare the record object with correct field names matching the database schema
     const patientRecord = {
-      Patient_ID: patientData.patientId,
+      Patient_ID: cleanPatientId,
       patient_name: patientData.patientName,
       phone: patientData.phoneNumber,
       report_url: patientData.reportUrl,
@@ -80,62 +83,47 @@ export const createPatientRecord = async (patientData: {
     if (insertError) {
       console.error('Direct insert failed:', insertError);
       
-      // If the problem is a duplicate phone number, try using upsert instead
+      // If the problem is a duplicate phone number, add a random suffix
       if (insertError.message && insertError.message.includes('patient_phone_key')) {
-        console.log('Trying upsert instead due to phone key constraint...');
+        console.log('Duplicate phone number detected, adding random suffix...');
         
-        const { data: upsertData, error: upsertError } = await supabase
+        // Generate a random 6-digit number as suffix
+        const randomSuffix = Math.floor(100000 + Math.random() * 900000);
+        patientRecord.phone = `${patientRecord.phone}_${randomSuffix}`;
+        
+        console.log('Retrying with modified phone number:', patientRecord.phone);
+        
+        const { data: retryData, error: retryError } = await supabase
           .from('patient')
-          .upsert([patientRecord], { 
-            onConflict: 'Patient_ID',
-            ignoreDuplicates: false 
-          })
+          .insert([patientRecord])
           .select();
           
-        if (upsertError) {
-          console.error('Upsert also failed:', upsertError);
-          
-          // Last resort: generate a unique phone number
-          console.log('Trying with modified phone number...');
-          const timestamp = Date.now();
-          patientRecord.phone = `${patientRecord.phone}_${timestamp}`;
-          
-          const { data: finalData, error: finalError } = await supabase
-            .from('patient')
-            .insert([patientRecord])
-            .select();
-            
-          if (finalError) {
-            console.error('All approaches failed:', finalError);
-            throw finalError;
-          }
-          
-          console.log('Patient record saved with modified phone. Database response:', finalData);
-          return finalData;
+        if (retryError) {
+          console.error('Insert with modified phone also failed:', retryError);
+          throw retryError;
         }
         
-        console.log('Patient record upserted successfully. Database response:', upsertData);
-        return upsertData;
+        console.log('Patient record saved with modified phone. Database response:', retryData);
+        return retryData;
       }
       
-      // If the error is not related to phone key constraint, try RPC as a fallback
-      console.log('Trying RPC method...');
-      try {
-        const { data: rpcData, error: rpcError } = await supabase
-          .rpc('insert_patient_ignore_phone_duplicate', patientRecord)
-          .select();
-          
-        if (rpcError) {
-          console.error('RPC method also failed:', rpcError);
-          throw rpcError;
-        }
+      // Try upsert as fallback for other issues
+      console.log('Trying upsert instead...');
+      const { data: upsertData, error: upsertError } = await supabase
+        .from('patient')
+        .upsert([patientRecord], { 
+          onConflict: 'Patient_ID',
+          ignoreDuplicates: false 
+        })
+        .select();
         
-        console.log('Patient record saved using RPC. Database response:', rpcData);
-        return rpcData;
-      } catch (rpcErr) {
-        console.error('RPC approach failed:', rpcErr);
-        throw insertError; // Throw the original error if RPC also fails
+      if (upsertError) {
+        console.error('Upsert also failed:', upsertError);
+        throw upsertError;
       }
+      
+      console.log('Patient record upserted successfully. Database response:', upsertData);
+      return upsertData;
     }
     
     console.log('Patient record saved successfully via direct insert. Database response:', insertData);
@@ -146,11 +134,11 @@ export const createPatientRecord = async (patientData: {
     
     // Special handling for duplicate key violations
     if (error.message && error.message.includes('patient_phone_key')) {
-      // Create a timestamp to make the phone number unique
-      const timestamp = Date.now();
+      // Create a random 6-digit number to make the phone number unique
+      const randomSuffix = Math.floor(100000 + Math.random() * 900000);
       const modifiedPatientData = {
         ...patientData,
-        phoneNumber: `${patientData.phoneNumber}_${timestamp}`
+        phoneNumber: `${patientData.phoneNumber}_${randomSuffix}`
       };
       
       // Try again with the modified phone number

@@ -98,14 +98,15 @@ export const uploadPatientDocument = async (file: File, patientId: string, docum
     }
     
     // Create folder path based on patient ID (use underscore instead of slash for patientId to avoid path issues)
-    const safePatientId = patientId.replace(/[^a-zA-Z0-9]/g, '_');
+    // Clean any potential quote marks or text formatting from the patientId
+    const cleanPatientId = patientId.replace(/[^a-zA-Z0-9]/g, '_').replace(/'|::|text/g, '');
     const timestamp = Date.now();
-    const folderPath = `${safePatientId}`;
+    const folderPath = `${cleanPatientId}`;
     const fileExt = file.name.split('.').pop();
     const fileName = `${documentType}-report-${timestamp}.${fileExt}`;
     const filePath = `${folderPath}/${fileName}`;
     
-    console.log(`Uploading ${documentType} report for patient ${patientId} to bucket '${BUCKET_NAME}'...`);
+    console.log(`Uploading ${documentType} report for patient ${cleanPatientId} to bucket '${BUCKET_NAME}'...`);
     console.log(`File path: ${filePath}`);
     
     try {
@@ -158,11 +159,12 @@ export const uploadPatientDocument = async (file: File, patientId: string, docum
         error.message.includes('row-level security policy') || 
         error.message.includes('Bucket not found') ||
         error.error === 'Bucket not found')) {
-      const safePatientId = patientId.replace(/[^a-zA-Z0-9]/g, '_');
+      // Clean patientId again to be safe
+      const cleanPatientId = patientId.replace(/[^a-zA-Z0-9]/g, '_').replace(/'|::|text/g, '');
       const timestamp = Date.now();
       const fileExt = file.name.split('.').pop();
       const fileName = `${documentType}-report-${timestamp}.${fileExt}`;
-      const filePath = `${safePatientId}/${fileName}`;
+      const filePath = `${cleanPatientId}/${fileName}`;
       
       console.warn('Returning potential URL despite bucket error');
       return `https://btfinmlyszedyeadqgvl.supabase.co/storage/v1/object/public/patient-reports/${filePath}`;

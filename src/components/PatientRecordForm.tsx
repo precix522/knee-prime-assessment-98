@@ -129,10 +129,13 @@ export default function PatientRecordForm({ onSuccess }: PatientRecordFormProps)
       console.log('Current formatted date/time for database:', formattedDateTime);
       
       // Step 3: Create the patient record with strong typing
+      // Ensure patientId is clean without any special characters
+      const cleanPatientId = formData.patientId.trim().replace(/['":]+/g, '');
+      
       const patientData = {
-        patientId: formData.patientId,
-        patientName: formData.patientName,
-        phoneNumber: formData.phoneNumber,
+        patientId: cleanPatientId,
+        patientName: formData.patientName.trim(),
+        phoneNumber: formData.phoneNumber.trim(),
         reportUrl: reportUrl,
         lastModifiedTime: formattedDateTime
       };
