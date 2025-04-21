@@ -4,15 +4,18 @@ import { supabase } from './client';
 // Function to check if patient ID already exists
 export const checkPatientIdExists = async (patientId: string): Promise<boolean> => {
   try {
+    console.log(`Checking if patient ID ${patientId} exists...`);
     const { data, error } = await supabase
       .from('patient')
       .select('Patient_ID')
       .eq('Patient_ID', patientId);
       
     if (error) {
+      console.error('Error checking patient ID:', error);
       throw error;
     }
     
+    console.log(`Patient ID check result:`, data);
     return data && data.length > 0;
   } catch (error) {
     console.error('Error checking patient ID:', error);
@@ -68,48 +71,75 @@ export const createPatientRecord = async (patientData: {
     
     console.log('Sending new record to database:', patientRecord);
     
-    // Use RPC call to insert record bypassing unique constraint on phone
-    // This will use a custom SQL function in Supabase
-    const { data, error } = await supabase
-      .rpc('insert_patient_ignore_phone_duplicate', patientRecord)
+    // First, try a direct insert - most straightforward approach
+    const { data: insertData, error: insertError } = await supabase
+      .from('patient')
+      .insert([patientRecord])
       .select();
+    
+    if (insertError) {
+      console.error('Direct insert failed:', insertError);
       
-    if (error) {
-      console.error('Supabase error while inserting patient record:', error);
-      
-      // Fallback to direct insert if RPC fails
-      // This will only work if the unique constraint on phone is removed from the database
-      const { data: insertData, error: insertError } = await supabase
-        .from('patient')
-        .insert([patientRecord])
-        .select();
+      // If the problem is a duplicate phone number, try using upsert instead
+      if (insertError.message && insertError.message.includes('patient_phone_key')) {
+        console.log('Trying upsert instead due to phone key constraint...');
         
-      if (insertError) {
-        console.error('Fallback insert also failed:', insertError);
-        
-        // If both methods fail, try one more approach - modify the record to make phone unique
-        const timestamp = Date.now();
-        patientRecord.phone = `${patientRecord.phone}_${timestamp}`;
-        
-        const { data: finalData, error: finalError } = await supabase
+        const { data: upsertData, error: upsertError } = await supabase
           .from('patient')
-          .insert([patientRecord])
+          .upsert([patientRecord], { 
+            onConflict: 'Patient_ID',
+            ignoreDuplicates: false 
+          })
           .select();
           
-        if (finalError) {
-          throw new Error(`Failed to save patient record: ${finalError.message}`);
+        if (upsertError) {
+          console.error('Upsert also failed:', upsertError);
+          
+          // Last resort: generate a unique phone number
+          console.log('Trying with modified phone number...');
+          const timestamp = Date.now();
+          patientRecord.phone = `${patientRecord.phone}_${timestamp}`;
+          
+          const { data: finalData, error: finalError } = await supabase
+            .from('patient')
+            .insert([patientRecord])
+            .select();
+            
+          if (finalError) {
+            console.error('All approaches failed:', finalError);
+            throw finalError;
+          }
+          
+          console.log('Patient record saved with modified phone. Database response:', finalData);
+          return finalData;
         }
         
-        console.log('Patient record saved with modified phone number. Database response:', finalData);
-        return finalData;
+        console.log('Patient record upserted successfully. Database response:', upsertData);
+        return upsertData;
       }
       
-      console.log('Patient record saved with fallback method. Database response:', insertData);
-      return insertData;
+      // If the error is not related to phone key constraint, try RPC as a fallback
+      console.log('Trying RPC method...');
+      try {
+        const { data: rpcData, error: rpcError } = await supabase
+          .rpc('insert_patient_ignore_phone_duplicate', patientRecord)
+          .select();
+          
+        if (rpcError) {
+          console.error('RPC method also failed:', rpcError);
+          throw rpcError;
+        }
+        
+        console.log('Patient record saved using RPC. Database response:', rpcData);
+        return rpcData;
+      } catch (rpcErr) {
+        console.error('RPC approach failed:', rpcErr);
+        throw insertError; // Throw the original error if RPC also fails
+      }
     }
     
-    console.log('Patient record saved successfully. Database response:', data);
-    return data;
+    console.log('Patient record saved successfully via direct insert. Database response:', insertData);
+    return insertData;
     
   } catch (error: any) {
     console.error('Error creating patient record:', error.message || error);

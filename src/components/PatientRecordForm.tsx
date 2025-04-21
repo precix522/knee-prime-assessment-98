@@ -85,6 +85,7 @@ export default function PatientRecordForm({ onSuccess }: PatientRecordFormProps)
         console.log('Uploading main report file...');
         reportUrl = await uploadPatientDocument(file, patientId, 'main');
         setUploadProgress(100);
+        console.log('Upload complete, report URL:', reportUrl);
       }
       
       return { reportUrl };
@@ -137,6 +138,7 @@ export default function PatientRecordForm({ onSuccess }: PatientRecordFormProps)
       };
       
       // Step 4: Submit the data to Supabase
+      console.log('Sending patient data to database:', patientData);
       const result = await createPatientRecord(patientData);
       
       console.log('Patient record creation result:', result);
