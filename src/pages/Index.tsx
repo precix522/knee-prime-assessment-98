@@ -21,20 +21,8 @@ export default function Index() {
       <Navbar />
       
       <main className="flex-grow">
-        {/* Hero Section with Admin Login in corner */}
+        {/* Hero Section - Removed Admin Login from corner */}
         <section className="text-center py-16 bg-gradient-to-b from-white to-gray-50 relative">
-          <div className="absolute top-4 right-4 z-10">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => navigate("/manage-patients")}
-              className="px-4 py-2"
-            >
-              <UserRoundPlus className="mr-2 h-4 w-4" />
-              Admin Login
-            </Button>
-          </div>
-
           <div className="container mx-auto px-4">
             <div className="max-w-6xl mx-auto space-y-6">
               <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-gray-900">
@@ -326,7 +314,7 @@ export default function Index() {
             </div>
           </div>
         </section>
-          
+        
         {/* How It Works Section */}
         <section className="py-16 bg-white">
           <div className="container mx-auto px-4">
