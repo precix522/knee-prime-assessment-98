@@ -1,4 +1,3 @@
-
 import { supabase } from './client';
 
 // Function to check if bucket exists and create if not
@@ -46,7 +45,8 @@ export const uploadPatientDocument = async (file: File, patientId: string, docum
       throw new Error('No file provided');
     }
     
-    const BUCKET_NAME = 'patient-reports';
+    // Use correct bucket name "Patient-report" as specified by user
+    const BUCKET_NAME = 'Patient-report';
     
     // Ensure bucket exists before proceeding
     await ensureBucketExists(BUCKET_NAME);
