@@ -14,6 +14,8 @@ interface PatientRecord {
   patientId: string;
   phoneNumber: string;
   reportFiles: FileList | null;
+  xrayFiles: FileList | null;
+  mriFiles: FileList | null;
 }
 
 interface PatientRecordFormProps {
@@ -26,6 +28,8 @@ export default function PatientRecordForm({ onSuccess }: PatientRecordFormProps)
     patientId: "",
     phoneNumber: "",
     reportFiles: null,
+    xrayFiles: null,
+    mriFiles: null,
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -34,8 +38,8 @@ export default function PatientRecordForm({ onSuccess }: PatientRecordFormProps)
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, files } = e.target;
     
-    if (name === "reportFiles" && files) {
-      setFormData({ ...formData, reportFiles: files });
+    if ((name === "reportFiles" || name === "xrayFiles" || name === "mriFiles") && files) {
+      setFormData({ ...formData, [name]: files });
     } else {
       setFormData({ ...formData, [name]: value });
     }
@@ -73,22 +77,44 @@ export default function PatientRecordForm({ onSuccess }: PatientRecordFormProps)
   
   const uploadFiles = async () => {
     try {
-      setUploadProgress(20);
-      const uniqueTimestamp = Date.now();
+      setUploadProgress(10);
       const patientId = formData.patientId;
       let reportUrl = null;
+      let xrayReportUrl = null;
+      let mriReportUrl = null;
       
       // Upload main report file
       if (formData.reportFiles && formData.reportFiles.length > 0) {
         const file = formData.reportFiles[0];
-        setUploadProgress(50);
+        setUploadProgress(30);
         console.log('Uploading main report file...');
         reportUrl = await uploadPatientDocument(file, patientId, 'main');
-        setUploadProgress(100);
-        console.log('Upload complete, report URL:', reportUrl);
+        setUploadProgress(50);
+        console.log('Main report upload complete, URL:', reportUrl);
       }
       
-      return { reportUrl };
+      // Upload X-ray report file if provided
+      if (formData.xrayFiles && formData.xrayFiles.length > 0) {
+        const xrayFile = formData.xrayFiles[0];
+        setUploadProgress(60);
+        console.log('Uploading X-ray report file...');
+        xrayReportUrl = await uploadPatientDocument(xrayFile, patientId, 'xray');
+        setUploadProgress(75);
+        console.log('X-ray report upload complete, URL:', xrayReportUrl);
+      }
+      
+      // Upload MRI report file if provided
+      if (formData.mriFiles && formData.mriFiles.length > 0) {
+        const mriFile = formData.mriFiles[0];
+        setUploadProgress(85);
+        console.log('Uploading MRI report file...');
+        mriReportUrl = await uploadPatientDocument(mriFile, patientId, 'mri');
+        setUploadProgress(95);
+        console.log('MRI report upload complete, URL:', mriReportUrl);
+      }
+      
+      setUploadProgress(100);
+      return { reportUrl, xrayReportUrl, mriReportUrl };
     } catch (error: any) {
       console.error("File upload error:", error);
       throw new Error(`File upload failed: ${error.message}`);
@@ -110,8 +136,8 @@ export default function PatientRecordForm({ onSuccess }: PatientRecordFormProps)
     
     try {
       // Step 1: Upload files and get the URLs
-      const { reportUrl } = await uploadFiles();
-      console.log('Report URL after upload:', reportUrl);
+      const { reportUrl, xrayReportUrl, mriReportUrl } = await uploadFiles();
+      console.log('Report URLs after upload:', { reportUrl, xrayReportUrl, mriReportUrl });
       
       // Step 2: Get current date and time in format MM/DD/YYYY, hh:mm:ss AM/PM
       const now = new Date();
@@ -137,6 +163,8 @@ export default function PatientRecordForm({ onSuccess }: PatientRecordFormProps)
         patientName: formData.patientName.trim(),
         phoneNumber: formData.phoneNumber.trim(),
         reportUrl: reportUrl,
+        xrayReportUrl: xrayReportUrl,
+        mriReportUrl: mriReportUrl,
         lastModifiedTime: formattedDateTime
       };
       
@@ -153,13 +181,18 @@ export default function PatientRecordForm({ onSuccess }: PatientRecordFormProps)
         patientId: "",
         phoneNumber: "",
         reportFiles: null,
+        xrayFiles: null,
+        mriFiles: null,
       });
       
-      // Reset file input
-      const fileInput = document.getElementById('reportFiles') as HTMLInputElement;
-      if (fileInput) {
-        fileInput.value = '';
-      }
+      // Reset file inputs
+      const fileInputs = ['reportFiles', 'xrayFiles', 'mriFiles'];
+      fileInputs.forEach(inputId => {
+        const fileInput = document.getElementById(inputId) as HTMLInputElement;
+        if (fileInput) {
+          fileInput.value = '';
+        }
+      });
       
       // Call onSuccess callback if provided
       if (onSuccess) {
@@ -241,6 +274,38 @@ export default function PatientRecordForm({ onSuccess }: PatientRecordFormProps)
             />
             <p className="text-xs text-gray-500 mt-1">
               Upload main patient report (required)
+            </p>
+          </div>
+          
+          <div>
+            <Label htmlFor="xrayFiles">X-ray Report (PDF)</Label>
+            <Input 
+              id="xrayFiles" 
+              name="xrayFiles"
+              type="file"
+              onChange={handleInputChange}
+              accept=".pdf"
+              disabled={isLoading}
+              className="cursor-pointer"
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              Upload X-ray report (optional)
+            </p>
+          </div>
+          
+          <div>
+            <Label htmlFor="mriFiles">MRI Report (PDF)</Label>
+            <Input 
+              id="mriFiles" 
+              name="mriFiles"
+              type="file"
+              onChange={handleInputChange}
+              accept=".pdf"
+              disabled={isLoading}
+              className="cursor-pointer"
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              Upload MRI report (optional)
             </p>
           </div>
           
