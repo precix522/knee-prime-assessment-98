@@ -148,7 +148,7 @@ export default function ReportViewer() {
     return (
       <div className="min-h-screen flex flex-col bg-gray-50">
         <Navbar />
-        <div className="flex-1 flex items-center justify-center">
+        <div className="flex-1 flex items-center justify-center pt-16">
           <div className="text-center">
             <div className="w-16 h-16 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
             <p className="text-gray-600">Loading your report...</p>
@@ -198,16 +198,16 @@ export default function ReportViewer() {
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Navbar />
-      <div className="flex-1 p-4 md:p-6">
+      <div className="flex-1 p-4 md:p-6 pt-24">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row gap-6">
-          <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6 md:w-72">
+          <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6 md:w-72">
             <div className="space-y-6">
-              <div className="text-center pb-4 border-b border-gray-100">
-                <div className="font-bold text-xl text-gray-900 flex items-center justify-center gap-1.5 mb-2">
-                  <span>GATOR</span>
-                  <span className="bg-orange-600 text-white px-2 py-0.5 rounded text-sm">PRIME</span>
+              <div className="text-center pb-5 border-b border-gray-200">
+                <div className="mb-2">
+                  <span className="text-2xl font-bold text-gray-900">GATOR</span>
+                  <span className="bg-orange-600 text-white px-2 py-0.5 rounded text-base ml-1">PRIME</span>
                 </div>
-                <p className="text-gray-600 text-sm">
+                <p className="text-gray-600 text-sm mt-2">
                   Patient ID: {patientId || (user?.id)}
                 </p>
               </div>
@@ -219,38 +219,38 @@ export default function ReportViewer() {
                 value={activeTab}
                 onValueChange={setActiveTab}
               >
-                <TabsList className="flex flex-col h-auto bg-transparent space-y-1 w-full">
+                <TabsList className="flex flex-col h-auto bg-transparent space-y-2 w-full">
                   <TabsTrigger 
                     value="report" 
-                    className="justify-start w-full px-3 py-2.5 text-gray-700 hover:bg-gray-50 data-[state=active]:bg-orange-50 data-[state=active]:text-orange-700"
+                    className="justify-start w-full px-4 py-3 text-gray-700 hover:bg-gray-50 data-[state=active]:bg-orange-50 data-[state=active]:text-orange-700 rounded-md"
                   >
                     <FileText className="mr-3 h-5 w-5" />
                     <span className="font-medium">View My Report</span>
                   </TabsTrigger>
                   <TabsTrigger 
                     value="annex" 
-                    className="justify-start w-full px-3 py-2.5 text-gray-700 hover:bg-gray-50 data-[state=active]:bg-orange-50 data-[state=active]:text-orange-700"
+                    className="justify-start w-full px-4 py-3 text-gray-700 hover:bg-gray-50 data-[state=active]:bg-orange-50 data-[state=active]:text-orange-700 rounded-md"
                   >
                     <BookOpen className="mr-3 h-5 w-5" />
                     <span className="font-medium">View Annex</span>
                   </TabsTrigger>
                   <TabsTrigger 
                     value="history" 
-                    className="justify-start w-full px-3 py-2.5 text-gray-700 hover:bg-gray-50 data-[state=active]:bg-orange-50 data-[state=active]:text-orange-700"
+                    className="justify-start w-full px-4 py-3 text-gray-700 hover:bg-gray-50 data-[state=active]:bg-orange-50 data-[state=active]:text-orange-700 rounded-md"
                   >
                     <Clock className="mr-3 h-5 w-5" />
                     <span className="font-medium">View Report History</span>
                   </TabsTrigger>
                   <TabsTrigger 
                     value="upload" 
-                    className="justify-start w-full px-3 py-2.5 text-gray-700 hover:bg-gray-50 data-[state=active]:bg-orange-50 data-[state=active]:text-orange-700"
+                    className="justify-start w-full px-4 py-3 text-gray-700 hover:bg-gray-50 data-[state=active]:bg-orange-50 data-[state=active]:text-orange-700 rounded-md"
                   >
                     <Upload className="mr-3 h-5 w-5" />
                     <span className="font-medium">Upload Your Documents</span>
                   </TabsTrigger>
                   <TabsTrigger 
                     value="appointment" 
-                    className="justify-start w-full px-3 py-2.5 text-gray-700 hover:bg-gray-50 data-[state=active]:bg-orange-50 data-[state=active]:text-orange-700"
+                    className="justify-start w-full px-4 py-3 text-gray-700 hover:bg-gray-50 data-[state=active]:bg-orange-50 data-[state=active]:text-orange-700 rounded-md"
                   >
                     <CalendarDays className="mr-3 h-5 w-5" />
                     <span className="font-medium">Book Appointment</span>
@@ -258,11 +258,11 @@ export default function ReportViewer() {
                 </TabsList>
               </Tabs>
 
-              <div className="space-y-3 pt-4 border-t border-gray-100">
+              <div className="space-y-3 pt-5 border-t border-gray-200">
                 <Button 
                   variant="outline" 
                   onClick={() => navigate('/patient-id')}
-                  className="w-full justify-start text-gray-700"
+                  className="w-full justify-start text-gray-700 border-gray-300 h-10"
                 >
                   Back to Patient ID
                 </Button>
@@ -270,24 +270,24 @@ export default function ReportViewer() {
                 <Button 
                   variant="health" 
                   onClick={() => navigate('/dashboard')}
-                  className="w-full justify-start bg-orange-600 hover:bg-orange-700"
+                  className="w-full justify-start bg-orange-600 hover:bg-orange-700 h-10"
                 >
                   Go to Dashboard
                 </Button>
               </div>
 
-              <div className="pt-4 border-t border-gray-100">
+              <div className="pt-5 border-t border-gray-200">
                 <p className="text-sm text-gray-600">
-                  <span className="font-semibold block mb-2">Contact</span>
+                  <span className="font-semibold block mb-3">Contact</span>
                   2 College Road #02-00,<br />
                   Singapore 169850<br />
-                  <span className="mt-2 block">Email: info@precix.io</span>
+                  <span className="mt-3 block">Email: info@precix.io</span>
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="flex-1 bg-white rounded-lg shadow-sm border border-gray-100 p-6">
+          <div className="flex-1 bg-white rounded-lg shadow-md border border-gray-200 p-6">
             <Tabs value={activeTab} className="w-full">
               <TabsContent value="report" className="mt-0">
                 <h1 className="text-2xl font-bold text-gray-900 mb-4">Patient Report</h1>
@@ -310,7 +310,7 @@ export default function ReportViewer() {
                         </div>
                       )}
                     </div>
-                    <div className="border border-gray-200 rounded-md mb-6 overflow-hidden bg-gray-50 h-[600px]">
+                    <div className="border border-gray-300 rounded-md mb-6 overflow-hidden bg-gray-50 h-[650px] shadow-sm">
                       <iframe 
                         src={reportUrl}
                         className="w-full h-full"
@@ -335,7 +335,7 @@ export default function ReportViewer() {
                   </div>
                 ) : (
                   !error && (
-                    <div className="border border-gray-200 rounded-md p-8 mb-6 bg-gray-50">
+                    <div className="border border-gray-300 rounded-md p-8 mb-6 bg-gray-50 shadow-sm">
                       <p className="text-center text-lg">
                         No report found for this patient ID.
                       </p>
@@ -352,7 +352,7 @@ export default function ReportViewer() {
                 
                 {annexReportUrl ? (
                   <div className="flex flex-col">
-                    <div className="border border-gray-200 rounded-md mb-6 overflow-hidden bg-gray-50 h-[600px]">
+                    <div className="border border-gray-300 rounded-md mb-6 overflow-hidden bg-gray-50 h-[650px] shadow-sm">
                       <iframe 
                         src={annexReportUrl}
                         className="w-full h-full"
@@ -376,7 +376,7 @@ export default function ReportViewer() {
                     </div>
                   </div>
                 ) : (
-                  <div className="border border-gray-200 rounded-md p-8 mb-6 bg-gray-50">
+                  <div className="border border-gray-300 rounded-md p-8 mb-6 bg-gray-50 shadow-sm">
                     <p className="text-center text-lg">
                       No annex report available.
                     </p>
@@ -392,47 +392,131 @@ export default function ReportViewer() {
                 
                 {reportHistory && reportHistory.length > 0 ? (
                   <div className="flex flex-col">
-                    <Table>
-                      <TableCaption>List of all reports for patient {patientId || user?.id}</TableCaption>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Report Date</TableHead>
-                          <TableHead>Assessment ID</TableHead>
-                          <TableHead>Actions</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {reportHistory.map((report, index) => (
-                          <TableRow key={index} className={index === selectedReportIndex ? "bg-orange-50" : ""}>
-                            <TableCell className="font-medium">{report.timestamp || 'Unknown'}</TableCell>
-                            <TableCell>{report.assessmentId || 'N/A'}</TableCell>
-                            <TableCell>
-                              <div className="flex gap-2">
-                                <Button 
-                                  variant="outline" 
-                                  size="sm"
-                                  onClick={() => {
-                                    handleReportSelect(index);
-                                    setActiveTab("report");
-                                  }}
-                                >
-                                  View
-                                </Button>
-                                <Button 
-                                  variant="outline" 
-                                  size="sm"
-                                  onClick={() => handleDownload(report.fileUrl, report.fileName)}
-                                >
-                                  Download
-                                </Button>
-                              </div>
-                            </TableCell>
+                    <div className="border border-gray-200 rounded-lg overflow-hidden">
+                      <Table>
+                        <TableCaption>List of all reports for patient {patientId || user?.id}</TableCaption>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Report Date</TableHead>
+                            <TableHead>Assessment ID</TableHead>
+                            <TableHead>Actions</TableHead>
                           </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
+                        </TableHeader>
+                        <TableBody>
+                          {reportHistory.map((report, index) => (
+                            <TableRow key={index} className={index === selectedReportIndex ? "bg-orange-50" : ""}>
+                              <TableCell className="font-medium">{report.timestamp || 'Unknown'}</TableCell>
+                              <TableCell>{report.assessmentId || 'N/A'}</TableCell>
+                              <TableCell>
+                                <div className="flex gap-2">
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm"
+                                    onClick={() => {
+                                      handleReportSelect(index);
+                                      setActiveTab("report");
+                                    }}
+                                  >
+                                    View
+                                  </Button>
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm"
+                                    onClick={() => handleDownload(report.fileUrl, report.fileName)}
+                                  >
+                                    Download
+                                  </Button>
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
                     <div className="mt-8">
                       <h2 className="text-xl font-semibold text-gray-800 mb-3">Your X-ray & MRI Report History</h2>
+                      <div className="border border-gray-200 rounded-lg overflow-hidden">
+                        <Table>
+                          <TableCaption>
+                            All historical uploaded X-ray and MRI documents for patient {patientId || user?.id}
+                          </TableCaption>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead>Type</TableHead>
+                              <TableHead>Report Date</TableHead>
+                              <TableHead>File</TableHead>
+                              <TableHead>Actions</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {(() => {
+                              const rows = getXrayMriRows();
+                              if (!rows.length) {
+                                return (
+                                  <TableRow>
+                                    <TableCell colSpan={4} className="text-center text-gray-500">
+                                      No X-ray or MRI report history found.
+                                    </TableCell>
+                                  </TableRow>
+                                );
+                              }
+                              return rows.map((row, idx) => (
+                                <TableRow key={`${row.type}-${idx}`}>
+                                  <TableCell>{row.type}</TableCell>
+                                  <TableCell>{row.timestamp}</TableCell>
+                                  <TableCell>
+                                    <span className="text-sm text-gray-700 break-all">
+                                      {row.fileName}
+                                    </span>
+                                  </TableCell>
+                                  <TableCell>
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => handleDownload(row.url, row.fileName)}
+                                    >
+                                      Download
+                                    </Button>
+                                  </TableCell>
+                                </TableRow>
+                              ));
+                            })()}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="border border-gray-300 rounded-md p-8 mb-6 bg-gray-50 shadow-sm">
+                    <p className="text-center text-lg">
+                      No report history found for this patient ID.
+                    </p>
+                    <p className="text-center text-gray-600 mt-2">
+                      Please check if the patient ID is correct or contact support.
+                    </p>
+                  </div>
+                )}
+              </TabsContent>
+              
+              <TabsContent value="upload" className="mt-0">
+                <h1 className="text-2xl font-bold text-gray-900 mb-4">Upload Your Documents</h1>
+                {uploadSuccessMessage && (
+                  <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded text-green-800 text-center">
+                    {uploadSuccessMessage}
+                  </div>
+                )}
+                <div className="border border-gray-200 rounded-lg p-6">
+                  <PatientDetailsForm
+                    onSuccess={() => {
+                      setUploadSuccessMessage("Your medical images/documents have been uploaded successfully!");
+                      fetchReports();
+                    }}
+                  />
+                </div>
+                {reportHistory && reportHistory.length > 0 && (
+                  <div className="mt-8">
+                    <h2 className="text-xl font-semibold text-gray-800 mb-3">Your X-ray & MRI Report History</h2>
+                    <div className="border border-gray-200 rounded-lg overflow-hidden">
                       <Table>
                         <TableCaption>
                           All historical uploaded X-ray and MRI documents for patient {patientId || user?.id}
@@ -482,89 +566,13 @@ export default function ReportViewer() {
                       </Table>
                     </div>
                   </div>
-                ) : (
-                  <div className="border border-gray-200 rounded-md p-8 mb-6 bg-gray-50">
-                    <p className="text-center text-lg">
-                      No report history found for this patient ID.
-                    </p>
-                    <p className="text-center text-gray-600 mt-2">
-                      Please check if the patient ID is correct or contact support.
-                    </p>
-                  </div>
-                )}
-              </TabsContent>
-              
-              <TabsContent value="upload" className="mt-0">
-                <h1 className="text-2xl font-bold text-gray-900 mb-4">Upload Your Documents</h1>
-                {uploadSuccessMessage && (
-                  <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded text-green-800 text-center">
-                    {uploadSuccessMessage}
-                  </div>
-                )}
-                <PatientDetailsForm
-                  onSuccess={() => {
-                    setUploadSuccessMessage("Your medical images/documents have been uploaded successfully!");
-                    fetchReports();
-                  }}
-                />
-                {reportHistory && reportHistory.length > 0 && (
-                  <div className="mt-8">
-                    <h2 className="text-xl font-semibold text-gray-800 mb-3">Your X-ray & MRI Report History</h2>
-                    <Table>
-                      <TableCaption>
-                        All historical uploaded X-ray and MRI documents for patient {patientId || user?.id}
-                      </TableCaption>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Type</TableHead>
-                          <TableHead>Report Date</TableHead>
-                          <TableHead>File</TableHead>
-                          <TableHead>Actions</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {(() => {
-                          const rows = getXrayMriRows();
-                          if (!rows.length) {
-                            return (
-                              <TableRow>
-                                <TableCell colSpan={4} className="text-center text-gray-500">
-                                  No X-ray or MRI report history found.
-                                </TableCell>
-                              </TableRow>
-                            );
-                          }
-                          return rows.map((row, idx) => (
-                            <TableRow key={`${row.type}-${idx}`}>
-                              <TableCell>{row.type}</TableCell>
-                              <TableCell>{row.timestamp}</TableCell>
-                              <TableCell>
-                                <span className="text-sm text-gray-700 break-all">
-                                  {row.fileName}
-                                </span>
-                              </TableCell>
-                              <TableCell>
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => handleDownload(row.url, row.fileName)}
-                                >
-                                  Download
-                                </Button>
-                              </TableCell>
-                            </TableRow>
-                          ));
-                        })()}
-                      </TableBody>
-                    </Table>
-                  </div>
                 )}
               </TabsContent>
               
               <TabsContent value="appointment" className="mt-0">
                 <h1 className="text-2xl font-bold text-gray-900 mb-4">Book an Appointment</h1>
                 
-                <div className="border border-gray-200 rounded-md p-8 mb-6 bg-gray-50">
+                <div className="border border-gray-300 rounded-md p-8 mb-6 bg-gray-50 shadow-sm">
                   <p className="text-center text-lg">
                     Schedule a follow-up assessment to track your progress
                   </p>
