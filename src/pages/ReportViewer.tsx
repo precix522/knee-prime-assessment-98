@@ -198,91 +198,96 @@ export default function ReportViewer() {
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Navbar />
-      <div className="flex-1 p-4 md:p-8">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row gap-4">
-          <div className="bg-white rounded-lg shadow-md p-4 md:w-64 lg:w-72">
-            <div className="text-center mb-6">
-              <div className="font-bold text-xl text-orange-600 flex items-center justify-center mb-2">
-                <span className="mr-1">GATOR</span>
-                <span className="bg-orange-600 text-white px-2 py-0.5 rounded">PRIME</span>
+      <div className="flex-1 p-4 md:p-6">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row gap-6">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6 md:w-72">
+            <div className="space-y-6">
+              <div className="text-center pb-4 border-b border-gray-100">
+                <div className="font-bold text-xl text-gray-900 flex items-center justify-center gap-1.5 mb-2">
+                  <span>GATOR</span>
+                  <span className="bg-orange-600 text-white px-2 py-0.5 rounded text-sm">PRIME</span>
+                </div>
+                <p className="text-gray-600 text-sm">
+                  Patient ID: {patientId || (user?.id)}
+                </p>
               </div>
-              <p className="text-gray-700 font-medium">
-                Patient ID: {patientId || (user?.id)}
-              </p>
-            </div>
 
-            <Tabs 
-              defaultValue="report"
-              orientation="vertical" 
-              className="w-full"
-              value={activeTab}
-              onValueChange={setActiveTab}
-            >
-              <TabsList className="flex flex-col h-auto bg-gray-100 p-1 w-full">
-                <TabsTrigger 
-                  value="report" 
-                  className="justify-start w-full mb-1 data-[state=active]:bg-orange-100 data-[state=active]:text-orange-700"
-                >
-                  <FileText className="mr-2 h-5 w-5" />
-                  <span>View My Report</span>
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="annex" 
-                  className="justify-start w-full mb-1 data-[state=active]:bg-orange-100 data-[state=active]:text-orange-700"
-                >
-                 <BookOpen className="mr-2 h-5 w-5" />
-                  <span>View Annex</span>
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="history" 
-                  className="justify-start w-full mb-1 data-[state=active]:bg-orange-100 data-[state=active]:text-orange-700"
-                >
-                  <Clock className="mr-2 h-5 w-5" />
-                  <span>View Report History</span>
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="upload" 
-                  className="justify-start w-full mb-1 data-[state=active]:bg-orange-100 data-[state=active]:text-orange-700"
-                >
-                  <Upload className="mr-2 h-5 w-5" />
-                  <span>Upload Your Documents</span>
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="appointment" 
-                  className="justify-start w-full data-[state=active]:bg-orange-100 data-[state=active]:text-orange-700"
-                >
-                  <CalendarDays className="mr-2 h-5 w-5" />
-                  <span>Book Appointment</span>
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
-
-            <div className="mt-6">
-              <Button 
-                variant="outline" 
-                onClick={() => navigate('/patient-id')}
-                className="w-full mb-2"
-              >
-                Back to Patient ID
-              </Button>
-              
-              <Button 
-                variant="health" 
-                onClick={() => navigate('/dashboard')}
+              <Tabs 
+                defaultValue="report"
+                orientation="vertical" 
                 className="w-full"
+                value={activeTab}
+                onValueChange={setActiveTab}
               >
-                Go to Dashboard
-              </Button>
-            </div>
-            <div>
-            <p className="text-center text-sm mt-2"> <b>Contact</b>
-            <p> 2 College Road #02-00, Singapore 169850</p>
-            <p> Email : info@precix.io</p>
-              </p>
+                <TabsList className="flex flex-col h-auto bg-transparent space-y-1 w-full">
+                  <TabsTrigger 
+                    value="report" 
+                    className="justify-start w-full px-3 py-2.5 text-gray-700 hover:bg-gray-50 data-[state=active]:bg-orange-50 data-[state=active]:text-orange-700"
+                  >
+                    <FileText className="mr-3 h-5 w-5" />
+                    <span className="font-medium">View My Report</span>
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="annex" 
+                    className="justify-start w-full px-3 py-2.5 text-gray-700 hover:bg-gray-50 data-[state=active]:bg-orange-50 data-[state=active]:text-orange-700"
+                  >
+                    <BookOpen className="mr-3 h-5 w-5" />
+                    <span className="font-medium">View Annex</span>
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="history" 
+                    className="justify-start w-full px-3 py-2.5 text-gray-700 hover:bg-gray-50 data-[state=active]:bg-orange-50 data-[state=active]:text-orange-700"
+                  >
+                    <Clock className="mr-3 h-5 w-5" />
+                    <span className="font-medium">View Report History</span>
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="upload" 
+                    className="justify-start w-full px-3 py-2.5 text-gray-700 hover:bg-gray-50 data-[state=active]:bg-orange-50 data-[state=active]:text-orange-700"
+                  >
+                    <Upload className="mr-3 h-5 w-5" />
+                    <span className="font-medium">Upload Your Documents</span>
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="appointment" 
+                    className="justify-start w-full px-3 py-2.5 text-gray-700 hover:bg-gray-50 data-[state=active]:bg-orange-50 data-[state=active]:text-orange-700"
+                  >
+                    <CalendarDays className="mr-3 h-5 w-5" />
+                    <span className="font-medium">Book Appointment</span>
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
+
+              <div className="space-y-3 pt-4 border-t border-gray-100">
+                <Button 
+                  variant="outline" 
+                  onClick={() => navigate('/patient-id')}
+                  className="w-full justify-start text-gray-700"
+                >
+                  Back to Patient ID
+                </Button>
+                
+                <Button 
+                  variant="health" 
+                  onClick={() => navigate('/dashboard')}
+                  className="w-full justify-start bg-orange-600 hover:bg-orange-700"
+                >
+                  Go to Dashboard
+                </Button>
+              </div>
+
+              <div className="pt-4 border-t border-gray-100">
+                <p className="text-sm text-gray-600">
+                  <span className="font-semibold block mb-2">Contact</span>
+                  2 College Road #02-00,<br />
+                  Singapore 169850<br />
+                  <span className="mt-2 block">Email: info@precix.io</span>
+                </p>
+              </div>
             </div>
           </div>
 
-          <div className="flex-1 bg-white rounded-lg shadow-md p-4 md:p-8">
+          <div className="flex-1 bg-white rounded-lg shadow-sm border border-gray-100 p-6">
             <Tabs value={activeTab} className="w-full">
               <TabsContent value="report" className="mt-0">
                 <h1 className="text-2xl font-bold text-gray-900 mb-4">Patient Report</h1>
