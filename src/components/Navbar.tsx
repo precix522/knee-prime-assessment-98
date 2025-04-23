@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "./Button";
 import { cn } from "../lib/utils";
@@ -67,8 +66,8 @@ export const Navbar = () => {
       className={cn(
         "fixed w-full top-0 z-50 transition-all duration-300",
         scrolled 
-          ? "bg-white/80 backdrop-blur-md shadow-sm py-3" 
-          : "bg-transparent py-5"
+          ? "bg-white/90 backdrop-blur-md shadow-sm py-3" 
+          : "bg-white py-4"
       )}
     >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -185,7 +184,6 @@ export const Navbar = () => {
               </div>
             ) : (
               <div className="flex items-center gap-2">
-                {/* Admin Login Button Added Here */}
                 <Button
                   onClick={() => window.location.href = '/admin-login'}
                   variant="health"
@@ -379,7 +377,6 @@ export const Navbar = () => {
                 </div>
               ) : (
                 <div className="flex flex-col gap-3 px-3 py-2">
-                  {/* Admin Login Button added for mobile */}
                   <Button
                     onClick={() => {
                       window.location.href = '/admin-login';
@@ -425,4 +422,3 @@ export const Navbar = () => {
 };
 
 export default Navbar;
-

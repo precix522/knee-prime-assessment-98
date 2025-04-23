@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useTwilioAuthStore } from "../utils/twilio-auth-store";
@@ -198,12 +199,14 @@ export default function ReportViewer() {
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Navbar />
-      <div className="flex-1 p-4 md:p-6 pt-24">
+      {/* Increased top padding to fix the overlap with navbar */}
+      <div className="flex-1 p-4 md:p-6 pt-28">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row gap-6">
-          <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6 md:w-72">
+          {/* Sidebar with improved spacing */}
+          <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6 md:w-80">
             <div className="space-y-6">
               <div className="text-center pb-5 border-b border-gray-200">
-                <div className="mb-2">
+                <div className="mb-4">
                   <span className="text-2xl font-bold text-gray-900">GATOR</span>
                   <span className="bg-orange-600 text-white px-2 py-0.5 rounded text-base ml-1">PRIME</span>
                 </div>
@@ -215,11 +218,11 @@ export default function ReportViewer() {
               <Tabs 
                 defaultValue="report"
                 orientation="vertical" 
-                className="w-full"
+                className="w-full mt-6"
                 value={activeTab}
                 onValueChange={setActiveTab}
               >
-                <TabsList className="flex flex-col h-auto bg-transparent space-y-2 w-full">
+                <TabsList className="flex flex-col h-auto bg-transparent space-y-3 w-full">
                   <TabsTrigger 
                     value="report" 
                     className="justify-start w-full px-4 py-3 text-gray-700 hover:bg-gray-50 data-[state=active]:bg-orange-50 data-[state=active]:text-orange-700 rounded-md"
@@ -258,7 +261,7 @@ export default function ReportViewer() {
                 </TabsList>
               </Tabs>
 
-              <div className="space-y-3 pt-5 border-t border-gray-200">
+              <div className="space-y-3 pt-6 mt-4 border-t border-gray-200">
                 <Button 
                   variant="outline" 
                   onClick={() => navigate('/patient-id')}
@@ -276,7 +279,7 @@ export default function ReportViewer() {
                 </Button>
               </div>
 
-              <div className="pt-5 border-t border-gray-200">
+              <div className="pt-6 mt-2 border-t border-gray-200">
                 <p className="text-sm text-gray-600">
                   <span className="font-semibold block mb-3">Contact</span>
                   2 College Road #02-00,<br />
@@ -290,7 +293,7 @@ export default function ReportViewer() {
           <div className="flex-1 bg-white rounded-lg shadow-md border border-gray-200 p-6">
             <Tabs value={activeTab} className="w-full">
               <TabsContent value="report" className="mt-0">
-                <h1 className="text-2xl font-bold text-gray-900 mb-4">Patient Report</h1>
+                <h1 className="text-2xl font-bold text-gray-900 mb-6">Patient Report</h1>
                 
                 {error && (
                   <div className="border border-red-200 rounded-md p-4 mb-6 bg-red-50 text-red-600">
@@ -310,7 +313,8 @@ export default function ReportViewer() {
                         </div>
                       )}
                     </div>
-                    <div className="border border-gray-300 rounded-md mb-6 overflow-hidden bg-gray-50 h-[650px] shadow-sm">
+                    {/* Increased height for better display */}
+                    <div className="border border-gray-300 rounded-md mb-6 overflow-hidden bg-gray-50 h-[700px] shadow-sm">
                       <iframe 
                         src={reportUrl}
                         className="w-full h-full"
