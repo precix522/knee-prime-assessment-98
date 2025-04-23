@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "./Button";
 import { cn } from "../lib/utils";
@@ -73,9 +74,9 @@ export const Navbar = () => {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between">
           <div className="flex items-center">
-            <a href="/" className="text-gray-900 font-bold text-xl flex items-center">
-              <span className="text-health-600 mr-1">GATOR</span>
-              PRIME
+            <a href="/" className="text-gray-900 font-bold text-xl flex items-center space-x-1">
+              <span className="text-health-600">GATOR</span>
+              <span>PRIME</span>
             </a>
           </div>
 
@@ -166,8 +167,8 @@ export const Navbar = () => {
             {user ? (
               <div className="flex items-center gap-4">
                 <div className="flex items-center gap-2">
-                  <User size={16} className="text-health-600" />
-                  <span className="text-sm font-medium">
+                  <User size={16} className="text-health-600 shrink-0" />
+                  <span className="text-sm font-medium truncate max-w-[150px]">
                     {user?.phone || "User"}
                     {isAdmin && <span className="ml-1 text-health-600">(Admin)</span>}
                   </span>

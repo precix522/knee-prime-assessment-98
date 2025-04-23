@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useTwilioAuthStore } from "../utils/twilio-auth-store";
@@ -199,94 +198,90 @@ export default function ReportViewer() {
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Navbar />
-      {/* Increased top padding to fix the overlap with navbar */}
       <div className="flex-1 p-4 md:p-6 pt-28">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row gap-6">
-          {/* Sidebar with improved spacing */}
-          <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6 md:w-80">
-            <div className="space-y-6">
-              <div className="text-center pb-5 border-b border-gray-200">
-                <div className="mb-4">
-                  <span className="text-2xl font-bold text-gray-900">GATOR</span>
-                  <span className="bg-orange-600 text-white px-2 py-0.5 rounded text-base ml-1">PRIME</span>
-                </div>
-                <p className="text-gray-600 text-sm mt-2">
-                  Patient ID: {patientId || (user?.id)}
-                </p>
+          <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6 md:w-80 space-y-4">
+            <div className="text-center pb-5 border-b border-gray-200">
+              <div className="mb-4 flex items-center justify-center space-x-1">
+                <span className="text-2xl font-bold text-gray-900">GATOR</span>
+                <span className="bg-orange-600 text-white px-2 py-0.5 rounded text-base">PRIME</span>
               </div>
+              <p className="text-gray-600 text-sm mt-2 truncate">
+                Patient ID: {patientId || (user?.id)}
+              </p>
+            </div>
 
-              <Tabs 
-                defaultValue="report"
-                orientation="vertical" 
-                className="w-full mt-6"
-                value={activeTab}
-                onValueChange={setActiveTab}
+            <Tabs 
+              defaultValue="report"
+              orientation="vertical" 
+              className="w-full mt-6"
+              value={activeTab}
+              onValueChange={setActiveTab}
+            >
+              <TabsList className="flex flex-col h-auto bg-transparent space-y-3 w-full">
+                <TabsTrigger 
+                  value="report" 
+                  className="justify-start w-full px-4 py-3 text-gray-700 hover:bg-gray-50 data-[state=active]:bg-orange-50 data-[state=active]:text-orange-700 rounded-md"
+                >
+                  <FileText className="mr-3 h-5 w-5" />
+                  <span className="font-medium">View My Report</span>
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="annex" 
+                  className="justify-start w-full px-4 py-3 text-gray-700 hover:bg-gray-50 data-[state=active]:bg-orange-50 data-[state=active]:text-orange-700 rounded-md"
+                >
+                  <BookOpen className="mr-3 h-5 w-5" />
+                  <span className="font-medium">View Annex</span>
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="history" 
+                  className="justify-start w-full px-4 py-3 text-gray-700 hover:bg-gray-50 data-[state=active]:bg-orange-50 data-[state=active]:text-orange-700 rounded-md"
+                >
+                  <Clock className="mr-3 h-5 w-5" />
+                  <span className="font-medium">View Report History</span>
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="upload" 
+                  className="justify-start w-full px-4 py-3 text-gray-700 hover:bg-gray-50 data-[state=active]:bg-orange-50 data-[state=active]:text-orange-700 rounded-md"
+                >
+                  <Upload className="mr-3 h-5 w-5" />
+                  <span className="font-medium">Upload Your Documents</span>
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="appointment" 
+                  className="justify-start w-full px-4 py-3 text-gray-700 hover:bg-gray-50 data-[state=active]:bg-orange-50 data-[state=active]:text-orange-700 rounded-md"
+                >
+                  <CalendarDays className="mr-3 h-5 w-5" />
+                  <span className="font-medium">Book Appointment</span>
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+
+            <div className="space-y-3 pt-6 mt-4 border-t border-gray-200">
+              <Button 
+                variant="outline" 
+                onClick={() => navigate('/patient-id')}
+                className="w-full justify-start text-gray-700 border-gray-300 h-10"
               >
-                <TabsList className="flex flex-col h-auto bg-transparent space-y-3 w-full">
-                  <TabsTrigger 
-                    value="report" 
-                    className="justify-start w-full px-4 py-3 text-gray-700 hover:bg-gray-50 data-[state=active]:bg-orange-50 data-[state=active]:text-orange-700 rounded-md"
-                  >
-                    <FileText className="mr-3 h-5 w-5" />
-                    <span className="font-medium">View My Report</span>
-                  </TabsTrigger>
-                  <TabsTrigger 
-                    value="annex" 
-                    className="justify-start w-full px-4 py-3 text-gray-700 hover:bg-gray-50 data-[state=active]:bg-orange-50 data-[state=active]:text-orange-700 rounded-md"
-                  >
-                    <BookOpen className="mr-3 h-5 w-5" />
-                    <span className="font-medium">View Annex</span>
-                  </TabsTrigger>
-                  <TabsTrigger 
-                    value="history" 
-                    className="justify-start w-full px-4 py-3 text-gray-700 hover:bg-gray-50 data-[state=active]:bg-orange-50 data-[state=active]:text-orange-700 rounded-md"
-                  >
-                    <Clock className="mr-3 h-5 w-5" />
-                    <span className="font-medium">View Report History</span>
-                  </TabsTrigger>
-                  <TabsTrigger 
-                    value="upload" 
-                    className="justify-start w-full px-4 py-3 text-gray-700 hover:bg-gray-50 data-[state=active]:bg-orange-50 data-[state=active]:text-orange-700 rounded-md"
-                  >
-                    <Upload className="mr-3 h-5 w-5" />
-                    <span className="font-medium">Upload Your Documents</span>
-                  </TabsTrigger>
-                  <TabsTrigger 
-                    value="appointment" 
-                    className="justify-start w-full px-4 py-3 text-gray-700 hover:bg-gray-50 data-[state=active]:bg-orange-50 data-[state=active]:text-orange-700 rounded-md"
-                  >
-                    <CalendarDays className="mr-3 h-5 w-5" />
-                    <span className="font-medium">Book Appointment</span>
-                  </TabsTrigger>
-                </TabsList>
-              </Tabs>
+                Back to Patient ID
+              </Button>
+              
+              <Button 
+                variant="health" 
+                onClick={() => navigate('/dashboard')}
+                className="w-full justify-start bg-orange-600 hover:bg-orange-700 h-10"
+              >
+                Go to Dashboard
+              </Button>
+            </div>
 
-              <div className="space-y-3 pt-6 mt-4 border-t border-gray-200">
-                <Button 
-                  variant="outline" 
-                  onClick={() => navigate('/patient-id')}
-                  className="w-full justify-start text-gray-700 border-gray-300 h-10"
-                >
-                  Back to Patient ID
-                </Button>
-                
-                <Button 
-                  variant="health" 
-                  onClick={() => navigate('/dashboard')}
-                  className="w-full justify-start bg-orange-600 hover:bg-orange-700 h-10"
-                >
-                  Go to Dashboard
-                </Button>
-              </div>
-
-              <div className="pt-6 mt-2 border-t border-gray-200">
-                <p className="text-sm text-gray-600">
-                  <span className="font-semibold block mb-3">Contact</span>
-                  2 College Road #02-00,<br />
-                  Singapore 169850<br />
-                  <span className="mt-3 block">Email: info@precix.io</span>
-                </p>
-              </div>
+            <div className="pt-6 mt-2 border-t border-gray-200">
+              <p className="text-sm text-gray-600">
+                <span className="font-semibold block mb-3">Contact</span>
+                2 College Road #02-00,<br />
+                Singapore 169850<br />
+                <span className="mt-3 block">Email: info@precix.io</span>
+              </p>
             </div>
           </div>
 
@@ -313,7 +308,6 @@ export default function ReportViewer() {
                         </div>
                       )}
                     </div>
-                    {/* Increased height for better display */}
                     <div className="border border-gray-300 rounded-md mb-6 overflow-hidden bg-gray-50 h-[700px] shadow-sm">
                       <iframe 
                         src={reportUrl}
