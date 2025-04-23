@@ -67,8 +67,8 @@ export const Navbar = () => {
       className={cn(
         "fixed w-full top-0 z-50 transition-all duration-300",
         scrolled 
-          ? "bg-white/90 backdrop-blur-md shadow-sm py-3" 
-          : "bg-white py-4"
+          ? "bg-white/90 backdrop-blur-md shadow-sm py-4" 
+          : "bg-white py-5"
       )}
     >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -177,7 +177,7 @@ export const Navbar = () => {
                   onClick={() => window.location.href = '/logout'}
                   variant="outline"
                   size="sm"
-                  className="border-health-500 text-health-600"
+                  className="border-health-500 text-health-600 whitespace-nowrap"
                 >
                   <LogOut size={16} className="mr-1" />
                   Sign Out
@@ -189,6 +189,7 @@ export const Navbar = () => {
                   onClick={() => window.location.href = '/admin-login'}
                   variant="health"
                   size="sm"
+                  className="whitespace-nowrap"
                 >
                   <User size={16} className="mr-1" />
                   Admin Login
@@ -198,6 +199,7 @@ export const Navbar = () => {
                   onClick={() => window.location.href = '/login'}
                   variant="health"
                   size="sm"
+                  className="whitespace-nowrap"
                 >
                   Access Report
                 </Button>
@@ -205,7 +207,7 @@ export const Navbar = () => {
                   onClick={() => window.location.href = '/general-login'}
                   variant="outline"
                   size="sm"
-                  className="border-health-500 text-health-600"
+                  className="border-health-500 text-health-600 whitespace-nowrap"
                 >
                   <LogIn size={16} className="mr-1" />
                   Login

@@ -198,11 +198,11 @@ export default function ReportViewer() {
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Navbar />
-      <div className="flex-1 p-4 md:p-6 pt-28">
+      <div className="flex-1 p-4 md:p-6 pt-32">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row gap-6">
           <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6 md:w-80 space-y-4">
             <div className="text-center pb-5 border-b border-gray-200">
-              <div className="mb-4 flex items-center justify-center space-x-1">
+              <div className="mb-4 flex items-center justify-center space-x-1 pt-2">
                 <span className="text-2xl font-bold text-gray-900">GATOR</span>
                 <span className="bg-orange-600 text-white px-2 py-0.5 rounded text-base">PRIME</span>
               </div>
@@ -214,7 +214,7 @@ export default function ReportViewer() {
             <Tabs 
               defaultValue="report"
               orientation="vertical" 
-              className="w-full mt-6"
+              className="w-full mt-8"
               value={activeTab}
               onValueChange={setActiveTab}
             >
@@ -285,7 +285,7 @@ export default function ReportViewer() {
             </div>
           </div>
 
-          <div className="flex-1 bg-white rounded-lg shadow-md border border-gray-200 p-6">
+          <div className="flex-1 bg-white rounded-lg shadow-md border border-gray-200 p-8">
             <Tabs value={activeTab} className="w-full">
               <TabsContent value="report" className="mt-0">
                 <h1 className="text-2xl font-bold text-gray-900 mb-6">Patient Report</h1>
