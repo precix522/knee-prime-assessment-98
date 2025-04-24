@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useTwilioAuthStore } from "../utils/twilio-auth-store";
@@ -198,11 +199,11 @@ export default function ReportViewer() {
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Navbar />
-      <div className="flex-1 p-4 md:p-6 pt-36">
+      <div className="flex-1 p-4 md:p-6 pt-4">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row gap-6">
           <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6 md:w-80 space-y-4">
             <div className="text-center pb-5 border-b border-gray-200">
-              <div className="mb-4 flex items-center justify-center space-x-1 pt-4">
+              <div className="mb-4 flex items-center justify-center space-x-1 pt-2">
                 <span className="text-2xl font-bold text-gray-900 whitespace-nowrap">GATOR</span>
                 <span className="bg-orange-600 text-white px-2 py-0.5 rounded text-base whitespace-nowrap">PRIME</span>
               </div>
