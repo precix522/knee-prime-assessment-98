@@ -1,11 +1,10 @@
-
 import React, { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useTwilioAuthStore } from "../utils/twilio-auth-store";
 import { Button } from "../components/Button";
 import { getPatientReport, getAnnexReport, getSupportingDocument } from "../utils/supabase";
 import { toast } from "sonner";
-import { CalendarDays, FileText, BookOpen, Clock, Upload } from "lucide-react";
+import { CalendarDays, FileText, BookOpen, Clock, Upload, Eye } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "../components/ui/tabs";
 import { 
   Table, 
@@ -28,6 +27,12 @@ type PatientReport = {
   mriReportUrl?: string | null;
 };
 
+type ViewingDocument = {
+  url: string;
+  type: string;
+  fileName: string;
+} | null;
+
 export default function ReportViewer() {
   const [searchParams] = useSearchParams();
   const patientId = searchParams.get("patientId");
@@ -44,6 +49,7 @@ export default function ReportViewer() {
   const [reportHistory, setReportHistory] = useState<PatientReport[]>([]);
   const [selectedReportIndex, setSelectedReportIndex] = useState(0);
   const [uploadSuccessMessage, setUploadSuccessMessage] = useState<string | null>(null);
+  const [viewingDocument, setViewingDocument] = useState<ViewingDocument>(null);
 
   const { validateSession, user } = useTwilioAuthStore();
   
@@ -145,6 +151,11 @@ export default function ReportViewer() {
     window.open("https://precix.webflow.io/contact", "_blank");
   };
   
+  const handleViewDocument = (url: string, type: string, fileName: string) => {
+    setViewingDocument({ url, type, fileName });
+    setActiveTab("report");
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex flex-col bg-gray-50">
@@ -289,7 +300,9 @@ export default function ReportViewer() {
           <div className="flex-1 bg-white rounded-lg shadow-md border border-gray-200 p-8">
             <Tabs value={activeTab} className="w-full">
               <TabsContent value="report" className="mt-0">
-                <h1 className="text-2xl font-bold text-gray-900 mb-6">Patient Report</h1>
+                <h1 className="text-2xl font-bold text-gray-900 mb-6">
+                  {viewingDocument ? `Viewing ${viewingDocument.type} Report` : "Patient Report"}
+                </h1>
                 
                 {error && (
                   <div className="border border-red-200 rounded-md p-4 mb-6 bg-red-50 text-red-600">
@@ -300,36 +313,27 @@ export default function ReportViewer() {
                   </div>
                 )}
                 
-                {!error && reportUrl ? (
+                {!error && (viewingDocument ? (
                   <div className="flex flex-col">
                     <div className="mb-4">
-                      {reportHistory.length > 0 && (
-                        <div className="text-gray-600 text-sm mb-2">
-                          <span className="font-medium">Report Date:</span> {reportHistory[selectedReportIndex]?.timestamp || 'Unknown'}
-                        </div>
-                      )}
+                      <p className="text-gray-600 text-sm mb-2">
+                        <span className="font-medium">File:</span> {viewingDocument.fileName}
+                      </p>
+                      <Button 
+                        variant="outline" 
+                        onClick={() => setViewingDocument(null)}
+                        className="mb-4"
+                      >
+                        Back to Main Report
+                      </Button>
                     </div>
                     <div className="border border-gray-300 rounded-md mb-6 overflow-hidden bg-gray-50 h-[700px] shadow-sm">
                       <iframe 
-                        src={reportUrl}
+                        src={viewingDocument.url}
                         className="w-full h-full"
-                        title="Patient Report PDF"
+                        title={`${viewingDocument.type} Document`}
                         frameBorder="0"
                       ></iframe>
-                    </div>
-                    <div className="mb-4">
-                      <Button 
-                        variant="health" 
-                        onClick={() => handleDownload(reportUrl, reportName)}
-                        className="flex items-center gap-2"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                          <polyline points="7 10 12 15 17 10"></polyline>
-                          <line x1="12" y1="15" x2="12" y2="3"></line>
-                        </svg>
-                        Download Report
-                      </Button>
                     </div>
                   </div>
                 ) : (
@@ -343,7 +347,7 @@ export default function ReportViewer() {
                       </p>
                     </div>
                   )
-                )}
+                ))}
               </TabsContent>
               
               <TabsContent value="annex" className="mt-0">
@@ -469,13 +473,23 @@ export default function ReportViewer() {
                                     </span>
                                   </TableCell>
                                   <TableCell>
-                                    <Button
-                                      variant="outline"
-                                      size="sm"
-                                      onClick={() => handleDownload(row.url, row.fileName)}
-                                    >
-                                      Download
-                                    </Button>
+                                    <div className="flex gap-2">
+                                      <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => handleViewDocument(row.url, row.type, row.fileName)}
+                                      >
+                                        <Eye className="h-4 w-4 mr-1" />
+                                        View
+                                      </Button>
+                                      <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => handleDownload(row.url, row.fileName)}
+                                      >
+                                        Download
+                                      </Button>
+                                    </div>
                                   </TableCell>
                                 </TableRow>
                               ));
