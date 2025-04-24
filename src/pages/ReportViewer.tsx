@@ -148,7 +148,7 @@ export default function ReportViewer() {
     return (
       <div className="min-h-screen flex flex-col bg-gray-50">
         <Navbar />
-        <div className="flex-1 flex items-center justify-center pt-16">
+        <div className="flex-1 flex items-center justify-center pt-20">
           <div className="text-center">
             <div className="w-16 h-16 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
             <p className="text-gray-600">Loading your report...</p>
@@ -198,13 +198,13 @@ export default function ReportViewer() {
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Navbar />
-      <div className="flex-1 p-4 md:p-6 pt-32">
+      <div className="flex-1 p-4 md:p-6 pt-36">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row gap-6">
           <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6 md:w-80 space-y-4">
             <div className="text-center pb-5 border-b border-gray-200">
-              <div className="mb-4 flex items-center justify-center space-x-1 pt-2">
-                <span className="text-2xl font-bold text-gray-900">GATOR</span>
-                <span className="bg-orange-600 text-white px-2 py-0.5 rounded text-base">PRIME</span>
+              <div className="mb-4 flex items-center justify-center space-x-1 pt-4">
+                <span className="text-2xl font-bold text-gray-900 whitespace-nowrap">GATOR</span>
+                <span className="bg-orange-600 text-white px-2 py-0.5 rounded text-base whitespace-nowrap">PRIME</span>
               </div>
               <p className="text-gray-600 text-sm mt-2 truncate">
                 Patient ID: {patientId || (user?.id)}
@@ -223,36 +223,36 @@ export default function ReportViewer() {
                   value="report" 
                   className="justify-start w-full px-4 py-3 text-gray-700 hover:bg-gray-50 data-[state=active]:bg-orange-50 data-[state=active]:text-orange-700 rounded-md"
                 >
-                  <FileText className="mr-3 h-5 w-5" />
-                  <span className="font-medium">View My Report</span>
+                  <FileText className="mr-3 h-5 w-5 shrink-0" />
+                  <span className="font-medium whitespace-nowrap">View My Report</span>
                 </TabsTrigger>
                 <TabsTrigger 
                   value="annex" 
                   className="justify-start w-full px-4 py-3 text-gray-700 hover:bg-gray-50 data-[state=active]:bg-orange-50 data-[state=active]:text-orange-700 rounded-md"
                 >
-                  <BookOpen className="mr-3 h-5 w-5" />
-                  <span className="font-medium">View Annex</span>
+                  <BookOpen className="mr-3 h-5 w-5 shrink-0" />
+                  <span className="font-medium whitespace-nowrap">View Annex</span>
                 </TabsTrigger>
                 <TabsTrigger 
                   value="history" 
                   className="justify-start w-full px-4 py-3 text-gray-700 hover:bg-gray-50 data-[state=active]:bg-orange-50 data-[state=active]:text-orange-700 rounded-md"
                 >
-                  <Clock className="mr-3 h-5 w-5" />
-                  <span className="font-medium">View Report History</span>
+                  <Clock className="mr-3 h-5 w-5 shrink-0" />
+                  <span className="font-medium whitespace-nowrap">View Report History</span>
                 </TabsTrigger>
                 <TabsTrigger 
                   value="upload" 
                   className="justify-start w-full px-4 py-3 text-gray-700 hover:bg-gray-50 data-[state=active]:bg-orange-50 data-[state=active]:text-orange-700 rounded-md"
                 >
-                  <Upload className="mr-3 h-5 w-5" />
-                  <span className="font-medium">Upload Your Documents</span>
+                  <Upload className="mr-3 h-5 w-5 shrink-0" />
+                  <span className="font-medium whitespace-nowrap">Upload Your Documents</span>
                 </TabsTrigger>
                 <TabsTrigger 
                   value="appointment" 
                   className="justify-start w-full px-4 py-3 text-gray-700 hover:bg-gray-50 data-[state=active]:bg-orange-50 data-[state=active]:text-orange-700 rounded-md"
                 >
-                  <CalendarDays className="mr-3 h-5 w-5" />
-                  <span className="font-medium">Book Appointment</span>
+                  <CalendarDays className="mr-3 h-5 w-5 shrink-0" />
+                  <span className="font-medium whitespace-nowrap">Book Appointment</span>
                 </TabsTrigger>
               </TabsList>
             </Tabs>
