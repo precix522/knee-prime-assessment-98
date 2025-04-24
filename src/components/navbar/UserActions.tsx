@@ -31,7 +31,7 @@ export const UserActions: FC<UserActionsProps> = ({ user, isAdmin }) => {
   ) : (
     <div className="flex items-center gap-2">
       <Button
-        onClick={() => window.location.href = '/admin-login'}
+        onClick={() => window.location.href = '/login'}
         variant="health"
         size="sm"
         className="whitespace-nowrap"

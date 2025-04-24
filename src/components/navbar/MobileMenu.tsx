@@ -157,7 +157,7 @@ export const MobileMenu: FC<MobileMenuProps> = ({
           <div className="flex flex-col gap-3 px-3 py-2">
             <Button
               onClick={() => {
-                window.location.href = '/admin-login';
+                window.location.href = '/login';
                 setIsOpen(false);
               }}
               variant="health"
