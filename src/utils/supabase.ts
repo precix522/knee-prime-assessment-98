@@ -28,3 +28,15 @@ export {
   updateUserLastLogin,
   type UserProfile
 } from './supabase/user-db';
+
+// Export AWS S3 utilities
+export { 
+  listS3Objects,
+  getS3Object 
+} from './aws/s3-client';
+
+export {
+  fetchDataFromS3,
+  startPeriodicS3Fetch,
+  stopPeriodicS3Fetch
+} from './aws/s3-fetch-service';
