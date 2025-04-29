@@ -12,12 +12,15 @@ import {
   UserRoundPlus, 
   BarChart3, 
   Search,
-  ChevronRight 
+  ChevronRight,
+  RefreshCw 
 } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
 import { supabase } from "../utils/supabase";
 import { getPatientReport } from "../utils/supabase";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { syncNow, getFetchStatus } from "../utils/supabase";
 
 // Interface for patient data from Supabase
 interface PatientData {
@@ -39,6 +42,13 @@ export default function Dashboard() {
   const [recentReports, setRecentReports] = useState<PatientData[]>([]);
   const [recentPatients, setRecentPatients] = useState<PatientData[]>([]);
   const [tableLoading, setTableLoading] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [fetchStatus, setFetchStatus] = useState({
+    lastFetchTime: null as Date | null,
+    currentlyFetching: false,
+    objectCount: 0,
+    error: null as string | null,
+  });
   const navigate = useNavigate();
   
   // Check if user is an admin
@@ -65,6 +75,27 @@ export default function Dashboard() {
       navigate("/login");
     }
   }, [user, isLoading, pageLoading, navigate]);
+
+  // S3 sync status check effect
+  useEffect(() => {
+    if (!isAdmin) return;
+
+    // Set up a periodic status check (every 10 seconds)
+    const statusCheckInterval = setInterval(() => {
+      const status = getFetchStatus();
+      setFetchStatus(status);
+      setIsSyncing(status.currentlyFetching);
+    }, 10000);
+
+    // Initial check
+    const status = getFetchStatus();
+    setFetchStatus(status);
+    setIsSyncing(status.currentlyFetching);
+
+    return () => {
+      clearInterval(statusCheckInterval);
+    };
+  }, [isAdmin]);
 
   // Effect to fetch patient data from Supabase based on phone number
   useEffect(() => {
@@ -198,6 +229,31 @@ export default function Dashboard() {
     }
   };
 
+  // Handle S3 sync now button
+  const handleSyncNow = async () => {
+    if (isSyncing) {
+      toast.info("Sync already in progress");
+      return;
+    }
+
+    setIsSyncing(true);
+    toast.info("Starting S3 sync...");
+    
+    try {
+      await syncNow();
+      const status = getFetchStatus();
+      setFetchStatus(status);
+      if (!status.error) {
+        toast.success(`Successfully synced ${status.objectCount} objects from S3`);
+      }
+    } catch (error) {
+      console.error("Error syncing data:", error);
+      toast.error("Failed to sync with S3. Please try again later.");
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
   // Count reports for a patient
   const getReportCount = (patientId: string) => {
     return recentReports.filter(report => report.Patient_ID === patientId).length;
@@ -318,6 +374,67 @@ export default function Dashboard() {
                         </Button>
                       </div>
                     </div>
+                  </div>
+                </div>
+
+                {/* S3 Sync Status Card */}
+                <div className="bg-white rounded-lg shadow-md overflow-hidden">
+                  <div className="p-6">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                      <div>
+                        <h2 className="text-xl font-bold text-gray-900 mb-2">
+                          AWS S3 Data Synchronization
+                        </h2>
+                        <div className="space-y-1">
+                          <div className="flex gap-2 items-center text-sm">
+                            <span className="font-medium text-gray-700">Status:</span>
+                            <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                              fetchStatus.currentlyFetching 
+                                ? 'bg-blue-100 text-blue-800' 
+                                : fetchStatus.error 
+                                  ? 'bg-red-100 text-red-800' 
+                                  : 'bg-green-100 text-green-800'
+                            }`}>
+                              {fetchStatus.currentlyFetching 
+                                ? 'Syncing...' 
+                                : fetchStatus.error 
+                                  ? 'Error' 
+                                  : 'Ready'}
+                            </span>
+                          </div>
+                          <div className="text-sm text-gray-600">
+                            <span className="font-medium">Last sync:</span> {
+                              fetchStatus.lastFetchTime 
+                                ? formatDate(fetchStatus.lastFetchTime.toString()) 
+                                : 'Never'
+                            }
+                          </div>
+                          <div className="text-sm text-gray-600">
+                            <span className="font-medium">Objects synced:</span> {fetchStatus.objectCount}
+                          </div>
+                          {fetchStatus.error && (
+                            <div className="text-sm text-red-600">
+                              <span className="font-medium">Error:</span> {fetchStatus.error}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex-shrink-0">
+                        <Button 
+                          onClick={handleSyncNow} 
+                          disabled={isSyncing}
+                          className="flex items-center"
+                        >
+                          <RefreshCw className={`h-4 w-4 mr-2 ${isSyncing ? 'animate-spin' : ''}`} />
+                          {isSyncing ? "Syncing..." : "Sync Now"}
+                        </Button>
+                      </div>
+                    </div>
+                    {isSyncing && (
+                      <div className="mt-3">
+                        <Progress value={100} className="animate-pulse" />
+                      </div>
+                    )}
                   </div>
                 </div>
 
