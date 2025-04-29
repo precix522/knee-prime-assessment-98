@@ -5,7 +5,7 @@ import { useTwilioAuthStore } from "../utils/twilio-auth-store";
 import PatientRecordForm from "../components/PatientRecordForm";
 import { Navbar } from "../components/Navbar";
 import Footer from "../components/Footer";
-import { ArrowLeft, Search, ShieldAlert, User, UserPlus } from "lucide-react";
+import { ArrowLeft, Search, ShieldAlert, User, UserPlus, Upload } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { supabase } from "../utils/supabase";
 import { 
@@ -19,6 +19,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import PatientReportUploader from "@/components/PatientReportUploader";
 
 // Interface for patient data
 interface Patient {
@@ -37,6 +38,7 @@ export default function ManagePatients() {
   const [patients, setPatients] = useState<Patient[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoadingPatients, setIsLoadingPatients] = useState(false);
+  const [reportData, setReportData] = useState(null);
   
   // Check admin authorization and redirect if not authorized
   useEffect(() => {
@@ -113,6 +115,16 @@ export default function ManagePatients() {
     navigate(`/report-viewer?patientId=${patientId}`);
   };
   
+  // Handle report data confirmation
+  const handleReportDataConfirmed = (data: any) => {
+    setReportData(data);
+    // Switch to the "Add Patient" tab and pre-fill the form
+    const tabsList = document.querySelector('[data-value="add-patient"]');
+    if (tabsList) {
+      (tabsList as HTMLElement).click();
+    }
+  };
+  
   // Show loading state while checking authorization
   if (isLoading) {
     return (
@@ -171,14 +183,18 @@ export default function ManagePatients() {
           
           <div className="mt-8">
             <Tabs defaultValue="patients" className="w-full">
-              <TabsList className="grid w-full max-w-md mx-auto grid-cols-2">
+              <TabsList className="grid w-full max-w-md mx-auto grid-cols-3">
                 <TabsTrigger value="patients">
                   <User className="mr-2 h-4 w-4" />
                   Patient List
                 </TabsTrigger>
-                <TabsTrigger value="add-patient">
+                <TabsTrigger value="add-patient" data-value="add-patient">
                   <UserPlus className="mr-2 h-4 w-4" />
                   Add Patient
+                </TabsTrigger>
+                <TabsTrigger value="upload-report">
+                  <Upload className="mr-2 h-4 w-4" />
+                  Upload Report
                 </TabsTrigger>
               </TabsList>
               
@@ -249,7 +265,16 @@ export default function ManagePatients() {
               
               <TabsContent value="add-patient" className="mt-6">
                 <div className="flex justify-center">
-                  <PatientRecordForm onSuccess={fetchPatients} />
+                  <PatientRecordForm 
+                    onSuccess={fetchPatients} 
+                    prefillData={reportData} 
+                  />
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="upload-report" className="mt-6">
+                <div className="flex justify-center">
+                  <PatientReportUploader onDataConfirmed={handleReportDataConfirmed} />
                 </div>
               </TabsContent>
             </Tabs>

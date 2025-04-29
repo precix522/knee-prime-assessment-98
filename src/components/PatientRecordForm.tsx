@@ -1,5 +1,4 @@
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "./Button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -20,9 +19,14 @@ interface PatientRecord {
 
 interface PatientRecordFormProps {
   onSuccess?: () => void;
+  prefillData?: {
+    patientId?: string;
+    patientName?: string;
+    phoneNumber?: string;
+  } | null;
 }
 
-export default function PatientRecordForm({ onSuccess }: PatientRecordFormProps) {
+export default function PatientRecordForm({ onSuccess, prefillData }: PatientRecordFormProps) {
   const [formData, setFormData] = useState<PatientRecord>({
     patientName: "",
     patientId: "",
@@ -34,6 +38,20 @@ export default function PatientRecordForm({ onSuccess }: PatientRecordFormProps)
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
+  
+  // Prefill form when data is provided from report upload
+  useEffect(() => {
+    if (prefillData) {
+      setFormData(prevData => ({
+        ...prevData,
+        patientId: prefillData.patientId || prevData.patientId,
+        patientName: prefillData.patientName || prevData.patientName,
+        phoneNumber: prefillData.phoneNumber || prevData.phoneNumber,
+      }));
+      
+      toast.info("Form pre-filled with report data");
+    }
+  }, [prefillData]);
   
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, files } = e.target;
@@ -214,6 +232,11 @@ export default function PatientRecordForm({ onSuccess }: PatientRecordFormProps)
       <div className="text-center mb-6">
         <h2 className="text-2xl font-bold text-gray-900">Add Patient Record</h2>
         <p className="text-gray-600 mt-2">Enter patient details and upload reports</p>
+        {prefillData && (
+          <div className="mt-2 text-sm text-health-600">
+            Using data from uploaded report
+          </div>
+        )}
       </div>
       
       {error && (
