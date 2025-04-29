@@ -1,12 +1,12 @@
-
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Navbar } from "../components/Navbar";
 import { Footer } from "../components/Footer";
 import { useTwilioAuthStore } from "../utils/twilio-auth-store";
-import { Users, UserPlus, Edit, Trash, Search, UserRound, Shield } from "lucide-react";
+import { Users, UserPlus, Edit, Trash, Search, UserRound, Shield, RefreshCw } from "lucide-react";
 import { Button } from "../components/Button";
 import { Input } from "@/components/ui/input";
+import { Progress } from "@/components/ui/progress";
 import { 
   Dialog,
   DialogContent,
@@ -26,6 +26,7 @@ import {
   TableHeader, 
   TableRow 
 } from "../components/ui/table";
+import { syncNow, getFetchStatus } from "../utils/supabase";
 
 type User = {
   id: string;
@@ -48,7 +49,32 @@ export default function ManageUsers() {
     name: "",
     email: ""
   });
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [fetchStatus, setFetchStatus] = useState({
+    lastFetchTime: null as Date | null,
+    currentlyFetching: false,
+    objectCount: 0,
+    error: null as string | null,
+  });
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // Set up a periodic status check (every 10 seconds)
+    const statusCheckInterval = setInterval(() => {
+      const status = getFetchStatus();
+      setFetchStatus(status);
+      setIsSyncing(status.currentlyFetching);
+    }, 10000);
+
+    // Initial check
+    const status = getFetchStatus();
+    setFetchStatus(status);
+    setIsSyncing(status.currentlyFetching);
+
+    return () => {
+      clearInterval(statusCheckInterval);
+    };
+  }, []);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -165,6 +191,29 @@ export default function ManageUsers() {
     const filteredUsers = users.filter(user => user.id !== userId);
     setUsers(filteredUsers);
     toast.success("User deleted successfully");
+  };
+
+  const handleSyncNow = async () => {
+    if (isSyncing) {
+      toast.info("Sync already in progress");
+      return;
+    }
+
+    setIsSyncing(true);
+    try {
+      await syncNow();
+      const status = getFetchStatus();
+      setFetchStatus(status);
+    } catch (error) {
+      console.error("Error syncing data:", error);
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
+  const formatDate = (date: Date | null) => {
+    if (!date) return "Never";
+    return date.toLocaleString();
   };
 
   if (pageLoading || isLoading) {
@@ -290,6 +339,59 @@ export default function ManageUsers() {
             </div>
 
             <div className="bg-white rounded-b-lg shadow-md overflow-hidden">
+              {/* S3 Sync Status Section */}
+              <div className="border-b border-gray-200 p-6">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                  <div>
+                    <h2 className="text-xl font-bold text-gray-900 mb-2">AWS S3 Synchronization</h2>
+                    <div className="space-y-1">
+                      <div className="flex gap-2 items-center text-sm">
+                        <span className="font-medium text-gray-700">Status:</span>
+                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                          fetchStatus.currentlyFetching 
+                            ? 'bg-blue-100 text-blue-800' 
+                            : fetchStatus.error 
+                              ? 'bg-red-100 text-red-800' 
+                              : 'bg-green-100 text-green-800'
+                        }`}>
+                          {fetchStatus.currentlyFetching 
+                            ? 'Syncing...' 
+                            : fetchStatus.error 
+                              ? 'Error' 
+                              : 'Ready'}
+                        </span>
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        <span className="font-medium">Last sync:</span> {formatDate(fetchStatus.lastFetchTime)}
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        <span className="font-medium">Objects synced:</span> {fetchStatus.objectCount}
+                      </div>
+                      {fetchStatus.error && (
+                        <div className="text-sm text-red-600">
+                          <span className="font-medium">Error:</span> {fetchStatus.error}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex-shrink-0">
+                    <Button 
+                      onClick={handleSyncNow} 
+                      disabled={isSyncing}
+                      className="flex items-center"
+                    >
+                      <RefreshCw className={`h-4 w-4 mr-2 ${isSyncing ? 'animate-spin' : ''}`} />
+                      {isSyncing ? "Syncing..." : "Sync Now"}
+                    </Button>
+                  </div>
+                </div>
+                {isSyncing && (
+                  <div className="mt-3">
+                    <Progress value={100} className="animate-pulse" />
+                  </div>
+                )}
+              </div>
+
               <div className="p-6">
                 <div className="mb-6 relative">
                   <div className="relative">

@@ -38,5 +38,7 @@ export {
 export {
   fetchDataFromS3,
   startPeriodicS3Fetch,
-  stopPeriodicS3Fetch
+  stopPeriodicS3Fetch,
+  syncNow,
+  getFetchStatus
 } from './aws/s3-fetch-service';
