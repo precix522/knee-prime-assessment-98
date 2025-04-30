@@ -20,6 +20,7 @@ import { AuthInitializer } from "./components/AuthInitializer";
 import AllReports from "./pages/AllReports";
 import ManageUsers from "./pages/ManageUsers";
 import { startPeriodicS3Fetch, stopPeriodicS3Fetch } from "./utils/aws/s3-fetch-service";
+import ChatbotWidget from "./components/ChatbotWidget";
 
 // Add global styles to ensure proper spacing
 import "./App.css";
@@ -64,6 +65,7 @@ const App = () => {
               <Route path="*" element={<NotFound />} />
             </Routes>
           </div>
+          <ChatbotWidget />
         </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>
