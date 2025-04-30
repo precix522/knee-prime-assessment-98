@@ -19,10 +19,20 @@ export const sendChatMessage = async (message: string): Promise<{ reply: string 
     throw new Error(`Error: ${response.status} - ${response.statusText}`);
   }
   
-  const data = await response.json();
-  console.log("Response data:", data);
+  // Get the raw text first, so we can handle both JSON and non-JSON responses
+  const rawText = await response.text();
+  console.log("Raw response text:", rawText);
   
-  return data;
+  // Try to parse as JSON first
+  try {
+    const jsonData = JSON.parse(rawText);
+    console.log("Parsed JSON data:", jsonData);
+    return jsonData;
+  } catch (error) {
+    console.log("Response is not valid JSON, using as plain text");
+    // If it's not valid JSON, return the raw text as the reply
+    return { reply: rawText };
+  }
 };
 
 export const handleChatError = (error: unknown): string => {
