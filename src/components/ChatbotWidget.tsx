@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, MessageCircle, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -58,8 +57,8 @@ export const ChatbotWidget: React.FC = () => {
     setError(null);
     
     try {
-      // Using the provided n8n webhook URL
-      const response = await fetch('https://operationspprecix.app.n8n.cloud/webhook/e92786b9-53db-43ef-9a5e-9ac7f50bceec', {
+      // Using the provided n8n webhook test URL
+      const response = await fetch('https://operationspprecix.app.n8n.cloud/webhook-test/e92786b9-53db-43ef-9a5e-9ac7f50bceec', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
