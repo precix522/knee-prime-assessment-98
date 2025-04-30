@@ -7,6 +7,20 @@ interface ChatMessageProps {
 }
 
 export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
+  // Format the text to handle line breaks and basic markdown
+  const formatMessageText = (text: string) => {
+    // Replace line breaks with <br /> tags
+    let formattedText = text.replace(/\n/g, '<br />');
+    
+    // Handle bold text (**text**)
+    formattedText = formattedText.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    
+    // Handle italic text (*text*)
+    formattedText = formattedText.replace(/\*(.*?)\*/g, '<em>$1</em>');
+    
+    return formattedText;
+  };
+
   return (
     <div className={`flex ${message.isUser ? 'justify-end' : 'justify-start'}`}>
       <div 
@@ -16,7 +30,10 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
             : 'bg-gray-100 text-gray-800 rounded-bl-none'
         }`}
       >
-        <p className="text-sm">{message.text}</p>
+        <p 
+          className="text-sm"
+          dangerouslySetInnerHTML={{ __html: formatMessageText(message.text) }}
+        />
         <p className="text-xs opacity-70 mt-1">
           {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
         </p>
