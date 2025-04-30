@@ -1,9 +1,11 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, MessageCircle, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
+import { useToast } from "@/hooks/use-toast";
 
 interface Message {
   text: string;
@@ -19,6 +21,7 @@ export const ChatbotWidget: React.FC = () => {
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { toast } = useToast();
   
   const messageEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -57,22 +60,26 @@ export const ChatbotWidget: React.FC = () => {
     setError(null);
     
     try {
+      // Debug log
+      console.log("Sending request to webhook with message:", userMessage.text);
+      
       // Using the provided n8n webhook test URL
       const response = await fetch('https://operationspprecix.app.n8n.cloud/webhook-test/e92786b9-53db-43ef-9a5e-9ac7f50bceec', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          // Uncomment and update if you need authorization
-          // 'Authorization': 'Bearer YOUR_API_KEY_HERE'
         },
         body: JSON.stringify({ message: userMessage.text })
       });
       
+      console.log("Response status:", response.status);
+      
       if (!response.ok) {
-        throw new Error(`Error: ${response.status}`);
+        throw new Error(`Error: ${response.status} - ${response.statusText}`);
       }
       
       const data = await response.json();
+      console.log("Response data:", data);
       
       // Add bot response
       const botMessage: Message = {
@@ -82,9 +89,24 @@ export const ChatbotWidget: React.FC = () => {
       };
       
       setMessages(prev => [...prev, botMessage]);
+      
+      // Show success toast
+      toast({
+        title: "Message sent",
+        description: "Your message was successfully processed.",
+      });
+      
     } catch (err) {
-      setError(`Failed to get response. Please try again later.`);
-      console.error('Chatbot error:', err);
+      console.error('Chatbot error details:', err);
+      const errorMessage = err instanceof Error ? err.message : "Unknown error occurred";
+      setError(`Failed to get response. Please try again later. (${errorMessage})`);
+      
+      // Show error toast
+      toast({
+        title: "Error",
+        description: `Failed to communicate with the chatbot service: ${errorMessage}`,
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -100,7 +122,7 @@ export const ChatbotWidget: React.FC = () => {
     <div className="fixed z-[1000]">
       {/* Chat Window */}
       {isOpen && (
-        <div className="fixed bottom-[100px] right-5 w-[320px] h-[450px] bg-white border border-gray-200 rounded-lg shadow-lg flex flex-col overflow-hidden z-[1000]">
+        <div className="fixed bottom-[100px] right-5 w-[350px] h-[500px] bg-white border border-gray-200 rounded-lg shadow-lg flex flex-col overflow-hidden z-[1000]">
           {/* Header */}
           <div className="bg-[#F97316] text-white px-4 py-3 flex justify-between items-center">
             <h3 className="font-medium">Chatbot</h3>
@@ -194,10 +216,10 @@ export const ChatbotWidget: React.FC = () => {
       {/* Chat Icon */}
       <button
         onClick={toggleChat}
-        className="fixed bottom-5 right-5 w-[70px] h-[70px] rounded-full bg-[#F97316] text-white shadow-lg flex items-center justify-center hover:bg-orange-600 transition-colors z-[1000]"
+        className="fixed bottom-5 right-5 w-[80px] h-[80px] rounded-full bg-[#F97316] text-white shadow-lg flex items-center justify-center hover:bg-orange-600 transition-colors z-[1000]"
         aria-label="Open chat"
       >
-        <MessageCircle size={32} />
+        <MessageCircle size={40} />
       </button>
     </div>
   );
