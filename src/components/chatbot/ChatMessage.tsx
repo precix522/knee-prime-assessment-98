@@ -9,8 +9,11 @@ interface ChatMessageProps {
 export const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
   // Format the text to handle line breaks and basic markdown
   const formatMessageText = (text: string) => {
+    // First, normalize different types of line breaks
+    let formattedText = text.replace(/\\n/g, '\n'); // Replace literal \n with actual line breaks
+    
     // Replace line breaks with <br /> tags
-    let formattedText = text.replace(/\n/g, '<br />');
+    formattedText = formattedText.replace(/\n/g, '<br />');
     
     // Handle bold text (**text**)
     formattedText = formattedText.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
