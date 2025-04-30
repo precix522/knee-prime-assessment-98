@@ -58,8 +58,8 @@ export const ChatbotWidget: React.FC = () => {
     setError(null);
     
     try {
-      // Replace with your actual endpoint
-      const response = await fetch('https://your-n8n-instance.com/webhook/chatbot', {
+      // Using the provided n8n webhook URL
+      const response = await fetch('https://operationspprecix.app.n8n.cloud/webhook/e92786b9-53db-43ef-9a5e-9ac7f50bceec', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -101,14 +101,14 @@ export const ChatbotWidget: React.FC = () => {
     <div className="fixed z-[1000]">
       {/* Chat Window */}
       {isOpen && (
-        <div className="fixed bottom-[90px] right-5 w-[300px] h-[400px] bg-white border border-gray-200 rounded-lg shadow-lg flex flex-col overflow-hidden z-[1000]">
+        <div className="fixed bottom-[100px] right-5 w-[320px] h-[450px] bg-white border border-gray-200 rounded-lg shadow-lg flex flex-col overflow-hidden z-[1000]">
           {/* Header */}
-          <div className="bg-[#007bff] text-white px-4 py-3 flex justify-between items-center">
+          <div className="bg-[#F97316] text-white px-4 py-3 flex justify-between items-center">
             <h3 className="font-medium">Chatbot</h3>
             <Button 
               variant="ghost" 
               size="icon" 
-              className="h-6 w-6 text-white hover:text-white hover:bg-blue-600"
+              className="h-6 w-6 text-white hover:text-white hover:bg-orange-600"
               onClick={toggleChat}
             >
               <X size={16} />
@@ -128,7 +128,7 @@ export const ChatbotWidget: React.FC = () => {
                   <div 
                     className={`max-w-[80%] p-3 rounded-lg ${
                       msg.isUser 
-                        ? 'bg-[#007bff] text-white rounded-br-none' 
+                        ? 'bg-[#F97316] text-white rounded-br-none' 
                         : 'bg-gray-100 text-gray-800 rounded-bl-none'
                     }`}
                   >
@@ -184,7 +184,7 @@ export const ChatbotWidget: React.FC = () => {
               onClick={handleSendMessage}
               disabled={!inputValue.trim() || isLoading}
               size="icon"
-              className="bg-[#007bff] hover:bg-blue-600"
+              className="bg-[#F97316] hover:bg-orange-600"
             >
               <Send size={16} />
             </Button>
@@ -195,10 +195,10 @@ export const ChatbotWidget: React.FC = () => {
       {/* Chat Icon */}
       <button
         onClick={toggleChat}
-        className="fixed bottom-5 right-5 w-[60px] h-[60px] rounded-full bg-[#007bff] text-white shadow-lg flex items-center justify-center hover:bg-blue-600 transition-colors z-[1000]"
+        className="fixed bottom-5 right-5 w-[70px] h-[70px] rounded-full bg-[#F97316] text-white shadow-lg flex items-center justify-center hover:bg-orange-600 transition-colors z-[1000]"
         aria-label="Open chat"
       >
-        <MessageCircle size={28} />
+        <MessageCircle size={32} />
       </button>
     </div>
   );
