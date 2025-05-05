@@ -34,7 +34,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
     <div className="fixed bottom-[100px] right-5 w-[350px] h-[500px] bg-white border border-gray-200 rounded-lg shadow-lg flex flex-col overflow-hidden z-[1000]">
       {/* Header */}
       <div className="bg-[#F97316] text-white px-4 py-3 flex justify-between items-center">
-        <h3 className="font-medium">Chatbot</h3>
+        <h3 className="font-medium">AI Assistant</h3>
         <Button 
           variant="ghost" 
           size="icon" 

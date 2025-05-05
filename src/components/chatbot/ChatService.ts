@@ -36,12 +36,12 @@ export const sendChatMessage = async (message: string): Promise<{ reply: string 
 };
 
 export const handleChatError = (error: unknown): string => {
-  console.error('Chatbot error details:', error);
+  console.error('AI Assistant error details:', error);
   const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
   
   toast({
     title: "Error",
-    description: `Failed to communicate with the chatbot service: ${errorMessage}`,
+    description: `Failed to communicate with the AI assistant service: ${errorMessage}`,
     variant: "destructive",
   });
   

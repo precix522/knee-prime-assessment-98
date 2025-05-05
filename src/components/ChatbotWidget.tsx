@@ -40,7 +40,7 @@ export const ChatbotWidget: React.FC = () => {
     setError(null);
     
     try {
-      // Send message to chatbot service
+      // Send message to AI assistant service
       const data = await sendChatMessage(userMessage.text);
       
       // Add bot response
