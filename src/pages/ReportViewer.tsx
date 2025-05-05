@@ -1,11 +1,10 @@
-
 import React, { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useTwilioAuthStore } from "../utils/twilio-auth-store";
 import { Button } from "../components/Button";
 import { getPatientReport, getAnnexReport, getSupportingDocument } from "../utils/supabase";
 import { toast } from "sonner";
-import { CalendarDays, FileText, BookOpen, Clock, Upload } from "lucide-react";
+import { CalendarDays, FileText, BookOpen, Clock, Upload, Download } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "../components/ui/tabs";
 import { 
   Table, 
@@ -289,7 +288,20 @@ export default function ReportViewer() {
           <div className="flex-1 bg-white rounded-lg shadow-md border border-gray-200 p-8">
             <Tabs value={activeTab} className="w-full">
               <TabsContent value="report" className="mt-0">
-                <h1 className="text-2xl font-bold text-gray-900 mb-6">Patient Report</h1>
+                <div className="flex justify-between items-center mb-6">
+                  <h1 className="text-2xl font-bold text-gray-900">Patient Report</h1>
+                  
+                  {!error && reportUrl && (
+                    <Button 
+                      variant="health" 
+                      onClick={() => handleDownload(reportUrl, reportName)}
+                      className="flex items-center gap-2"
+                    >
+                      <Download className="h-4 w-4" />
+                      Download Report
+                    </Button>
+                  )}
+                </div>
                 
                 {error && (
                   <div className="border border-red-200 rounded-md p-4 mb-6 bg-red-50 text-red-600">
@@ -317,20 +329,6 @@ export default function ReportViewer() {
                         frameBorder="0"
                       ></iframe>
                     </div>
-                    <div className="mb-4">
-                      <Button 
-                        variant="health" 
-                        onClick={() => handleDownload(reportUrl, reportName)}
-                        className="flex items-center gap-2"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                          <polyline points="7 10 12 15 17 10"></polyline>
-                          <line x1="12" y1="15" x2="12" y2="3"></line>
-                        </svg>
-                        Download Report
-                      </Button>
-                    </div>
                   </div>
                 ) : (
                   !error && (
@@ -347,7 +345,20 @@ export default function ReportViewer() {
               </TabsContent>
               
               <TabsContent value="annex" className="mt-0">
-                <h1 className="text-2xl font-bold text-gray-900 mb-4">Annex Report</h1>
+                <div className="flex justify-between items-center mb-4">
+                  <h1 className="text-2xl font-bold text-gray-900">Annex Report</h1>
+                  
+                  {annexReportUrl && (
+                    <Button 
+                      variant="health" 
+                      onClick={handleAnnexDownload}
+                      className="flex items-center gap-2"
+                    >
+                      <Download className="h-4 w-4" />
+                      Download Annex Report
+                    </Button>
+                  )}
+                </div>
                 
                 {annexReportUrl ? (
                   <div className="flex flex-col">
@@ -358,20 +369,6 @@ export default function ReportViewer() {
                         title="Annex Report PDF"
                         frameBorder="0"
                       ></iframe>
-                    </div>
-                    <div className="mb-4">
-                      <Button 
-                        variant="health" 
-                        onClick={handleAnnexDownload}
-                        className="flex items-center gap-2"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                          <polyline points="7 10 12 15 17 10"></polyline>
-                          <line x1="12" y1="15" x2="12" y2="3"></line>
-                        </svg>
-                        Download Annex Report
-                      </Button>
                     </div>
                   </div>
                 ) : (
