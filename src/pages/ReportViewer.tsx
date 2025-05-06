@@ -274,15 +274,6 @@ export default function ReportViewer() {
                 Go to Dashboard
               </Button>
             </div>
-
-            <div className="pt-6 mt-2 border-t border-gray-200">
-              <p className="text-sm text-gray-600">
-                <span className="font-semibold block mb-3">Contact</span>
-                2 College Road #02-00,<br />
-                Singapore 169850<br />
-                <span className="mt-3 block">Email: info@precix.io</span>
-              </p>
-            </div>
           </div>
 
           <div className="flex-1 bg-white rounded-lg shadow-md border border-gray-200 p-8">
