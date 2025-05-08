@@ -11,11 +11,25 @@ interface EmailData {
   html: string;
 }
 
+// Define interfaces for our request bodies
+interface SendOTPRequest {
+  phone_number: string;
+}
+
+interface VerifyOTPRequest {
+  phone_number: string;
+  code: string;
+}
+
+interface ValidateSessionRequest {
+  session_id: string;
+}
+
 // API route for sending OTP
 export async function handleSendOTP(request: Request): Promise<Response> {
   try {
-    const body = await request.json() as Record<string, any>;
-    const phone_number = body?.phone_number as string;
+    const body = await request.json() as SendOTPRequest;
+    const phone_number = body.phone_number;
     
     if (!phone_number) {
       return new Response(
@@ -55,9 +69,9 @@ export async function handleSendOTP(request: Request): Promise<Response> {
 // API route for verifying OTP
 export async function handleVerifyOTP(request: Request): Promise<Response> {
   try {
-    const body = await request.json() as Record<string, any>;
-    const phone_number = body?.phone_number as string;
-    const code = body?.code as string;
+    const body = await request.json() as VerifyOTPRequest;
+    const phone_number = body.phone_number;
+    const code = body.code;
     
     if (!phone_number || !code) {
       return new Response(
@@ -100,8 +114,8 @@ export async function handleVerifyOTP(request: Request): Promise<Response> {
 // API route for validating session
 export async function handleValidateSession(request: Request): Promise<Response> {
   try {
-    const body = await request.json() as Record<string, any>;
-    const session_id = body?.session_id as string;
+    const body = await request.json() as ValidateSessionRequest;
+    const session_id = body.session_id;
     
     if (!session_id) {
       return new Response(
