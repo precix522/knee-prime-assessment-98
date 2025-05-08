@@ -1,7 +1,7 @@
 
 // This file contains the Vonage service functions that interact with the Vonage API
 
-// Vonage credentials from environment variables
+// Vonage credentials - hardcoded for now
 const VONAGE_API_KEY = "b26fc285";
 const VONAGE_API_SECRET = "LSiwpgJGoeqZ4Qwg";
 const VONAGE_BRAND_NAME = "Precix";
@@ -38,8 +38,24 @@ export const sendOTP = async (phoneNumber: string): Promise<{ success: boolean; 
       body: formData
     });
     
-    const data = await response.json() as any;
-    console.log('[Vonage Service] Response:', data);
+    console.log('[Vonage Service] Response status:', response.status);
+    
+    if (!response.ok) {
+      console.error('[Vonage Service] Response not OK:', response.status, response.statusText);
+      const errorText = await response.text();
+      console.error('[Vonage Service] Error response body:', errorText);
+      throw new Error(`API returned ${response.status}: ${errorText || response.statusText}`);
+    }
+    
+    const responseText = await response.text();
+    console.log('[Vonage Service] Response text:', responseText);
+    
+    if (!responseText || responseText.trim() === '') {
+      throw new Error('Empty response from Vonage API');
+    }
+    
+    const data = JSON.parse(responseText);
+    console.log('[Vonage Service] Parsed response:', data);
     
     if (data.status === "0") {
       return { 
@@ -81,8 +97,23 @@ export const verifyOTP = async (requestId: string, code: string): Promise<{ succ
       body: formData
     });
     
-    const data = await response.json() as any;
-    console.log('[Vonage Service] Verification response:', data);
+    console.log('[Vonage Service] Verification response status:', response.status);
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('[Vonage Service] Error response body:', errorText);
+      throw new Error(`API returned ${response.status}: ${errorText || response.statusText}`);
+    }
+    
+    const responseText = await response.text();
+    console.log('[Vonage Service] Verification response text:', responseText);
+    
+    if (!responseText || responseText.trim() === '') {
+      throw new Error('Empty response from Vonage API');
+    }
+    
+    const data = JSON.parse(responseText);
+    console.log('[Vonage Service] Verification parsed response:', data);
     
     if (data.status === "0") {
       // Generate a session ID for the verified user

@@ -4,20 +4,22 @@ import { handleRequest } from './pages/api/index';
 import type { ViteDevServer } from 'vite';
 import { IncomingMessage, ServerResponse } from 'http';
 
+// Define types for middleware
+type NextFunction = () => void;
+
 export default function apiMiddleware() {
   return {
     name: 'api-middleware',
     configureServer(server: ViteDevServer) {
-      server.middlewares.use(async (req: IncomingMessage, res: ServerResponse, next: () => void) => {
+      server.middlewares.use(async (req: IncomingMessage, res: ServerResponse, next: NextFunction) => {
         if (req.url?.startsWith('/api/')) {
           try {
             // Create a Request object from the incoming request
-            const url = new URL(req.url, `http://${req.headers.host}`);
+            const url = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
             
-            const requestInit: RequestInit = {
-              method: req.method,
-              headers: {} as Record<string, string>
-            };
+            console.log('API Request:', req.method, url.pathname);
+            
+            const headers = new Headers();
             
             // Copy headers safely
             if (req.headers) {
@@ -25,17 +27,22 @@ export default function apiMiddleware() {
                 if (value !== undefined) {
                   // Handle both string and string[] header values
                   if (Array.isArray(value)) {
-                    (requestInit.headers as Record<string, string>)[key] = value.join(', ');
+                    headers.set(key, value.join(', '));
                   } else if (typeof value === 'string') {
-                    (requestInit.headers as Record<string, string>)[key] = value;
+                    headers.set(key, value);
                   }
                 }
               });
             }
             
+            const requestInit: RequestInit = {
+              method: req.method,
+              headers: headers
+            };
+            
             // Add body for POST/PUT requests
             if (['POST', 'PUT', 'PATCH'].includes(req.method || '')) {
-              const bodyPromise = new Promise((resolve) => {
+              const bodyPromise = new Promise<string>((resolve) => {
                 let body = '';
                 req.on('data', (chunk: Buffer) => {
                   body += chunk.toString();
@@ -46,7 +53,7 @@ export default function apiMiddleware() {
                 });
               });
               
-              requestInit.body = await bodyPromise as string;
+              requestInit.body = await bodyPromise;
             }
             
             const request = new Request(url.toString(), requestInit);
@@ -56,13 +63,14 @@ export default function apiMiddleware() {
             
             // Send the response back
             res.statusCode = response.status;
+            
             response.headers.forEach((value, key) => {
               res.setHeader(key, value);
             });
             
-            const responseText = await response.text();
-            console.log('API response:', responseText);
-            res.end(responseText);
+            const responseBody = await response.text();
+            console.log('API response:', responseBody);
+            res.end(responseBody);
           } catch (error: any) {
             console.error('API middleware error:', error);
             res.statusCode = 500;

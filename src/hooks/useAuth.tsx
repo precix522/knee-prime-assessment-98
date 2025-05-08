@@ -1,3 +1,4 @@
+
 import { useState, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useTwilioAuthStore } from '@/utils/twilio-auth-store';
@@ -87,12 +88,32 @@ export const useAuth = () => {
         body: JSON.stringify({ phone_number: state.phone })
       });
 
+      console.log('OTP send response status:', response.status);
+      
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to send verification code');
+        const errorText = await response.text();
+        console.error('Error response text:', errorText);
+        
+        let errorMessage = 'Failed to send verification code';
+        try {
+          const errorData = JSON.parse(errorText);
+          errorMessage = errorData.message || errorMessage;
+        } catch (e) {
+          console.error('Failed to parse error response:', e);
+        }
+        
+        throw new Error(errorMessage);
       }
 
-      const data = await response.json();
+      const responseText = await response.text();
+      console.log('OTP send response text:', responseText);
+      
+      if (!responseText || responseText.trim() === '') {
+        throw new Error('Empty response from server');
+      }
+      
+      const data = JSON.parse(responseText);
+      console.log('OTP send parsed data:', data);
 
       if (!data.success) {
         throw new Error(data.message || 'Failed to send verification code');
@@ -159,12 +180,32 @@ export const useAuth = () => {
         })
       });
 
+      console.log('OTP verification response status:', response.status);
+      
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to verify code');
+        const errorText = await response.text();
+        console.error('Error verification response text:', errorText);
+        
+        let errorMessage = 'Failed to verify code';
+        try {
+          const errorData = JSON.parse(errorText);
+          errorMessage = errorData.message || errorMessage;
+        } catch (e) {
+          console.error('Failed to parse verification error response:', e);
+        }
+        
+        throw new Error(errorMessage);
       }
 
-      const data = await response.json();
+      const responseText = await response.text();
+      console.log('OTP verification response text:', responseText);
+      
+      if (!responseText || responseText.trim() === '') {
+        throw new Error('Empty response from verification server');
+      }
+      
+      const data = JSON.parse(responseText);
+      console.log('OTP verification parsed data:', data);
 
       if (!data.success) {
         throw new Error(data.message || 'Failed to verify code');

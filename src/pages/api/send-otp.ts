@@ -13,6 +13,7 @@ export default async function handleSendOTP(request: Request): Promise<Response>
     let body;
     try {
       body = await request.json();
+      console.log('Parsed request body:', body);
     } catch (error) {
       console.error('Error parsing JSON body:', error);
       return new Response(
