@@ -9,8 +9,24 @@ const OTP_SERVICE: 'twilio' | 'vonage' = 'vonage';
 export default async function handleSendOTP(request: Request): Promise<Response> {
   try {
     console.log('Processing OTP send request');
-    const body = await request.json() as { phone_number?: string };
-    const phone_number = body.phone_number as string;
+    
+    let body;
+    try {
+      body = await request.json();
+    } catch (error) {
+      console.error('Error parsing JSON body:', error);
+      return new Response(
+        JSON.stringify({ success: false, message: 'Invalid JSON body' }),
+        { 
+          status: 400,
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+    }
+    
+    const phone_number = body?.phone_number as string;
     
     console.log('Received phone number:', phone_number);
     

@@ -22,6 +22,14 @@ export const sendOTP = async (phoneNumber: string): Promise<{ success: boolean; 
       workflow_id: "6" // SMS and then voice call if SMS fails
     });
     
+    console.log('[Vonage Service] Request parameters:', {
+      api_key: VONAGE_API_KEY,
+      number: phoneNumber,
+      brand: VONAGE_BRAND_NAME,
+      code_length: "6",
+      workflow_id: "6"
+    });
+    
     const response = await fetch(url, {
       method: 'POST',
       headers: {

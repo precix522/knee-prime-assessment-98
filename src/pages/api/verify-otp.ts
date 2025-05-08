@@ -9,14 +9,26 @@ const OTP_SERVICE: 'twilio' | 'vonage' = 'vonage';
 export default async function handleVerifyOTP(request: Request): Promise<Response> {
   try {
     console.log('Processing OTP verification request');
-    const body = await request.json() as { 
-      request_id?: string; 
-      code?: string; 
-      phone_number?: string 
-    };
     
-    const request_id = body.request_id as string;
-    const code = body.code as string;
+    let body;
+    try {
+      body = await request.json();
+    } catch (error) {
+      console.error('Error parsing JSON body:', error);
+      return new Response(
+        JSON.stringify({ success: false, message: 'Invalid JSON body' }),
+        { 
+          status: 400,
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+    }
+    
+    const request_id = body?.request_id as string;
+    const code = body?.code as string;
+    const phone_number = body?.phone_number as string;
     
     console.log('Verifying OTP with code:', code);
     
@@ -36,8 +48,6 @@ export default async function handleVerifyOTP(request: Request): Promise<Respons
     
     if (OTP_SERVICE === 'twilio') {
       // For Twilio, we would need phone_number and code
-      const phone_number = body.phone_number as string;
-      
       if (!phone_number) {
         return new Response(
           JSON.stringify({ success: false, message: 'Phone number is required for Twilio verification' }),

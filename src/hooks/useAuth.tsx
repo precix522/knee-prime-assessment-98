@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useTwilioAuthStore } from '@/utils/twilio-auth-store';
@@ -20,7 +19,7 @@ export interface AuthState {
 export const useAuth = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { setUser, setToken } = useTwilioAuthStore();
+  const authStore = useTwilioAuthStore();
 
   const [state, setState] = useState<AuthState>({
     phone: '',
@@ -198,8 +197,7 @@ export const useAuth = () => {
       ...userData
     };
 
-    setUser(user);
-    setToken(sessionId);
+    authStore.setAuthUser(user);
     
     updateState({
       loading: false,
@@ -215,7 +213,7 @@ export const useAuth = () => {
     setTimeout(() => {
       navigate('/dashboard');
     }, 500);
-  }, [setUser, setToken, updateState, navigate, toast]);
+  }, [authStore, updateState, navigate, toast]);
 
   const handleToggleDevMode = useCallback(() => {
     updateState({ 

@@ -16,7 +16,7 @@ export default function apiMiddleware() {
             
             const requestInit: RequestInit = {
               method: req.method,
-              headers: {}
+              headers: {} as Record<string, string>
             };
             
             // Copy headers safely
@@ -26,7 +26,7 @@ export default function apiMiddleware() {
                   // Handle both string and string[] header values
                   if (Array.isArray(value)) {
                     (requestInit.headers as Record<string, string>)[key] = value.join(', ');
-                  } else {
+                  } else if (typeof value === 'string') {
                     (requestInit.headers as Record<string, string>)[key] = value;
                   }
                 }
@@ -41,6 +41,7 @@ export default function apiMiddleware() {
                   body += chunk.toString();
                 });
                 req.on('end', () => {
+                  console.log('Request body received:', body);
                   resolve(body);
                 });
               });
@@ -59,14 +60,16 @@ export default function apiMiddleware() {
               res.setHeader(key, value);
             });
             
-            res.end(await response.text());
+            const responseText = await response.text();
+            console.log('API response:', responseText);
+            res.end(responseText);
           } catch (error: any) {
             console.error('API middleware error:', error);
             res.statusCode = 500;
             res.setHeader('Content-Type', 'application/json');
             res.end(JSON.stringify({ 
               success: false, 
-              message: 'Internal server error' 
+              message: 'Internal server error: ' + (error.message || error.toString())
             }));
           }
         } else {
