@@ -89,15 +89,20 @@ export const useAuth = () => {
       });
 
       console.log('OTP send response status:', response.status);
+      console.log('OTP send response headers:', Object.fromEntries([...response.headers.entries()]));
+      
+      // First get the raw text response to help with debugging
+      const responseText = await response.text();
+      console.log('OTP send raw response text:', responseText);
       
       if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Error response text:', errorText);
-        
         let errorMessage = 'Failed to send verification code';
+        
         try {
-          const errorData = JSON.parse(errorText);
-          errorMessage = errorData.message || errorMessage;
+          if (responseText && responseText.trim() !== '') {
+            const errorData = JSON.parse(responseText);
+            errorMessage = errorData.message || errorMessage;
+          }
         } catch (e) {
           console.error('Failed to parse error response:', e);
         }
@@ -105,15 +110,19 @@ export const useAuth = () => {
         throw new Error(errorMessage);
       }
 
-      const responseText = await response.text();
-      console.log('OTP send response text:', responseText);
-      
       if (!responseText || responseText.trim() === '') {
         throw new Error('Empty response from server');
       }
       
-      const data = JSON.parse(responseText);
-      console.log('OTP send parsed data:', data);
+      let data;
+      try {
+        data = JSON.parse(responseText);
+        console.log('OTP send parsed data:', data);
+      } catch (jsonError) {
+        console.error('Failed to parse JSON response:', jsonError);
+        console.error('Response was:', responseText);
+        throw new Error('Invalid JSON response from server');
+      }
 
       if (!data.success) {
         throw new Error(data.message || 'Failed to send verification code');

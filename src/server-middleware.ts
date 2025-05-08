@@ -64,12 +64,16 @@ export default function apiMiddleware() {
             // Send the response back
             res.statusCode = response.status;
             
+            // Set appropriate Content-Type header
             response.headers.forEach((value, key) => {
               res.setHeader(key, value);
             });
             
             const responseBody = await response.text();
-            console.log('API response:', responseBody);
+            console.log('API response status:', response.status);
+            console.log('API response headers:', [...response.headers.entries()]);
+            console.log('API response body (first 200 chars):', responseBody.substring(0, 200));
+            
             res.end(responseBody);
           } catch (error: any) {
             console.error('API middleware error:', error);

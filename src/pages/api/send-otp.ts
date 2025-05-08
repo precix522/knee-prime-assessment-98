@@ -11,11 +11,18 @@ export default async function handleSendOTP(request: Request): Promise<Response>
     console.log('Processing OTP send request');
     
     let body;
+    let bodyText = '';
+    
     try {
+      // First get the raw text to help with debugging
+      bodyText = await request.clone().text();
+      console.log('Raw request body:', bodyText);
+      
+      // Then try to parse as JSON
       body = await request.json();
       console.log('Parsed request body:', body);
     } catch (error) {
-      console.error('Error parsing JSON body:', error);
+      console.error('Error parsing JSON body:', error, 'Raw body was:', bodyText);
       return new Response(
         JSON.stringify({ success: false, message: 'Invalid JSON body' }),
         { 

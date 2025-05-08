@@ -16,18 +16,25 @@ export async function handleRequest(request: Request): Promise<Response> {
     const url = new URL(request.url);
     const path = url.pathname;
     
+    console.log('API path:', path);
+    
     // Route the request to the appropriate handler
     if (path.endsWith('/api/send-otp')) {
+      console.log('Routing to send-otp handler');
       return await handleSendOTP(request);
     } else if (path.endsWith('/api/verify-otp')) {
+      console.log('Routing to verify-otp handler');
       return await handleVerifyOTP(request);
     } else if (path.endsWith('/api/validate-session')) {
+      console.log('Routing to validate-session handler');
       return await handleValidateSession(request);
     } else if (path.endsWith('/api/send-email')) {
+      console.log('Routing to send-email handler');
       return await handleSendEmail(request);
     }
     
     // If no handler matches, return a 404
+    console.log('No handler found for path:', path);
     return new Response(
       JSON.stringify({ success: false, message: 'Endpoint not found' }),
       {

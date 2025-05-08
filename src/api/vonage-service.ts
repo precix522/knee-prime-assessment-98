@@ -1,7 +1,7 @@
 
 // This file contains the Vonage service functions that interact with the Vonage API
 
-// Vonage credentials - hardcoded for now
+// Vonage credentials
 const VONAGE_API_KEY = "b26fc285";
 const VONAGE_API_SECRET = "LSiwpgJGoeqZ4Qwg";
 const VONAGE_BRAND_NAME = "Precix";
@@ -39,6 +39,7 @@ export const sendOTP = async (phoneNumber: string): Promise<{ success: boolean; 
     });
     
     console.log('[Vonage Service] Response status:', response.status);
+    console.log('[Vonage Service] Response headers:', Object.fromEntries([...response.headers.entries()]));
     
     if (!response.ok) {
       console.error('[Vonage Service] Response not OK:', response.status, response.statusText);
@@ -54,20 +55,27 @@ export const sendOTP = async (phoneNumber: string): Promise<{ success: boolean; 
       throw new Error('Empty response from Vonage API');
     }
     
-    const data = JSON.parse(responseText);
-    console.log('[Vonage Service] Parsed response:', data);
-    
-    if (data.status === "0") {
-      return { 
-        success: true, 
-        message: 'Verification code sent successfully', 
-        request_id: data.request_id 
-      };
-    } else {
-      return { 
-        success: false, 
-        message: data.error_text || 'Failed to send verification code' 
-      };
+    // Try parsing the response text as JSON
+    try {
+      const data = JSON.parse(responseText);
+      console.log('[Vonage Service] Parsed response:', data);
+      
+      if (data.status === "0") {
+        return { 
+          success: true, 
+          message: 'Verification code sent successfully', 
+          request_id: data.request_id 
+        };
+      } else {
+        return { 
+          success: false, 
+          message: data.error_text || 'Failed to send verification code' 
+        };
+      }
+    } catch (parseError) {
+      console.error('[Vonage Service] Failed to parse response as JSON:', parseError);
+      console.error('[Vonage Service] Raw response:', responseText);
+      throw new Error('Invalid JSON response from Vonage API');
     }
   } catch (error: any) {
     console.error('[Vonage Service] Error sending OTP:', error);
@@ -98,6 +106,7 @@ export const verifyOTP = async (requestId: string, code: string): Promise<{ succ
     });
     
     console.log('[Vonage Service] Verification response status:', response.status);
+    console.log('[Vonage Service] Verification response headers:', Object.fromEntries([...response.headers.entries()]));
     
     if (!response.ok) {
       const errorText = await response.text();
@@ -112,23 +121,30 @@ export const verifyOTP = async (requestId: string, code: string): Promise<{ succ
       throw new Error('Empty response from Vonage API');
     }
     
-    const data = JSON.parse(responseText);
-    console.log('[Vonage Service] Verification parsed response:', data);
-    
-    if (data.status === "0") {
-      // Generate a session ID for the verified user
-      const sessionId = `vonage_${Date.now()}_${requestId}`;
+    // Try parsing the response text as JSON
+    try {
+      const data = JSON.parse(responseText);
+      console.log('[Vonage Service] Verification parsed response:', data);
       
-      return { 
-        success: true, 
-        message: 'Verification successful', 
-        session_id: sessionId 
-      };
-    } else {
-      return { 
-        success: false, 
-        message: data.error_text || 'Failed to verify code' 
-      };
+      if (data.status === "0") {
+        // Generate a session ID for the verified user
+        const sessionId = `vonage_${Date.now()}_${requestId}`;
+        
+        return { 
+          success: true, 
+          message: 'Verification successful', 
+          session_id: sessionId 
+        };
+      } else {
+        return { 
+          success: false, 
+          message: data.error_text || 'Failed to verify code' 
+        };
+      }
+    } catch (parseError) {
+      console.error('[Vonage Service] Failed to parse verification response as JSON:', parseError);
+      console.error('[Vonage Service] Raw verification response:', responseText);
+      throw new Error('Invalid JSON response from Vonage API');
     }
   } catch (error: any) {
     console.error('[Vonage Service] Error verifying OTP:', error);
