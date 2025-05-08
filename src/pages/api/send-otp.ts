@@ -4,9 +4,9 @@ import { sendOTP as twilioSendOTP } from '../../api/twilio-service';
 import { sendOTP as vonageSendOTP } from '../../api/vonage-service';
 
 // Default to using Vonage service
-const OTP_SERVICE: 'twilio' | 'vonage' = 'vonage'; // Fixed typing issue
+const OTP_SERVICE: 'twilio' | 'vonage' = 'vonage';
 
-export async function handleSendOTP(request: Request): Promise<Response> {
+export default async function handleSendOTP(request: Request): Promise<Response> {
   try {
     const { phone_number } = await request.json();
     
@@ -39,5 +39,3 @@ export async function handleSendOTP(request: Request): Promise<Response> {
     );
   }
 }
-
-export default handleSendOTP;

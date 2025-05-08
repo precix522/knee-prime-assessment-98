@@ -4,30 +4,20 @@ import { verifyOTP as twilioVerifyOTP } from '../../api/twilio-service';
 import { verifyOTP as vonageVerifyOTP } from '../../api/vonage-service';
 
 // Default to using Vonage service
-const OTP_SERVICE: 'twilio' | 'vonage' = 'vonage'; // Fixed typing issue
+const OTP_SERVICE: 'twilio' | 'vonage' = 'vonage';
 
-export async function handleVerifyOTP(request: Request): Promise<Response> {
+export default async function handleVerifyOTP(request: Request): Promise<Response> {
   try {
-    const { phone_number, code, request_id } = await request.json();
+    const { request_id, code } = await request.json();
     
     let result;
     
     if (OTP_SERVICE === 'twilio') {
-      // Call the Twilio service to verify OTP
+      // For Twilio, we would need phone_number and code
+      const { phone_number } = await request.json();
       result = await twilioVerifyOTP(phone_number, code);
     } else {
-      // Call the Vonage service to verify OTP
-      if (!request_id) {
-        return new Response(
-          JSON.stringify({ success: false, message: 'Request ID is required for Vonage verification' }),
-          { 
-            status: 400,
-            headers: {
-              'Content-Type': 'application/json'
-            }
-          }
-        );
-      }
+      // For Vonage, we need request_id and code
       result = await vonageVerifyOTP(request_id, code);
     }
     
@@ -50,5 +40,3 @@ export async function handleVerifyOTP(request: Request): Promise<Response> {
     );
   }
 }
-
-export default handleVerifyOTP;
