@@ -1,5 +1,43 @@
 
 // API route for sending OTP
-import { handleSendOTP } from '../../api/api-endpoints';
+import { sendOTP as twilioSendOTP } from '../../api/twilio-service';
+import { sendOTP as vonageSendOTP } from '../../api/vonage-service';
+
+// Default to using Vonage service
+const OTP_SERVICE = 'vonage'; // Can be 'twilio' or 'vonage'
+
+export async function handleSendOTP(request: Request): Promise<Response> {
+  try {
+    const { phone_number } = await request.json();
+    
+    let result;
+    
+    if (OTP_SERVICE === 'twilio') {
+      // Call the Twilio service to send OTP
+      result = await twilioSendOTP(phone_number);
+    } else {
+      // Call the Vonage service to send OTP
+      result = await vonageSendOTP(phone_number);
+    }
+    
+    return new Response(JSON.stringify(result), {
+      status: result.success ? 200 : 400,
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+  } catch (error: any) {
+    console.error('API Error - Send OTP:', error);
+    return new Response(
+      JSON.stringify({ success: false, message: error.message || 'Server error' }),
+      { 
+        status: 500,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+  }
+}
 
 export default handleSendOTP;
