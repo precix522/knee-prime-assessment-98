@@ -2,25 +2,13 @@
 // Vite Server Middleware for API routes
 import { handleRequest } from './pages/api/index';
 import type { ViteDevServer } from 'vite';
-
-interface ServerMiddlewareRequest {
-  url?: string;
-  method?: string;
-  headers: Record<string, string>;
-  on: (event: string, callback: (chunk: any) => void) => void;
-}
-
-interface ServerMiddlewareResponse {
-  statusCode: number;
-  setHeader: (name: string, value: string) => void;
-  end: (body: string) => void;
-}
+import { IncomingMessage, ServerResponse } from 'http';
 
 export default function apiMiddleware() {
   return {
     name: 'api-middleware',
     configureServer(server: ViteDevServer) {
-      server.middlewares.use(async (req: ServerMiddlewareRequest, res: ServerMiddlewareResponse, next: () => void) => {
+      server.middlewares.use(async (req: IncomingMessage, res: ServerResponse, next: () => void) => {
         if (req.url?.startsWith('/api/')) {
           try {
             // Create a Request object from the incoming request
@@ -28,15 +16,29 @@ export default function apiMiddleware() {
             
             const requestInit: RequestInit = {
               method: req.method,
-              headers: req.headers as HeadersInit,
+              headers: {}
             };
+            
+            // Copy headers safely
+            if (req.headers) {
+              Object.entries(req.headers).forEach(([key, value]) => {
+                if (value !== undefined) {
+                  // Handle both string and string[] header values
+                  if (Array.isArray(value)) {
+                    (requestInit.headers as Record<string, string>)[key] = value.join(', ');
+                  } else {
+                    (requestInit.headers as Record<string, string>)[key] = value;
+                  }
+                }
+              });
+            }
             
             // Add body for POST/PUT requests
             if (['POST', 'PUT', 'PATCH'].includes(req.method || '')) {
               const bodyPromise = new Promise((resolve) => {
                 let body = '';
-                req.on('data', (chunk: string) => {
-                  body += chunk;
+                req.on('data', (chunk: Buffer) => {
+                  body += chunk.toString();
                 });
                 req.on('end', () => {
                   resolve(body);

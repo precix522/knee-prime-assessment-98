@@ -3,9 +3,9 @@
 
 // Twilio credentials - Using test credentials for development
 // In production, these should be environment variables
-const TWILIO_ACCOUNT_SID = import.meta.env.VITE_TWILIO_ACCOUNT_SID || "AC00000000000000000000000000000000";
-const TWILIO_AUTH_TOKEN = import.meta.env.VITE_TWILIO_AUTH_TOKEN || "00000000000000000000000000000000";
-const TWILIO_SERVICE_SID = import.meta.env.VITE_TWILIO_SERVICE_SID || "VA00000000000000000000000000000000";
+const TWILIO_ACCOUNT_SID = "AC00000000000000000000000000000000";
+const TWILIO_AUTH_TOKEN = "00000000000000000000000000000000";
+const TWILIO_SERVICE_SID = "VA00000000000000000000000000000000";
 
 // Function to send OTP via Twilio Verify
 export const sendOTP = async (phoneNumber: string): Promise<{ success: boolean; message: string }> => {

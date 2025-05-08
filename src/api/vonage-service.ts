@@ -2,9 +2,9 @@
 // This file contains the Vonage service functions that interact with the Vonage API
 
 // Vonage credentials from environment variables
-const VONAGE_API_KEY = import.meta.env.VITE_VONAGE_API_KEY || "b26fc285";
-const VONAGE_API_SECRET = import.meta.env.VITE_VONAGE_API_SECRET || "LSiwpgJGoeqZ4Qwg";
-const VONAGE_BRAND_NAME = import.meta.env.VITE_VONAGE_BRAND_NAME || "Precix";
+const VONAGE_API_KEY = "b26fc285";
+const VONAGE_API_SECRET = "LSiwpgJGoeqZ4Qwg";
+const VONAGE_BRAND_NAME = "Precix";
 
 // Function to send OTP via Vonage Verify API
 export const sendOTP = async (phoneNumber: string): Promise<{ success: boolean; message: string; request_id?: string }> => {

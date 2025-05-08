@@ -8,7 +8,12 @@ const OTP_SERVICE: 'twilio' | 'vonage' = 'vonage';
 
 export default async function handleVerifyOTP(request: Request): Promise<Response> {
   try {
-    const body = await request.json();
+    const body = await request.json() as { 
+      request_id?: string; 
+      code?: string; 
+      phone_number?: string 
+    };
+    
     const request_id = body.request_id as string;
     const code = body.code as string;
     
