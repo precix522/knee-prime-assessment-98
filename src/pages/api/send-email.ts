@@ -1,5 +1,5 @@
 
-import { handleSendEmail } from '@/api/api-endpoints';
+import { handleSendEmail } from '../../api/api-endpoints';
 
 // This is a simple API handler for sending emails
 export default async function handler(req: Request) {

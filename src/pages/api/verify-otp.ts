@@ -10,11 +10,19 @@ export default async function handleVerifyOTP(request: Request): Promise<Respons
   try {
     console.log('Processing OTP verification request');
     
-    let body;
+    let body: any = {};
+    let bodyText = '';
+    
     try {
+      // First get the raw text to help with debugging
+      bodyText = await request.clone().text();
+      console.log('Raw request body:', bodyText);
+      
+      // Then try to parse as JSON
       body = await request.json();
+      console.log('Parsed request body:', body);
     } catch (error) {
-      console.error('Error parsing JSON body:', error);
+      console.error('Error parsing JSON body:', error, 'Raw body was:', bodyText);
       return new Response(
         JSON.stringify({ success: false, message: 'Invalid JSON body' }),
         { 
@@ -26,9 +34,9 @@ export default async function handleVerifyOTP(request: Request): Promise<Respons
       );
     }
     
-    const request_id = body?.request_id as string;
-    const code = body?.code as string;
-    const phone_number = body?.phone_number as string;
+    const request_id = body.request_id as string;
+    const code = body.code as string;
+    const phone_number = body.phone_number as string;
     
     console.log('Verifying OTP with code:', code);
     

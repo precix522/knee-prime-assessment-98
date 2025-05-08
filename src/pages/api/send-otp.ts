@@ -10,7 +10,7 @@ export default async function handleSendOTP(request: Request): Promise<Response>
   try {
     console.log('Processing OTP send request');
     
-    let body;
+    let body: any = {};
     let bodyText = '';
     
     try {
@@ -34,7 +34,7 @@ export default async function handleSendOTP(request: Request): Promise<Response>
       );
     }
     
-    const phone_number = body?.phone_number as string;
+    const phone_number = body.phone_number as string;
     
     console.log('Received phone number:', phone_number);
     
