@@ -1,12 +1,26 @@
 
 // Vite Server Middleware for API routes
 import { handleRequest } from './pages/api/index';
+import type { ViteDevServer } from 'vite';
+
+interface ServerMiddlewareRequest {
+  url?: string;
+  method?: string;
+  headers: Record<string, string>;
+  on: (event: string, callback: (chunk: any) => void) => void;
+}
+
+interface ServerMiddlewareResponse {
+  statusCode: number;
+  setHeader: (name: string, value: string) => void;
+  end: (body: string) => void;
+}
 
 export default function apiMiddleware() {
   return {
     name: 'api-middleware',
-    configureServer(server) {
-      server.middlewares.use(async (req, res, next) => {
+    configureServer(server: ViteDevServer) {
+      server.middlewares.use(async (req: ServerMiddlewareRequest, res: ServerMiddlewareResponse, next: () => void) => {
         if (req.url?.startsWith('/api/')) {
           try {
             // Create a Request object from the incoming request
@@ -21,7 +35,7 @@ export default function apiMiddleware() {
             if (['POST', 'PUT', 'PATCH'].includes(req.method || '')) {
               const bodyPromise = new Promise((resolve) => {
                 let body = '';
-                req.on('data', chunk => {
+                req.on('data', (chunk: string) => {
                   body += chunk;
                 });
                 req.on('end', () => {
@@ -44,7 +58,7 @@ export default function apiMiddleware() {
             });
             
             res.end(await response.text());
-          } catch (error) {
+          } catch (error: any) {
             console.error('API middleware error:', error);
             res.statusCode = 500;
             res.setHeader('Content-Type', 'application/json');

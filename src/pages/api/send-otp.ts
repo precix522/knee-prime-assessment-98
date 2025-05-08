@@ -8,7 +8,20 @@ const OTP_SERVICE: 'twilio' | 'vonage' = 'vonage';
 
 export default async function handleSendOTP(request: Request): Promise<Response> {
   try {
-    const { phone_number } = await request.json();
+    const body = await request.json();
+    const phone_number = body.phone_number as string;
+    
+    if (!phone_number) {
+      return new Response(
+        JSON.stringify({ success: false, message: 'Phone number is required' }),
+        { 
+          status: 400,
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+    }
     
     let result;
     

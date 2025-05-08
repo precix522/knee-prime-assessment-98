@@ -8,16 +8,55 @@ const OTP_SERVICE: 'twilio' | 'vonage' = 'vonage';
 
 export default async function handleVerifyOTP(request: Request): Promise<Response> {
   try {
-    const { request_id, code } = await request.json();
+    const body = await request.json();
+    const request_id = body.request_id as string;
+    const code = body.code as string;
+    
+    if (!code) {
+      return new Response(
+        JSON.stringify({ success: false, message: 'Verification code is required' }),
+        { 
+          status: 400,
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+    }
     
     let result;
     
     if (OTP_SERVICE === 'twilio') {
       // For Twilio, we would need phone_number and code
-      const { phone_number } = await request.json();
+      const phone_number = body.phone_number as string;
+      
+      if (!phone_number) {
+        return new Response(
+          JSON.stringify({ success: false, message: 'Phone number is required for Twilio verification' }),
+          { 
+            status: 400,
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          }
+        );
+      }
+      
       result = await twilioVerifyOTP(phone_number, code);
     } else {
       // For Vonage, we need request_id and code
+      if (!request_id) {
+        return new Response(
+          JSON.stringify({ success: false, message: 'Request ID is required for Vonage verification' }),
+          { 
+            status: 400,
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          }
+        );
+      }
+      
       result = await vonageVerifyOTP(request_id, code);
     }
     

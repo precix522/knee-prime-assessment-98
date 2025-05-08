@@ -30,7 +30,7 @@ export const sendOTP = async (phoneNumber: string): Promise<{ success: boolean; 
       body: formData
     });
     
-    const data = await response.json();
+    const data = await response.json() as any;
     console.log('[Vonage Service] Response:', data);
     
     if (data.status === "0") {
@@ -73,7 +73,7 @@ export const verifyOTP = async (requestId: string, code: string): Promise<{ succ
       body: formData
     });
     
-    const data = await response.json();
+    const data = await response.json() as any;
     console.log('[Vonage Service] Verification response:', data);
     
     if (data.status === "0") {
