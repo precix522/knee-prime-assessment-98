@@ -11,6 +11,8 @@ export async function handleRequest(request: Request): Promise<Response> {
   // Extract the path from the URL
   const path = url.pathname;
   
+  console.log('API Request:', path, request.method);
+  
   // Route the request based on the path
   if (path === '/api/send-otp') {
     return handleSendOTP(request);
@@ -18,6 +20,7 @@ export async function handleRequest(request: Request): Promise<Response> {
     return handleVerifyOTP(request);
   } else {
     // Handle 404 for unknown API routes
+    console.log('API route not found:', path);
     return new Response(
       JSON.stringify({ 
         success: false, 

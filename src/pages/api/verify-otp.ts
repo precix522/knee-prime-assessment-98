@@ -8,6 +8,7 @@ const OTP_SERVICE: 'twilio' | 'vonage' = 'vonage';
 
 export default async function handleVerifyOTP(request: Request): Promise<Response> {
   try {
+    console.log('Processing OTP verification request');
     const body = await request.json() as { 
       request_id?: string; 
       code?: string; 
@@ -16,6 +17,8 @@ export default async function handleVerifyOTP(request: Request): Promise<Respons
     
     const request_id = body.request_id as string;
     const code = body.code as string;
+    
+    console.log('Verifying OTP with code:', code);
     
     if (!code) {
       return new Response(
@@ -64,6 +67,8 @@ export default async function handleVerifyOTP(request: Request): Promise<Respons
       
       result = await vonageVerifyOTP(request_id, code);
     }
+    
+    console.log('OTP verification result:', result);
     
     return new Response(JSON.stringify(result), {
       status: result.success ? 200 : 400,
