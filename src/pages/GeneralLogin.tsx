@@ -25,6 +25,7 @@ export default function GeneralLogin() {
   const [devMode, setDevMode] = useState(false);
   const [captchaVerified, setCaptchaVerified] = useState(false);
   const [captchaError, setCaptchaError] = useState<string | null>(null);
+  const [requestId, setRequestId] = useState<string | null>(null); // For Vonage verification
   const { verifyOTP, validateSession, setLoginUser } = useTwilioAuthStore();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -92,20 +93,34 @@ export default function GeneralLogin() {
           description: "Dev mode: OTP code is 123456",
         });
       } else {
-        const { data, error } = await supabase.functions.invoke('send-sms', {
-          body: { phone: `+${phone}` },
+        // Send OTP via API route
+        const formattedPhone = phone.startsWith('+') ? phone : `+${phone}`;
+        
+        const response = await fetch('/api/send-otp', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ phone_number: formattedPhone }),
         });
-
-        if (error) {
-          console.error("Error sending OTP:", error);
+        
+        const result = await response.json();
+        
+        if (!result.success) {
           toast({
             title: "Error",
-            description: "Failed to send OTP. Please try again.",
+            description: result.message || "Failed to send OTP. Please try again.",
             variant: "destructive",
           });
+          setLoading(false);
           return;
         }
-
+        
+        // For Vonage, store request_id for verification
+        if (result.request_id) {
+          setRequestId(result.request_id);
+        }
+        
         setOtpSent(true);
         toast({
           title: "Success",
@@ -187,24 +202,80 @@ export default function GeneralLogin() {
           return;
         }
       } else {
-        const formattedPhone = phone.startsWith('+') ? phone : `+${phone}`;
-        const user = await verifyOTP(formattedPhone, otp);
-        
-        if (!user) {
+        // Verify OTP via API route or direct call
+        if (requestId) {
+          // Use Vonage verification
+          try {
+            const response = await fetch('/api/verify-otp', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                request_id: requestId,
+                code: otp
+              }),
+            });
+            
+            const result = await response.json();
+            
+            if (!result.success) {
+              toast({
+                title: "Error",
+                description: result.message || "Failed to verify OTP. Please try again.",
+                variant: "destructive",
+              });
+              setLoading(false);
+              return;
+            }
+            
+            // Look up user profile
+            const formattedPhone = phone.startsWith('+') ? phone : `+${phone}`;
+            let userProfile = await getUserProfileByPhone(formattedPhone);
+            
+            if (!userProfile) {
+              userProfile = {
+                id: "user-" + Date.now(),
+                phone: formattedPhone,
+                profile_type: "patient",
+                created_at: new Date().toISOString(),
+                name: "",
+                email: ""
+              };
+            }
+            
+            useTwilioAuthStore.getState().setLoginUser(userProfile);
+            handleOTPSuccess(userProfile);
+            
+          } catch (error) {
+            console.error("Error verifying OTP:", error);
+            toast({
+              title: "Error",
+              description: "Failed to verify OTP. Please try again.",
+              variant: "destructive",
+            });
+          }
+        } else {
+          // Fallback to Twilio method
+          const formattedPhone = phone.startsWith('+') ? phone : `+${phone}`;
+          const user = await verifyOTP(formattedPhone, otp);
+          
+          if (!user) {
+            toast({
+              title: "Error",
+              description: "Failed to verify OTP. Please try again.",
+              variant: "destructive",
+            });
+            setLoading(false);
+            return;
+          }
+          
+          handleOTPSuccess(user);
           toast({
-            title: "Error",
-            description: "Failed to verify OTP. Please try again.",
-            variant: "destructive",
+            title: "Success",
+            description: "OTP verified successfully.",
           });
-          setLoading(false);
-          return;
         }
-        
-        handleOTPSuccess(user);
-        toast({
-          title: "Success",
-          description: "OTP verified successfully.",
-        });
       }
     } catch (error) {
       console.error("Error verifying OTP:", error);

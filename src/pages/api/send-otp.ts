@@ -4,7 +4,7 @@ import { sendOTP as twilioSendOTP } from '../../api/twilio-service';
 import { sendOTP as vonageSendOTP } from '../../api/vonage-service';
 
 // Default to using Vonage service
-const OTP_SERVICE = 'vonage'; // Can be 'twilio' or 'vonage'
+const OTP_SERVICE: 'twilio' | 'vonage' = 'vonage'; // Fixed typing issue
 
 export async function handleSendOTP(request: Request): Promise<Response> {
   try {

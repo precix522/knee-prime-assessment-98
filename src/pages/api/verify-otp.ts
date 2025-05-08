@@ -4,7 +4,7 @@ import { verifyOTP as twilioVerifyOTP } from '../../api/twilio-service';
 import { verifyOTP as vonageVerifyOTP } from '../../api/vonage-service';
 
 // Default to using Vonage service
-const OTP_SERVICE = 'vonage'; // Can be 'twilio' or 'vonage'
+const OTP_SERVICE: 'twilio' | 'vonage' = 'vonage'; // Fixed typing issue
 
 export async function handleVerifyOTP(request: Request): Promise<Response> {
   try {
