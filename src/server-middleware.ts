@@ -58,23 +58,33 @@ export default function apiMiddleware() {
             
             const request = new Request(url.toString(), requestInit);
             
-            // Process the API request
-            const response = await handleRequest(request);
-            
-            // Send the response back
-            res.statusCode = response.status;
-            
-            // Set appropriate Content-Type header
-            response.headers.forEach((value, key) => {
-              res.setHeader(key, value);
-            });
-            
-            const responseBody = await response.text();
-            console.log('API response status:', response.status);
-            console.log('API response headers:', [...response.headers.entries()]);
-            console.log('API response body (first 200 chars):', responseBody.substring(0, 200));
-            
-            res.end(responseBody);
+            try {
+              // Process the API request
+              const response = await handleRequest(request);
+              
+              // Send the response back
+              res.statusCode = response.status;
+              
+              // Set appropriate Content-Type header
+              response.headers.forEach((value, key) => {
+                res.setHeader(key, value);
+              });
+              
+              const responseBody = await response.text();
+              console.log('API response status:', response.status);
+              console.log('API response headers:', [...response.headers.entries()]);
+              console.log('API response body (first 200 chars):', responseBody.substring(0, 200));
+              
+              res.end(responseBody);
+            } catch (error: any) {
+              console.error('API request handler error:', error);
+              res.statusCode = 500;
+              res.setHeader('Content-Type', 'application/json');
+              res.end(JSON.stringify({ 
+                success: false, 
+                message: 'API handler error: ' + (error.message || error.toString())
+              }));
+            }
           } catch (error: any) {
             console.error('API middleware error:', error);
             res.statusCode = 500;

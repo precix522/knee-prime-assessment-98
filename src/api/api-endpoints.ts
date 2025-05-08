@@ -14,7 +14,7 @@ interface EmailData {
 // API route for sending OTP
 export async function handleSendOTP(request: Request): Promise<Response> {
   try {
-    const body = await request.json();
+    const body = await request.json() as Record<string, any>;
     const phone_number = body?.phone_number as string;
     
     if (!phone_number) {
@@ -55,7 +55,7 @@ export async function handleSendOTP(request: Request): Promise<Response> {
 // API route for verifying OTP
 export async function handleVerifyOTP(request: Request): Promise<Response> {
   try {
-    const body = await request.json();
+    const body = await request.json() as Record<string, any>;
     const phone_number = body?.phone_number as string;
     const code = body?.code as string;
     
@@ -100,7 +100,7 @@ export async function handleVerifyOTP(request: Request): Promise<Response> {
 // API route for validating session
 export async function handleValidateSession(request: Request): Promise<Response> {
   try {
-    const body = await request.json();
+    const body = await request.json() as Record<string, any>;
     const session_id = body?.session_id as string;
     
     if (!session_id) {
@@ -141,7 +141,7 @@ export async function handleValidateSession(request: Request): Promise<Response>
 // API route for sending emails
 export async function handleSendEmail(request: Request): Promise<Response> {
   try {
-    const body = await request.json() as any;
+    const body = await request.json() as Record<string, any>;
     
     // Validate the email data
     if (!body.to || !body.from || !body.subject || !body.html) {
