@@ -3,9 +3,7 @@
 import { verifyOTP as twilioVerifyOTP } from '../../api/twilio-service';
 import { verifyOTP as vonageVerifyOTP } from '../../api/vonage-service';
 
-// Default to using Vonage service
-const OTP_SERVICE: 'twilio' | 'vonage' = 'vonage';
-
+// Always use Twilio for verification
 export default async function handleVerifyOTP(request: Request): Promise<Response> {
   try {
     console.log('Processing OTP verification request');
@@ -16,83 +14,56 @@ export default async function handleVerifyOTP(request: Request): Promise<Respons
     try {
       // First get the raw text to help with debugging
       bodyText = await request.clone().text();
-      console.log('Raw request body:', bodyText);
+      console.log('Raw verification request body:', bodyText);
       
       // Then try to parse as JSON
-      body = await request.json();
-      console.log('Parsed request body:', body);
+      body = JSON.parse(bodyText);
+      console.log('Parsed verification request body:', body);
     } catch (error) {
-      console.error('Error parsing JSON body:', error, 'Raw body was:', bodyText);
+      console.error('Error parsing verification JSON body:', error, 'Raw body was:', bodyText);
       return new Response(
         JSON.stringify({ success: false, message: 'Invalid JSON body' }),
         { 
-          status: 400,
-          headers: {
-            'Content-Type': 'application/json'
-          }
+          status: 400, 
+          headers: { 'Content-Type': 'application/json' }
         }
       );
     }
     
-    const request_id = body.request_id as string;
-    const code = body.code as string;
-    const phone_number = body.phone_number as string;
+    const { phone_number, code, request_id } = body;
     
-    console.log('Verifying OTP with code:', code);
+    console.log('Verifying code:', code, 'for phone:', phone_number);
     
+    // Validate required fields
     if (!code) {
       return new Response(
         JSON.stringify({ success: false, message: 'Verification code is required' }),
         { 
-          status: 400,
-          headers: {
-            'Content-Type': 'application/json'
-          }
+          status: 400, 
+          headers: { 'Content-Type': 'application/json' }
         }
       );
     }
     
-    let result;
-    
-    if (OTP_SERVICE === 'twilio') {
-      // For Twilio, we would need phone_number and code
-      if (!phone_number) {
-        return new Response(
-          JSON.stringify({ success: false, message: 'Phone number is required for Twilio verification' }),
-          { 
-            status: 400,
-            headers: {
-              'Content-Type': 'application/json'
-            }
-          }
-        );
-      }
-      
-      result = await twilioVerifyOTP(phone_number, code);
-    } else {
-      // For Vonage, we need request_id and code
-      if (!request_id) {
-        return new Response(
-          JSON.stringify({ success: false, message: 'Request ID is required for Vonage verification' }),
-          { 
-            status: 400,
-            headers: {
-              'Content-Type': 'application/json'
-            }
-          }
-        );
-      }
-      
-      result = await vonageVerifyOTP(request_id, code);
+    if (!phone_number) {
+      return new Response(
+        JSON.stringify({ success: false, message: 'Phone number is required' }),
+        { 
+          status: 400, 
+          headers: { 'Content-Type': 'application/json' }
+        }
+      );
     }
     
-    console.log('OTP verification result:', result);
+    // Always use Twilio
+    console.log('Using Twilio service for verification');
+    const result = await twilioVerifyOTP(phone_number, code);
+    
+    console.log('Verification result:', result);
     
     return new Response(JSON.stringify(result), {
       status: result.success ? 200 : 400,
-      headers: {
-        'Content-Type': 'application/json'
-      }
+      headers: { 'Content-Type': 'application/json' }
     });
   } catch (error: any) {
     console.error('API Error - Verify OTP:', error);
@@ -100,9 +71,7 @@ export default async function handleVerifyOTP(request: Request): Promise<Respons
       JSON.stringify({ success: false, message: error.message || 'Server error' }),
       { 
         status: 500,
-        headers: {
-          'Content-Type': 'application/json'
-        }
+        headers: { 'Content-Type': 'application/json' }
       }
     );
   }

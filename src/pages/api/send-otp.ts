@@ -9,6 +9,7 @@ const OTP_SERVICE = (typeof import.meta.env !== 'undefined' && typeof import.met
 export default async function handleSendOTP(request: Request): Promise<Response> {
   try {
     console.log('Processing OTP send request');
+    console.log('Using OTP service:', OTP_SERVICE);
     
     let body: any = {};
     let bodyText = '';
@@ -52,17 +53,9 @@ export default async function handleSendOTP(request: Request): Promise<Response>
     
     let result;
     
-    console.log('Using OTP service:', OTP_SERVICE);
-    
-    if (OTP_SERVICE === 'twilio') {
-      // Call the Twilio service to send OTP
-      console.log('Calling Twilio service with phone:', phone_number);
-      result = await twilioSendOTP(phone_number);
-    } else {
-      // Call the Vonage service to send OTP
-      console.log('Calling Vonage service with phone:', phone_number);
-      result = await vonageSendOTP(phone_number);
-    }
+    // Always use Twilio service regardless of environment variable
+    console.log('Calling Twilio service with phone:', phone_number);
+    result = await twilioSendOTP(phone_number);
     
     console.log('OTP send result:', result);
     

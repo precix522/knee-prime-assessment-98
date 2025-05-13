@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from 'react';
 import { toast } from "sonner";
 import { useTwilioAuthStore } from '@/utils/twilio-auth-store';
@@ -130,10 +129,10 @@ export const useAuth = () => {
         throw new Error(data.message || 'Failed to send verification code');
       }
 
+      // For Twilio, no request_id is provided, so we don't need to store it
       updateState({
         loading: false,
         otpSent: true,
-        requestId: data.request_id,
         error: null
       });
 
@@ -192,7 +191,6 @@ export const useAuth = () => {
         },
         body: JSON.stringify({
           code: state.otp,
-          request_id: state.requestId,
           phone_number: state.phone
         })
       });
@@ -245,7 +243,7 @@ export const useAuth = () => {
         duration: 5000
       });
     }
-  }, [state.loading, state.otp, state.devMode, state.requestId, state.phone, updateState]);
+  }, [state.loading, state.otp, state.devMode, state.phone, updateState]);
 
   const handleOTPSuccess = useCallback((sessionId: string, userData: any) => {
     const user = {
