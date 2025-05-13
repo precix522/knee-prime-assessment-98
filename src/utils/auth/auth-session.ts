@@ -30,7 +30,7 @@ export const createSessionState = (
   get: Function
 ): SessionState => ({
   sessionId: getStoredSessionId(),
-  sessionExpiry: getStoredSessionExpiry(),
+  sessionExpiry: getStoredSessionExpiry() ? getStoredSessionExpiry()?.toString() : null,
   rememberMe: getRememberMePreference(),
   isLoading: true,
   error: null,

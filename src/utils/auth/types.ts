@@ -1,6 +1,14 @@
+
 export interface User {
   id: string;
   phone: string;
+  profile_type?: string;
+  [key: string]: any;
+}
+
+export interface UserProfile {
+  id: string;
+  phone?: string;
   profile_type?: string;
   [key: string]: any;
 }

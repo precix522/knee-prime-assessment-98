@@ -5,9 +5,9 @@ export const getStoredSessionId = (): string | null => {
   return localStorage.getItem(STORAGE_KEYS.SESSION_ID);
 };
 
-export const getStoredSessionExpiry = (): number | null => {
+export const getStoredSessionExpiry = (): string | null => {
   const expiry = localStorage.getItem(STORAGE_KEYS.SESSION_EXPIRY);
-  return expiry ? Number(expiry) : null;
+  return expiry;
 };
 
 export const getRememberMePreference = (): boolean => {
@@ -18,7 +18,7 @@ export const saveSession = (
   sessionId: string, 
   rememberMe: boolean,
   phone?: string
-): { sessionId: string; sessionExpiry: number } => {
+): { sessionId: string; sessionExpiry: string } => {
   // Use the extended session time if rememberMe is true
   const expiryTime = Date.now() + (rememberMe 
     ? EXTENDED_SESSION_EXPIRY_TIME 
@@ -33,7 +33,7 @@ export const saveSession = (
   
   return {
     sessionId,
-    sessionExpiry: expiryTime
+    sessionExpiry: expiryTime.toString()
   };
 };
 
@@ -43,9 +43,9 @@ export const clearSession = () => {
   localStorage.removeItem(STORAGE_KEYS.AUTHENTICATED_PHONE);
 };
 
-export const isSessionExpired = (sessionExpiry: number | null): boolean => {
+export const isSessionExpired = (sessionExpiry: string | null): boolean => {
   if (sessionExpiry === null) return true;
-  return Date.now() > sessionExpiry;
+  return Date.now() > Number(sessionExpiry);
 };
 
 export const setRememberMePreference = (remember: boolean): void => {
