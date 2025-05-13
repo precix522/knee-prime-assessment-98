@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { cn } from "../lib/utils";
-import { useTwilioAuthStore } from "../utils/twilio-auth-store";
+import { useTwilioAuthStore } from "../utils/auth";
 import { useLocation } from "react-router-dom";
 import { Logo } from "./navbar/Logo";
 import { NavLinks } from "./navbar/NavLinks";

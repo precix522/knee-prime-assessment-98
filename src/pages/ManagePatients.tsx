@@ -1,11 +1,9 @@
-
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useTwilioAuthStore } from "../utils/twilio-auth-store";
-import PatientRecordForm from "../components/PatientRecordForm";
 import { Navbar } from "../components/Navbar";
-import Footer from "../components/Footer";
-import { ArrowLeft, Search, ShieldAlert, User, UserPlus, Upload } from "lucide-react";
+import { useTwilioAuthStore } from "../utils/auth";
+import PatientRecordForm from "../components/PatientRecordForm";
+import { ShieldAlert, User, UserPlus, Upload } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { supabase } from "../utils/supabase";
 import { 

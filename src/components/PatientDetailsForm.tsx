@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Button } from "./Button";
 import { Input } from "@/components/ui/input";
@@ -8,7 +7,7 @@ import { AlertCircle, Loader2, FileText, X } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { uploadPatientDocument } from "../utils/supabase";
 import { supabase } from "../utils/supabase/client";
-import { useTwilioAuthStore } from "../utils/twilio-auth-store";
+import { useTwilioAuthStore } from "../utils/auth";
 
 interface PatientDetailsFormProps {
   onSuccess: () => void;
