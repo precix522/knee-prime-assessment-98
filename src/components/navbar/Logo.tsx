@@ -12,12 +12,15 @@ export const Logo = () => {
   return (
     <a 
       href="/" 
-      className="text-gray-900 font-bold text-xl flex items-center space-x-1.5 py-1"
+      className="text-gray-900 font-bold text-xl flex items-center py-1"
       onClick={handleHomeClick}
       aria-label="GATOR PRIME Home"
     >
-      <span className="text-health-600 whitespace-nowrap">GATOR</span>
-      <span className="whitespace-nowrap">PRIME</span>
+      <img 
+        src="/lovable-uploads/cbb9c383-12da-4b7c-9a0e-22d0bc691c2f.png" 
+        alt="GATOR PRIME Logo" 
+        className="h-8" 
+      />
     </a>
   );
 };
