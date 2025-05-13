@@ -11,8 +11,8 @@ const TWILIO_AUTH_TOKEN = typeof import.meta.env !== 'undefined' ?
   "8889ab51e7d4e708d8eff9e3d00c3c39";
 
 const TWILIO_SERVICE_SID = typeof import.meta.env !== 'undefined' ? 
-  import.meta.env.VITE_TWILIO_SERVICE_SID || "US72ebc90661ce6ed1b9770a382d103e51" : 
-  "US72ebc90661ce6ed1b9770a382d103e51";
+  import.meta.env.VITE_TWILIO_SERVICE_SID || "MGd76cb94c80915ebd2134400668e79f5c" : 
+  "MGd76cb94c80915ebd2134400668e79f5c";
 
 // Function to send OTP via Twilio Verify
 export const sendOTP = async (phoneNumber: string): Promise<{ success: boolean; message: string }> => {
