@@ -1,9 +1,10 @@
+
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Navbar } from "../components/Navbar";
 import { useTwilioAuthStore } from "../utils/auth";
 import PatientRecordForm from "../components/PatientRecordForm";
-import { ShieldAlert, User, UserPlus, Upload } from "lucide-react";
+import { ShieldAlert, User, UserPlus, Upload, Search, ArrowLeft } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { supabase } from "../utils/supabase";
 import { 
@@ -18,6 +19,7 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import PatientReportUploader from "@/components/PatientReportUploader";
+import { Footer } from "../components/Footer";
 
 // Interface for patient data
 interface Patient {
