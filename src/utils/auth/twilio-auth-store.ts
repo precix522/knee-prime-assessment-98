@@ -1,41 +1,18 @@
 
 import { create } from 'zustand';
 import { toast } from 'sonner';
-import { sendOTP as sendOTPService, verifyOTP as verifyOTPService, validateSession as validateSessionService } from '../api/twilio-service';
-import { getUserProfileByPhone, createUserProfile, UserProfile } from './supabase';
-
-interface User {
-  id: string;
-  phone: string;
-  profile_type?: string; // Profile type from database
-}
-
-interface AuthState {
-  user: User | null;
-  isLoading: boolean;
-  isVerifying: boolean;
-  error: string | null;
-  phoneNumber: string;
-  sessionId: string | null;
-  sessionExpiry: number | null;
-  rememberMe: boolean;
-  
-  setPhoneNumber: (phone: string) => void;
-  setRememberMe: (remember: boolean) => void;
-  sendOTP: (phone: string) => Promise<void>;
-  verifyOTP: (phone: string, code: string) => Promise<User | null>; 
-  logout: () => void;
-  clearError: () => void;
-  validateSession: () => Promise<boolean>;
-  
-  setLoginUser: (user: any) => void;
-  setAuthUser: (user: any) => void;
-}
-
-// Default session duration: 2 hours
-const DEFAULT_SESSION_EXPIRY_TIME = 2 * 60 * 60 * 1000;
-// Extended session duration: 30 days
-const EXTENDED_SESSION_EXPIRY_TIME = 30 * 24 * 60 * 60 * 1000;
+import { sendOTP as sendOTPService, verifyOTP as verifyOTPService, validateSession as validateSessionService } from '../../api/twilio-service';
+import { getOrCreateUserProfile } from './user-profile-service';
+import { 
+  getStoredSessionId, 
+  getStoredSessionExpiry, 
+  getRememberMePreference, 
+  saveSession, 
+  clearSession, 
+  isSessionExpired,
+  setRememberMePreference
+} from './session-service';
+import { AuthState, User } from './types';
 
 export const useTwilioAuthStore = create<AuthState>((set, get) => ({
   user: null,
@@ -43,14 +20,14 @@ export const useTwilioAuthStore = create<AuthState>((set, get) => ({
   isVerifying: false,
   error: null,
   phoneNumber: '',
-  sessionId: localStorage.getItem('gator_prime_session_id'),
-  sessionExpiry: Number(localStorage.getItem('gator_prime_session_expiry')) || null,
-  rememberMe: localStorage.getItem('gator_prime_remember_me') === 'true',
+  sessionId: getStoredSessionId(),
+  sessionExpiry: getStoredSessionExpiry(),
+  rememberMe: getRememberMePreference(),
   
   setPhoneNumber: (phone) => set({ phoneNumber: phone }),
   
   setRememberMe: (remember) => {
-    localStorage.setItem('gator_prime_remember_me', remember.toString());
+    setRememberMePreference(remember);
     set({ rememberMe: remember });
   },
   
@@ -96,38 +73,18 @@ export const useTwilioAuthStore = create<AuthState>((set, get) => ({
       }
       
       if (response.session_id) {
-        // Use the extended session time if rememberMe is true
-        const expiryTime = Date.now() + (get().rememberMe 
-          ? EXTENDED_SESSION_EXPIRY_TIME 
-          : DEFAULT_SESSION_EXPIRY_TIME);
+        const { sessionId, sessionExpiry } = saveSession(
+          response.session_id, 
+          get().rememberMe,
+          phone
+        );
         
-        localStorage.setItem('gator_prime_session_id', response.session_id);
-        localStorage.setItem('gator_prime_session_expiry', expiryTime.toString());
-        
-        console.log('Fetching user profile for phone:', phone);
-        let userProfile: UserProfile | null = await getUserProfileByPhone(phone);
-        
-        console.log('User profile from database:', userProfile);
-        
-        if (!userProfile) {
-          console.log('Creating new user profile for phone:', phone);
-          userProfile = await createUserProfile(phone, 'user');
-          console.log('Created new user profile:', userProfile);
-        }
-        
-        const profile_type = userProfile?.profile_type || 'user';
-        console.log('User profile type:', profile_type);
-        
-        const user = {
-          id: userProfile?.id || response.session_id,
-          phone: phone,
-          profile_type: profile_type
-        };
+        const user = await getOrCreateUserProfile(phone, response.session_id);
         
         set({
           user,
-          sessionId: response.session_id,
-          sessionExpiry: expiryTime,
+          sessionId,
+          sessionExpiry,
           isVerifying: false,
           isLoading: false
         });
@@ -145,8 +102,8 @@ export const useTwilioAuthStore = create<AuthState>((set, get) => ({
   },
   
   validateSession: async () => {
-    const sessionId = get().sessionId || localStorage.getItem('gator_prime_session_id');
-    const sessionExpiry = Number(localStorage.getItem('gator_prime_session_expiry')) || null;
+    const sessionId = get().sessionId || getStoredSessionId();
+    const sessionExpiry = getStoredSessionExpiry();
     const currentUser = get().user;
     
     // If we already have a user in state, consider the session valid
@@ -160,9 +117,8 @@ export const useTwilioAuthStore = create<AuthState>((set, get) => ({
       return false;
     }
     
-    if (sessionExpiry && Date.now() > sessionExpiry) {
-      localStorage.removeItem('gator_prime_session_id');
-      localStorage.removeItem('gator_prime_session_expiry');
+    if (sessionExpiry && isSessionExpired(sessionExpiry)) {
+      clearSession();
       set({ 
         user: null, 
         sessionId: null, 
@@ -181,24 +137,16 @@ export const useTwilioAuthStore = create<AuthState>((set, get) => ({
       if (process.env.NODE_ENV === 'development' && sessionId) {
         const storedPhone = localStorage.getItem('authenticatedPhone');
         if (storedPhone) {
-          const userProfile = await getUserProfileByPhone(storedPhone);
-          if (userProfile) {
-            const user = {
-              id: userProfile.id,
-              phone: storedPhone,
-              profile_type: userProfile.profile_type || 'user'
-            };
-            set({ user, isLoading: false });
-            return true;
-          }
+          const user = await getOrCreateUserProfile(storedPhone, sessionId);
+          set({ user, isLoading: false });
+          return true;
         }
       }
       
       const response = await validateSessionService(sessionId);
       
       if (!response.valid) {
-        localStorage.removeItem('gator_prime_session_id');
-        localStorage.removeItem('gator_prime_session_expiry');
+        clearSession();
         set({ user: null, sessionId: null, sessionExpiry: null, isLoading: false });
         return false;
       } else {
@@ -211,15 +159,10 @@ export const useTwilioAuthStore = create<AuthState>((set, get) => ({
         // Store the authenticated phone for dev mode
         localStorage.setItem('authenticatedPhone', phone);
         
-        const userProfile = await getUserProfileByPhone(phone);
-        const profile_type = userProfile?.profile_type || 'user';
+        const user = await getOrCreateUserProfile(phone, sessionId);
         
         set({
-          user: {
-            id: userProfile?.id || sessionId,
-            phone: phone,
-            profile_type: profile_type
-          },
+          user,
           isLoading: false
         });
         return true;
@@ -233,9 +176,7 @@ export const useTwilioAuthStore = create<AuthState>((set, get) => ({
   },
   
   logout: () => {
-    localStorage.removeItem('gator_prime_session_id');
-    localStorage.removeItem('gator_prime_session_expiry');
-    localStorage.removeItem('authenticatedPhone');
+    clearSession();
     // Don't remove the rememberMe preference when logging out
     set({ user: null, sessionId: null, sessionExpiry: null, isVerifying: false });
     toast.success('Logged out successfully');

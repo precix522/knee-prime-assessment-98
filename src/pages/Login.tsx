@@ -2,7 +2,7 @@
 import React, { useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { useTwilioAuthStore } from "../utils/twilio-auth-store";
+import { useTwilioAuthStore } from "../utils/auth";
 import { AuthContainer } from "@/components/auth/AuthContainer";
 import { AuthPhoneForm } from "@/components/auth/AuthPhoneForm";
 import { AuthOTPForm } from "@/components/auth/AuthOTPForm";

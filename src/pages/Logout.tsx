@@ -1,7 +1,7 @@
 
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useTwilioAuthStore } from "../utils/twilio-auth-store";
+import { useTwilioAuthStore } from "../utils/auth";
 import { toast } from "sonner";
 
 export default function Logout() {

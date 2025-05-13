@@ -1,6 +1,6 @@
 
 import { useEffect } from "react";
-import { useTwilioAuthStore } from "../utils/twilio-auth-store";
+import { useTwilioAuthStore } from "../utils/auth";
 import { toast } from "sonner";
 import { useNavigate, useLocation } from "react-router-dom";
 
