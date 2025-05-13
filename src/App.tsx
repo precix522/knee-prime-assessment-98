@@ -1,7 +1,6 @@
 
 import "./App.css";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import { useState } from "react";
 import { Navbar } from "./components/Navbar";
 import Dashboard from "./pages/Dashboard";
 import Index from "./pages/Index";
@@ -24,7 +23,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <AuthInitializer />
-      <Toaster position="bottom-left" />
+      <Toaster position="bottom-left" richColors closeButton />
       <div className="flex flex-col min-h-screen">
         <Navbar />
         <main className="flex-1">
