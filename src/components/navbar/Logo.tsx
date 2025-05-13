@@ -17,7 +17,7 @@ export const Logo = () => {
       aria-label="PRECIX Home"
     >
       <img 
-        src="/lovable-uploads/d9a24f6e-d258-4ec3-9a5e-3af02541919b.png" 
+        src="/lovable-uploads/508a5528-851c-4a1c-96c6-3847e0488399.png" 
         alt="PRECIX Logo" 
         className="h-12 w-auto" 
       />
