@@ -17,12 +17,19 @@ const TWILIO_SERVICE_SID = typeof import.meta.env !== 'undefined' ?
 // Function to send OTP via Twilio Verify
 export const sendOTP = async (phoneNumber: string): Promise<{ success: boolean; message: string }> => {
   try {
-    // Check if we're in development mode (using placeholder values)
-    const isDevelopmentMode = !import.meta.env || !import.meta.env.PROD;
+    console.log('[Twilio Service] Starting sendOTP with phone:', phoneNumber);
+    console.log('[Twilio Service] Using account SID:', TWILIO_ACCOUNT_SID);
+    console.log('[Twilio Service] Using service SID:', TWILIO_SERVICE_SID);
+    
+    // Check if we're in development mode (using dev values)
+    const isDevelopmentMode = import.meta.env ? !import.meta.env.PROD : true;
     
     if (isDevelopmentMode) {
       // For development purposes, simulate a successful OTP send
-      console.log(`[Twilio Service] Simulating sending OTP to ${phoneNumber}`);
+      console.log(`[Twilio Service] Development mode: Simulating sending OTP to ${phoneNumber}`);
+      
+      // Always log the test code for development
+      console.log(`[Twilio Service] Development mode: Use code "123456" for verification`);
       
       // Simulate API call success
       return { 
@@ -31,8 +38,10 @@ export const sendOTP = async (phoneNumber: string): Promise<{ success: boolean; 
       };
     } else {
       // Using real Twilio implementation with the provided credentials
-      console.log(`[Twilio Service] Sending OTP to ${phoneNumber} using Twilio API`);
+      console.log(`[Twilio Service] Production mode: Sending OTP to ${phoneNumber} using Twilio API`);
       const url = `https://verify.twilio.com/v2/Services/${TWILIO_SERVICE_SID}/Verifications`;
+      
+      console.log('[Twilio Service] Making API request to:', url);
       
       const response = await fetch(url, {
         method: 'POST',
@@ -46,19 +55,36 @@ export const sendOTP = async (phoneNumber: string): Promise<{ success: boolean; 
         })
       });
       
+      console.log('[Twilio Service] API response status:', response.status);
+      
+      const responseText = await response.text();
+      console.log('[Twilio Service] API response body:', responseText);
+      
       if (!response.ok) {
-        const errorData = await response.json();
+        let errorData;
+        try {
+          errorData = JSON.parse(responseText);
+        } catch (e) {
+          errorData = { message: 'Invalid response from Twilio API' };
+        }
+        
         console.error('[Twilio Service] Error sending OTP:', errorData);
         return { success: false, message: errorData.message || 'Failed to send verification code' };
       }
       
-      const data = await response.json();
-      console.log('[Twilio Service] OTP sent successfully:', data);
+      let data;
+      try {
+        data = JSON.parse(responseText);
+        console.log('[Twilio Service] OTP sent successfully:', data);
+      } catch (e) {
+        console.error('[Twilio Service] Error parsing response:', e);
+        return { success: false, message: 'Invalid response from Twilio API' };
+      }
       
       return { success: true, message: 'Verification code sent successfully' };
     }
   } catch (error: any) {
-    console.error('[Twilio Service] Error sending OTP:', error);
+    console.error('[Twilio Service] Exception in sendOTP:', error);
     return { success: false, message: error.message || 'Failed to send verification code' };
   }
 };
@@ -67,7 +93,7 @@ export const sendOTP = async (phoneNumber: string): Promise<{ success: boolean; 
 export const verifyOTP = async (phoneNumber: string, code: string): Promise<{ success: boolean; message: string; session_id?: string }> => {
   try {
     // Check if we're in development mode
-    const isDevelopmentMode = !import.meta.env || !import.meta.env.PROD;
+    const isDevelopmentMode = import.meta.env ? !import.meta.env.PROD : true;
     
     if (isDevelopmentMode) {
       // For development purposes, accept any 6-digit code

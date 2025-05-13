@@ -19,7 +19,7 @@ export default async function handleSendOTP(request: Request): Promise<Response>
       console.log('Raw request body:', bodyText);
       
       // Then try to parse as JSON
-      body = await request.json();
+      body = JSON.parse(bodyText);
       console.log('Parsed request body:', body);
     } catch (error) {
       console.error('Error parsing JSON body:', error, 'Raw body was:', bodyText);
@@ -56,9 +56,11 @@ export default async function handleSendOTP(request: Request): Promise<Response>
     
     if (OTP_SERVICE === 'twilio') {
       // Call the Twilio service to send OTP
+      console.log('Calling Twilio service with phone:', phone_number);
       result = await twilioSendOTP(phone_number);
     } else {
       // Call the Vonage service to send OTP
+      console.log('Calling Vonage service with phone:', phone_number);
       result = await vonageSendOTP(phone_number);
     }
     

@@ -1,6 +1,6 @@
 
 import { useState, useCallback } from 'react';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from "sonner";
 import { useTwilioAuthStore } from '@/utils/twilio-auth-store';
 import { useNavigate } from 'react-router-dom';
 
@@ -18,7 +18,6 @@ export interface AuthState {
 }
 
 export const useAuth = () => {
-  const { toast } = useToast();
   const navigate = useNavigate();
   const authStore = useTwilioAuthStore();
 
@@ -59,6 +58,8 @@ export const useAuth = () => {
           loading: false,
           error: 'Phone number is required'
         });
+        
+        toast.error('Phone number is required');
         return;
       }
 
@@ -71,15 +72,16 @@ export const useAuth = () => {
           error: null
         });
         
-        toast({
-          title: 'Dev Mode',
-          description: 'OTP sending bypassed. Enter any code to verify.',
+        toast.success('Dev Mode: OTP sending bypassed. Enter any code to verify.', {
+          duration: 5000
         });
         
         return;
       }
 
       console.log('Sending OTP to:', state.phone);
+      toast.info('Sending verification code...', { id: 'sending-otp' });
+      
       const response = await fetch('/api/send-otp', {
         method: 'POST',
         headers: {
@@ -135,10 +137,12 @@ export const useAuth = () => {
         error: null
       });
 
-      toast({
-        title: 'OTP Sent',
-        description: 'Verification code has been sent to your phone.',
+      toast.success('Verification code has been sent to your phone.', {
+        duration: 5000
       });
+      
+      // Dismiss the sending toast
+      toast.dismiss('sending-otp');
     } catch (error: any) {
       console.error('Error sending OTP:', error);
       updateState({
@@ -146,13 +150,14 @@ export const useAuth = () => {
         error: error.message || 'Failed to send verification code'
       });
       
-      toast({
-        variant: 'destructive',
-        title: 'Error',
-        description: error.message || 'Failed to send OTP. Please try again.',
+      // Dismiss the sending toast
+      toast.dismiss('sending-otp');
+      
+      toast.error(error.message || 'Failed to send OTP. Please try again.', {
+        duration: 5000
       });
     }
-  }, [state.loading, state.phone, state.devMode, updateState, toast]);
+  }, [state.loading, state.phone, state.devMode, updateState]);
 
   const handleVerifyOTP = useCallback(async () => {
     try {
@@ -165,6 +170,7 @@ export const useAuth = () => {
           loading: false,
           error: 'Verification code is required'
         });
+        toast.error('Verification code is required');
         return;
       }
 
@@ -177,6 +183,8 @@ export const useAuth = () => {
         return;
       }
 
+      toast.info('Verifying code...', { id: 'verifying-otp' });
+      
       const response = await fetch('/api/verify-otp', {
         method: 'POST',
         headers: {
@@ -221,6 +229,7 @@ export const useAuth = () => {
       }
 
       // Authentication successful
+      toast.dismiss('verifying-otp');
       handleOTPSuccess(data.session_id, {
         phone_number: state.phone
       });
@@ -231,13 +240,12 @@ export const useAuth = () => {
         error: error.message || 'Failed to verify code'
       });
       
-      toast({
-        variant: 'destructive',
-        title: 'Error',
-        description: error.message || 'Failed to verify OTP. Please try again.',
+      toast.dismiss('verifying-otp');
+      toast.error(error.message || 'Failed to verify OTP. Please try again.', {
+        duration: 5000
       });
     }
-  }, [state.loading, state.otp, state.devMode, state.requestId, state.phone, updateState, toast]);
+  }, [state.loading, state.otp, state.devMode, state.requestId, state.phone, updateState]);
 
   const handleOTPSuccess = useCallback((sessionId: string, userData: any) => {
     const user = {
@@ -254,22 +262,31 @@ export const useAuth = () => {
       error: null,
     });
 
-    toast({
-      title: 'Logged In',
-      description: 'You have successfully logged in.',
+    toast.success('You have successfully logged in.', {
+      duration: 5000
     });
 
     // Redirect to dashboard or home
     setTimeout(() => {
       navigate('/dashboard');
     }, 500);
-  }, [authStore, updateState, navigate, toast]);
+  }, [authStore, updateState, navigate]);
 
   const handleToggleDevMode = useCallback(() => {
     updateState({ 
       devMode: !state.devMode,
       captchaVerified: !state.devMode, // Auto verify captcha in dev mode
     });
+    
+    if (!state.devMode) {
+      toast.info('Developer mode activated. OTP verification will be bypassed.', {
+        duration: 5000
+      });
+    } else {
+      toast.info('Developer mode deactivated.', {
+        duration: 5000
+      });
+    }
   }, [state.devMode, updateState]);
 
   return {

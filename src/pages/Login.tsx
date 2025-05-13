@@ -8,6 +8,7 @@ import { AuthPhoneForm } from "@/components/auth/AuthPhoneForm";
 import { AuthOTPForm } from "@/components/auth/AuthOTPForm";
 import { DevModeToggle } from "@/components/auth/DevModeToggle";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Toaster } from "sonner";
 
 export default function Login() {
   const {
@@ -42,6 +43,7 @@ export default function Login() {
 
   return (
     <AuthContainer>
+      <Toaster position="bottom-left" />
       <Card className="w-full max-w-md space-y-4 p-4">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl text-center">
