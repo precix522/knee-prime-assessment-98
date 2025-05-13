@@ -19,7 +19,7 @@ export const Logo = () => {
       <img 
         src="/lovable-uploads/d9a24f6e-d258-4ec3-9a5e-3af02541919b.png" 
         alt="PRECIX Logo" 
-        className="h-8" 
+        className="h-12 w-auto" 
       />
     </a>
   );
