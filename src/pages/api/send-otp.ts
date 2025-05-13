@@ -3,8 +3,8 @@
 import { sendOTP as twilioSendOTP } from '../../api/twilio-service';
 import { sendOTP as vonageSendOTP } from '../../api/vonage-service';
 
-// Default to using Twilio service
-const OTP_SERVICE = 'twilio';
+// Default to using Twilio service - can be switched via env variable
+const OTP_SERVICE = import.meta.env.VITE_OTP_SERVICE || 'twilio';
 
 export default async function handleSendOTP(request: Request): Promise<Response> {
   try {
@@ -51,6 +51,8 @@ export default async function handleSendOTP(request: Request): Promise<Response>
     }
     
     let result;
+    
+    console.log('Using OTP service:', OTP_SERVICE);
     
     if (OTP_SERVICE === 'twilio') {
       // Call the Twilio service to send OTP
