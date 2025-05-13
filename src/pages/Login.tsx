@@ -9,6 +9,8 @@ import { AuthOTPForm } from "@/components/auth/AuthOTPForm";
 import { DevModeToggle } from "@/components/auth/DevModeToggle";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Toaster } from "sonner";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { InfoIcon } from "lucide-react";
 
 export default function Login() {
   const {
@@ -58,14 +60,13 @@ export default function Login() {
         
         <CardContent className="grid gap-4">
           {state.devMode && (
-            <Card className="bg-amber-50 border-amber-200">
-              <CardContent className="pt-4">
-                <p className="text-amber-700">
-                  <strong>Developer Mode Active:</strong> OTP verification is bypassed.
-                  Any code will work, and a mock user will be created if needed.
-                </p>
-              </CardContent>
-            </Card>
+            <Alert className="bg-amber-50 border-amber-200 text-amber-800">
+              <InfoIcon className="h-4 w-4 text-amber-800" />
+              <AlertDescription>
+                <strong>Developer Mode Active:</strong> OTP verification is bypassed.
+                Use code <strong className="font-mono">123456</strong> to login.
+              </AlertDescription>
+            </Alert>
           )}
           
           {!state.otpSent ? (

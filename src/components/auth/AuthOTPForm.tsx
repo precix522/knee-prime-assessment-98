@@ -5,6 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "../Button";
 import { AuthState } from "@/hooks/useAuth";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { InfoIcon } from "lucide-react";
 
 interface AuthOTPFormProps {
   state: AuthState;
@@ -22,6 +24,15 @@ export function AuthOTPForm({ state, updateState, onSubmit, onBack }: AuthOTPFor
   return (
     <form onSubmit={handleSubmit}>
       <div className="space-y-4">
+        {state.devMode && (
+          <Alert className="bg-blue-50 border-blue-200 text-blue-800">
+            <InfoIcon className="h-4 w-4 text-blue-800" />
+            <AlertDescription>
+              Developer mode is active. Use code <strong className="font-mono">123456</strong> for testing.
+            </AlertDescription>
+          </Alert>
+        )}
+        
         <div>
           <Label htmlFor="otp" className="text-gray-700">
             OTP Code
@@ -39,6 +50,7 @@ export function AuthOTPForm({ state, updateState, onSubmit, onBack }: AuthOTPFor
           </div>
           <p className="text-sm text-gray-500 mt-2">
             A verification code has been sent to your phone number
+            {state.devMode && ' (In dev mode, no actual SMS is sent)'}
           </p>
         </div>
         
@@ -67,7 +79,7 @@ export function AuthOTPForm({ state, updateState, onSubmit, onBack }: AuthOTPFor
       
       {state.devMode && (
         <p className="text-sm text-center mt-4 text-green-600">
-          Developer mode: Enter any code to log in
+          Developer mode: Enter code <strong className="font-mono">123456</strong> to log in
         </p>
       )}
     </form>

@@ -58,6 +58,12 @@ export default async function handleSendOTP(request: Request): Promise<Response>
     result = await twilioSendOTP(phone_number);
     
     console.log('OTP send result:', result);
+
+    // For development mode, always include the OTP code in the response
+    if (process.env.NODE_ENV !== 'production' || !import.meta.env.PROD) {
+      result.testCode = '123456';
+      result.message = `${result.message}. In development mode, use code "123456" for testing.`;
+    }
     
     return new Response(JSON.stringify(result), {
       status: result.success ? 200 : 400,
