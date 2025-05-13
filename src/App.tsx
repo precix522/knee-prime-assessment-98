@@ -17,13 +17,12 @@ import AllReports from "./pages/AllReports";
 import Logout from "./pages/Logout";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import GeneralLogin from "./pages/GeneralLogin";
-import { Toaster } from "sonner";
+import { Toaster } from "@/components/ui/toaster";
 
 export default function App() {
   return (
     <BrowserRouter>
       <AuthInitializer />
-      <Toaster position="bottom-left" richColors closeButton />
       <div className="flex flex-col min-h-screen">
         <Navbar />
         <main className="flex-1">
@@ -44,6 +43,7 @@ export default function App() {
           </Routes>
         </main>
         <Footer />
+        <Toaster />
       </div>
     </BrowserRouter>
   );

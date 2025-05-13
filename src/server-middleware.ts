@@ -75,6 +75,7 @@ export default function apiMiddleware() {
               console.log('API response headers:', [...response.headers.entries()]);
               console.log('API response body (first 200 chars):', responseBody.substring(0, 200));
               
+              // Ensure we send proper JSON responses
               res.end(responseBody);
             } catch (error: any) {
               console.error('API request handler error:', error);

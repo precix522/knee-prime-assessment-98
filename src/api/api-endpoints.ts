@@ -43,6 +43,8 @@ export async function handleSendOTP(request: Request): Promise<Response> {
       );
     }
     
+    console.log('Processing send OTP request for phone:', phone_number);
+    
     // Call the Twilio service to send OTP
     const result = await sendOTP(phone_number);
     
