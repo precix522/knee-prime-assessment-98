@@ -18,6 +18,7 @@ import Logout from "./pages/Logout";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import GeneralLogin from "./pages/GeneralLogin";
 import { Toaster } from "@/components/ui/toaster";
+import { ChatbotWidget } from "./components/ChatbotWidget";
 
 export default function App() {
   return (
@@ -44,6 +45,7 @@ export default function App() {
         </main>
         <Footer />
         <Toaster />
+        <ChatbotWidget />
       </div>
     </BrowserRouter>
   );
