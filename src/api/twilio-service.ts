@@ -2,9 +2,9 @@
 // This file contains the Twilio service functions that interact with the Twilio API
 
 // Import environment variables for Twilio credentials with provided values
-const TWILIO_ACCOUNT_SID = "SK8a0d7b71748df9b63d004f41d95f9c59";
-const TWILIO_AUTH_TOKEN = "FeZBq5peEhJMGjFr4BVSZXqIiPf9hyo7";
-const TWILIO_SERVICE_SID = "MGd76cb94c80915ebd2134400668e79f5c";
+const TWILIO_ACCOUNT_SID = "AC908525387e45de896bd0c72bc3e4973a";
+const TWILIO_AUTH_TOKEN = "8889ab51e7d4e708d8eff9e3d00c3c39";
+const TWILIO_SERVICE_SID = "VA927ba04aabce22a28fbc26f3421f7208";
 
 // Function to send OTP via Twilio Verify
 export const sendOTP = async (phoneNumber: string): Promise<{ success: boolean; message: string }> => {
