@@ -53,7 +53,6 @@ export default async function handleSendOTP(request: Request): Promise<Response>
     
     let result;
     
-    // Always use Twilio service regardless of environment variable
     console.log('Calling Twilio service with phone:', phone_number);
     result = await twilioSendOTP(phone_number);
     

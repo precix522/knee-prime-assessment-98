@@ -3,12 +3,12 @@
 
 // Import environment variables for Twilio credentials with safe fallbacks
 const TWILIO_ACCOUNT_SID = typeof import.meta.env !== 'undefined' ? 
-  import.meta.env.VITE_TWILIO_ACCOUNT_SID || "AC908525387e45de896bd0c72bc3e4973a" : 
-  "AC908525387e45de896bd0c72bc3e4973a";
+  import.meta.env.VITE_TWILIO_ACCOUNT_SID || "SK8a0d7b71748df9b63d004f41d95f9c59" : 
+  "SK8a0d7b71748df9b63d004f41d95f9c59";
 
 const TWILIO_AUTH_TOKEN = typeof import.meta.env !== 'undefined' ? 
-  import.meta.env.VITE_TWILIO_AUTH_TOKEN || "8889ab51e7d4e708d8eff9e3d00c3c39" : 
-  "8889ab51e7d4e708d8eff9e3d00c3c39";
+  import.meta.env.VITE_TWILIO_AUTH_TOKEN || "FeZBq5peEhJMGjFr4BVSZXqIiPf9hyo7" : 
+  "FeZBq5peEhJMGjFr4BVSZXqIiPf9hyo7";
 
 const TWILIO_SERVICE_SID = typeof import.meta.env !== 'undefined' ? 
   import.meta.env.VITE_TWILIO_SERVICE_SID || "MGd76cb94c80915ebd2134400668e79f5c" : 
