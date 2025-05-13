@@ -33,7 +33,7 @@ export default function App() {
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/manage-users" element={<ManageUsers />} />
             <Route path="/login" element={<Login />} />
-            <Route path="/auth" element={<GeneralLogin />} />
+            <Route path="/general-login" element={<GeneralLogin />} />
             <Route path="/logout" element={<Logout />} />
             <Route path="/contact" element={<ContactUs />} />
             <Route path="/privacy" element={<PrivacyPolicy />} />
