@@ -1,27 +1,15 @@
-
 // This file contains the Twilio service functions that interact with the Twilio API
 
-// Twilio credentials - Using test credentials for development
-// In production, these should be environment variables
-const TWILIO_ACCOUNT_SID = "AC00000000000000000000000000000000";
-const TWILIO_AUTH_TOKEN = "00000000000000000000000000000000";
-const TWILIO_SERVICE_SID = "VA00000000000000000000000000000000";
+// Twilio credentials
+// These should ideally be environment variables in production
+const TWILIO_ACCOUNT_SID = "AC908525387e45de896bd0c72bc3e4973a";
+const TWILIO_AUTH_TOKEN = "3a24b4d341aa36fe287ca5cf6dceb76b";
+const TWILIO_SERVICE_SID = "VA00000000000000000000000000000000"; // You'll need to replace this with your actual Service SID
 
 // Function to send OTP via Twilio Verify
 export const sendOTP = async (phoneNumber: string): Promise<{ success: boolean; message: string }> => {
   try {
-    // For development purposes, simulate a successful OTP send
-    // This allows testing the UI flow without actual Twilio credentials
-    console.log(`[Twilio Service] Simulating sending OTP to ${phoneNumber}`);
-    
-    // Simulate API call success
-    return { 
-      success: true, 
-      message: 'Development mode: Verification code "123456" sent successfully' 
-    };
-    
-    /* 
-    // Real Twilio implementation (commented out until valid credentials are provided)
+    // Using real Twilio implementation with the provided credentials
     const url = `https://verify.twilio.com/v2/Services/${TWILIO_SERVICE_SID}/Verifications`;
     
     const response = await fetch(url, {
@@ -46,6 +34,14 @@ export const sendOTP = async (phoneNumber: string): Promise<{ success: boolean; 
     console.log('[Twilio Service] OTP sent successfully:', data);
     
     return { success: true, message: 'Verification code sent successfully' };
+    
+    /* 
+    // Development mode fallback (commented out but keeping for reference)
+    console.log(`[Twilio Service] Simulating sending OTP to ${phoneNumber}`);
+    return { 
+      success: true, 
+      message: 'Development mode: Verification code "123456" sent successfully' 
+    };
     */
   } catch (error: any) {
     console.error('[Twilio Service] Error sending OTP:', error);
@@ -56,28 +52,7 @@ export const sendOTP = async (phoneNumber: string): Promise<{ success: boolean; 
 // Function to verify OTP via Twilio Verify
 export const verifyOTP = async (phoneNumber: string, code: string): Promise<{ success: boolean; message: string; session_id?: string }> => {
   try {
-    // For development purposes, accept any 6-digit code
-    // In production, this should call the actual Twilio API
-    console.log(`[Twilio Service] Simulating verification of OTP ${code} for ${phoneNumber}`);
-    
-    // For testing, accept any 6-digit code or "123456"
-    const isValidCode = code === "123456" || /^\d{6}$/.test(code);
-    
-    if (!isValidCode) {
-      return { success: false, message: 'Invalid verification code. Please try again.' };
-    }
-    
-    // Generate a session ID for the verified user
-    const sessionId = `twilio_${Date.now()}_${phoneNumber.replace(/[^0-9]/g, '')}`;
-    
-    return { 
-      success: true, 
-      message: 'Development mode: Verification successful', 
-      session_id: sessionId 
-    };
-    
-    /* 
-    // Real Twilio implementation (commented out until valid credentials are provided)
+    // Using real Twilio implementation with the provided credentials
     const url = `https://verify.twilio.com/v2/Services/${TWILIO_SERVICE_SID}/VerificationCheck`;
     
     const response = await fetch(url, {
@@ -107,6 +82,24 @@ export const verifyOTP = async (phoneNumber: string, code: string): Promise<{ su
     return { 
       success: true, 
       message: 'Verification successful', 
+      session_id: sessionId 
+    };
+    
+    /* 
+    // Development mode fallback (commented out but keeping for reference)
+    console.log(`[Twilio Service] Simulating verification of OTP ${code} for ${phoneNumber}`);
+    
+    const isValidCode = code === "123456" || /^\d{6}$/.test(code);
+    
+    if (!isValidCode) {
+      return { success: false, message: 'Invalid verification code. Please try again.' };
+    }
+    
+    const sessionId = `twilio_${Date.now()}_${phoneNumber.replace(/[^0-9]/g, '')}`;
+    
+    return { 
+      success: true, 
+      message: 'Development mode: Verification successful', 
       session_id: sessionId 
     };
     */
