@@ -1,17 +1,15 @@
-
 // This file contains the Twilio service functions that interact with the Twilio API
 
 // Import environment variables for Twilio credentials
 const TWILIO_ACCOUNT_SID = import.meta.env.VITE_TWILIO_ACCOUNT_SID || "AC908525387e45de896bd0c72bc3e4973a";
-const TWILIO_AUTH_TOKEN = import.meta.env.VITE_TWILIO_AUTH_TOKEN || "3a24b4d341aa36fe287ca5cf6dceb76b";
-const TWILIO_SERVICE_SID = import.meta.env.VITE_TWILIO_SERVICE_SID || "VA00000000000000000000000000000000";
+const TWILIO_AUTH_TOKEN = import.meta.env.VITE_TWILIO_AUTH_TOKEN || "8889ab51e7d4e708d8eff9e3d00c3c39";
+const TWILIO_SERVICE_SID = import.meta.env.VITE_TWILIO_SERVICE_SID || "US72ebc90661ce6ed1b9770a382d103e51";
 
 // Function to send OTP via Twilio Verify
 export const sendOTP = async (phoneNumber: string): Promise<{ success: boolean; message: string }> => {
   try {
-    // Check if we're in development mode (no environment variables set)
-    const isDevelopmentMode = !import.meta.env.VITE_TWILIO_SERVICE_SID || 
-                              import.meta.env.VITE_TWILIO_SERVICE_SID === "VA00000000000000000000000000000000";
+    // Check if we're in development mode (using placeholder values)
+    const isDevelopmentMode = !import.meta.env.PROD;
     
     if (isDevelopmentMode) {
       // For development purposes, simulate a successful OTP send
