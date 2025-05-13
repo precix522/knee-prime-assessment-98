@@ -14,7 +14,7 @@ export const sendOTP = async (phoneNumber: string): Promise<{ success: boolean; 
     console.log('[Twilio Service] Using service SID:', TWILIO_SERVICE_SID);
     
     // Check if we're in development mode (using dev values)
-    const isDevelopmentMode = true; // Force development mode for testing
+    const isDevelopmentMode = false; // Set to false to use real Twilio API
     
     if (isDevelopmentMode) {
       // For development purposes, simulate a successful OTP send
@@ -85,7 +85,7 @@ export const sendOTP = async (phoneNumber: string): Promise<{ success: boolean; 
 export const verifyOTP = async (phoneNumber: string, code: string): Promise<{ success: boolean; message: string; session_id?: string }> => {
   try {
     // Check if we're in development mode
-    const isDevelopmentMode = true; // Force development mode for testing
+    const isDevelopmentMode = false; // Set to false to use real Twilio API
     
     if (isDevelopmentMode) {
       // For development purposes, accept any 6-digit code
