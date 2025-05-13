@@ -22,7 +22,7 @@ export const sendOTP = async (phoneNumber: string): Promise<{ success: boolean; 
     console.log('[Twilio Service] Using service SID:', TWILIO_SERVICE_SID);
     
     // Check if we're in development mode (using dev values)
-    const isDevelopmentMode = import.meta.env ? !import.meta.env.PROD : true;
+    const isDevelopmentMode = true; // Force development mode for testing
     
     if (isDevelopmentMode) {
       // For development purposes, simulate a successful OTP send

@@ -27,6 +27,9 @@ export default function Login() {
   const patientID = searchParams.get("patientId");
 
   useEffect(() => {
+    console.log('Login component mounted');
+    console.log('Current auth state:', state);
+    
     const checkAuthStatus = async () => {
       try {
         const isValid = await validateSession();
@@ -41,7 +44,7 @@ export default function Login() {
     };
     
     checkAuthStatus();
-  }, [validateSession]);
+  }, [validateSession, state]);
 
   return (
     <AuthContainer>
@@ -73,7 +76,10 @@ export default function Login() {
             <AuthPhoneForm
               state={state}
               updateState={updateState}
-              onSubmit={handleSendOTP}
+              onSubmit={() => {
+                console.log('Submit button clicked in AuthPhoneForm');
+                handleSendOTP();
+              }}
             />
           ) : (
             <AuthOTPForm

@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from 'react';
 import { toast } from "sonner";
 import { useTwilioAuthStore } from '@/utils/auth';
@@ -82,69 +81,39 @@ export const useAuth = () => {
       console.log('Sending OTP to:', state.phone);
       toast.info('Sending verification code...', { id: 'sending-otp' });
       
-      const response = await fetch('/api/send-otp', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ phone_number: state.phone })
-      });
+      // Use direct function call to service for better debugging
+      authStore.sendOTP(state.phone)
+        .then(() => {
+          // If we get here, the OTP was sent successfully
+          updateState({
+            loading: false,
+            otpSent: true,
+            error: null
+          });
 
-      console.log('OTP send response status:', response.status);
-      console.log('OTP send response headers:', Object.fromEntries([...response.headers.entries()]));
-      
-      // First get the raw text response to help with debugging
-      const responseText = await response.text();
-      console.log('OTP send raw response text:', responseText);
-      
-      if (!response.ok) {
-        let errorMessage = 'Failed to send verification code';
-        
-        try {
-          if (responseText && responseText.trim() !== '') {
-            const errorData = JSON.parse(responseText);
-            errorMessage = errorData.message || errorMessage;
-          }
-        } catch (e) {
-          console.error('Failed to parse error response:', e);
-        }
-        
-        throw new Error(errorMessage);
-      }
-
-      if (!responseText || responseText.trim() === '') {
-        throw new Error('Empty response from server');
-      }
-      
-      let data;
-      try {
-        data = JSON.parse(responseText);
-        console.log('OTP send parsed data:', data);
-      } catch (jsonError) {
-        console.error('Failed to parse JSON response:', jsonError);
-        console.error('Response was:', responseText);
-        throw new Error('Invalid JSON response from server');
-      }
-
-      if (!data.success) {
-        throw new Error(data.message || 'Failed to send verification code');
-      }
-
-      // For Twilio, no request_id is provided, so we don't need to store it
-      updateState({
-        loading: false,
-        otpSent: true,
-        error: null
-      });
-
-      toast.success('Verification code has been sent to your phone.', {
-        duration: 5000
-      });
-      
-      // Dismiss the sending toast
-      toast.dismiss('sending-otp');
+          toast.success('Verification code has been sent to your phone.', {
+            duration: 5000
+          });
+          
+          // Dismiss the sending toast
+          toast.dismiss('sending-otp');
+        })
+        .catch((error) => {
+          console.error('Error sending OTP:', error);
+          updateState({
+            loading: false,
+            error: error.message || 'Failed to send verification code'
+          });
+          
+          // Dismiss the sending toast
+          toast.dismiss('sending-otp');
+          
+          toast.error(error.message || 'Failed to send OTP. Please try again.', {
+            duration: 5000
+          });
+        });
     } catch (error: any) {
-      console.error('Error sending OTP:', error);
+      console.error('Error in handleSendOTP:', error);
       updateState({
         loading: false,
         error: error.message || 'Failed to send verification code'
@@ -157,7 +126,7 @@ export const useAuth = () => {
         duration: 5000
       });
     }
-  }, [state.loading, state.phone, state.devMode, updateState]);
+  }, [state.loading, state.phone, state.devMode, updateState, authStore]);
 
   const handleVerifyOTP = useCallback(async () => {
     try {
