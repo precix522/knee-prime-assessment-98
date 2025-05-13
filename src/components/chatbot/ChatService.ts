@@ -1,6 +1,5 @@
-
 import { Message } from './types';
-import { toast } from '@/components/ui/toast';
+import { toast } from '@/hooks/use-toast';
 
 export const sendChatMessage = async (message: string): Promise<{ reply: string }> => {
   console.log("Sending request to webhook with message:", message);

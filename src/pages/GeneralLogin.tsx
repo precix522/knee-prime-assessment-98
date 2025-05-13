@@ -6,6 +6,7 @@ import { AuthContainer } from "@/components/auth/AuthContainer";
 import { AuthPhoneForm } from "@/components/auth/AuthPhoneForm";
 import { AuthOTPForm } from "@/components/auth/AuthOTPForm";
 import { DevModeToggle } from "@/components/auth/DevModeToggle";
+import { Toaster } from "sonner";
 
 export default function GeneralLogin() {
   const {
@@ -39,6 +40,7 @@ export default function GeneralLogin() {
 
   return (
     <AuthContainer>
+      <Toaster position="bottom-left" />
       <div className="bg-white shadow-md rounded-md p-8 w-full max-w-md">
         <h2 className="text-2xl font-bold text-gray-800 text-center mb-6">
           Login with OTP

@@ -1,7 +1,7 @@
 
 // This file contains the Twilio service functions that interact with the Twilio API
 
-// Import environment variables for Twilio credentials with safe fallbacks
+// Import environment variables for Twilio credentials with provided values
 const TWILIO_ACCOUNT_SID = typeof import.meta.env !== 'undefined' ? 
   import.meta.env.VITE_TWILIO_ACCOUNT_SID || "SK8a0d7b71748df9b63d004f41d95f9c59" : 
   "SK8a0d7b71748df9b63d004f41d95f9c59";
