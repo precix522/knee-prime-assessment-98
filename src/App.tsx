@@ -10,7 +10,7 @@ import Login from "./pages/Login";
 import ContactUs from "./pages/ContactUs";
 import ManagePatients from "./pages/ManagePatients";
 import PatientID from "./pages/PatientID";
-import AuthInitializer from "./components/AuthInitializer";
+import { AuthInitializer } from "./components/AuthInitializer";
 import { Footer } from "./components/Footer";
 import NotFound from "./pages/NotFound";
 import ReportViewer from "./pages/ReportViewer";
