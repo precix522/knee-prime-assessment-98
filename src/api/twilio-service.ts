@@ -2,17 +2,9 @@
 // This file contains the Twilio service functions that interact with the Twilio API
 
 // Import environment variables for Twilio credentials with provided values
-const TWILIO_ACCOUNT_SID = typeof import.meta.env !== 'undefined' ? 
-  import.meta.env.VITE_TWILIO_ACCOUNT_SID || "SK8a0d7b71748df9b63d004f41d95f9c59" : 
-  "SK8a0d7b71748df9b63d004f41d95f9c59";
-
-const TWILIO_AUTH_TOKEN = typeof import.meta.env !== 'undefined' ? 
-  import.meta.env.VITE_TWILIO_AUTH_TOKEN || "FeZBq5peEhJMGjFr4BVSZXqIiPf9hyo7" : 
-  "FeZBq5peEhJMGjFr4BVSZXqIiPf9hyo7";
-
-const TWILIO_SERVICE_SID = typeof import.meta.env !== 'undefined' ? 
-  import.meta.env.VITE_TWILIO_SERVICE_SID || "MGd76cb94c80915ebd2134400668e79f5c" : 
-  "MGd76cb94c80915ebd2134400668e79f5c";
+const TWILIO_ACCOUNT_SID = "SK8a0d7b71748df9b63d004f41d95f9c59";
+const TWILIO_AUTH_TOKEN = "FeZBq5peEhJMGjFr4BVSZXqIiPf9hyo7";
+const TWILIO_SERVICE_SID = "MGd76cb94c80915ebd2134400668e79f5c";
 
 // Function to send OTP via Twilio Verify
 export const sendOTP = async (phoneNumber: string): Promise<{ success: boolean; message: string }> => {
@@ -61,7 +53,7 @@ export const sendOTP = async (phoneNumber: string): Promise<{ success: boolean; 
       console.log('[Twilio Service] API response body:', responseText);
       
       if (!response.ok) {
-        let errorData;
+        let errorData: { message?: string } = {};
         try {
           errorData = JSON.parse(responseText);
         } catch (e) {
@@ -93,7 +85,7 @@ export const sendOTP = async (phoneNumber: string): Promise<{ success: boolean; 
 export const verifyOTP = async (phoneNumber: string, code: string): Promise<{ success: boolean; message: string; session_id?: string }> => {
   try {
     // Check if we're in development mode
-    const isDevelopmentMode = import.meta.env ? !import.meta.env.PROD : true;
+    const isDevelopmentMode = true; // Force development mode for testing
     
     if (isDevelopmentMode) {
       // For development purposes, accept any 6-digit code
@@ -132,7 +124,14 @@ export const verifyOTP = async (phoneNumber: string, code: string): Promise<{ su
       });
       
       if (!response.ok) {
-        const errorData = await response.json();
+        const errorText = await response.text();
+        let errorData: { message?: string } = {};
+        try {
+          errorData = JSON.parse(errorText);
+        } catch (e) {
+          errorData = { message: 'Failed to parse error response' };
+        }
+        
         console.error('[Twilio Service] Error verifying OTP:', errorData);
         return { success: false, message: errorData.message || 'Failed to verify code' };
       }
