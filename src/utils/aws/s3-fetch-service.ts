@@ -131,4 +131,3 @@ export const stopPeriodicS3Fetch = () => {
     console.log("Stopped periodic S3 fetch");
   }
 };
-

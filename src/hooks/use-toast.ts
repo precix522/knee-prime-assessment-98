@@ -1,6 +1,6 @@
 
 import * as React from "react"
-import { useToast as useSonnerToast, toast as sonnerToast } from "sonner"
+import { toast as sonnerToast } from "sonner"
 
 export interface ToastProps {
   title?: React.ReactNode
@@ -10,21 +10,35 @@ export interface ToastProps {
 }
 
 export const useToast = () => {
-  // Use the sonner toast hook under the hood
-  const sonnerHook = useSonnerToast()
-
   return {
-    ...sonnerHook,
     toast: (props: ToastProps) => {
-      sonnerToast[props.variant === "destructive" ? "error" : "success"](
-        props.title,
-        {
+      if (props.variant === "destructive") {
+        sonnerToast.error(props.title as string, {
           description: props.description,
           action: props.action,
-        }
-      )
-    }
+        })
+      } else {
+        sonnerToast.success(props.title as string, {
+          description: props.description,
+          action: props.action,
+        })
+      }
+    },
+    // Maintain compatibility with the toaster component
+    toasts: [] as any[]
   }
 }
 
-export const toast = sonnerToast
+export const toast = (props: ToastProps) => {
+  if (props.variant === "destructive") {
+    sonnerToast.error(props.title as string, {
+      description: props.description,
+      action: props.action,
+    })
+  } else {
+    sonnerToast.success(props.title as string, {
+      description: props.description,
+      action: props.action,
+    })
+  }
+}
