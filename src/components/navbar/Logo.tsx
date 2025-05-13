@@ -14,11 +14,11 @@ export const Logo = () => {
       href="/" 
       className="text-gray-900 font-bold text-xl flex items-center py-1"
       onClick={handleHomeClick}
-      aria-label="GATOR PRIME Home"
+      aria-label="PRECIX Home"
     >
       <img 
-        src="/lovable-uploads/cbb9c383-12da-4b7c-9a0e-22d0bc691c2f.png" 
-        alt="GATOR PRIME Logo" 
+        src="/lovable-uploads/d9a24f6e-d258-4ec3-9a5e-3af02541919b.png" 
+        alt="PRECIX Logo" 
         className="h-8" 
       />
     </a>
