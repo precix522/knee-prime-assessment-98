@@ -1,3 +1,4 @@
+
 // This file contains the Twilio service functions that interact with the Twilio API
 
 // Import environment variables for Twilio credentials
@@ -58,8 +59,7 @@ export const sendOTP = async (phoneNumber: string): Promise<{ success: boolean; 
 export const verifyOTP = async (phoneNumber: string, code: string): Promise<{ success: boolean; message: string; session_id?: string }> => {
   try {
     // Check if we're in development mode (no environment variables set)
-    const isDevelopmentMode = !import.meta.env.VITE_TWILIO_SERVICE_SID || 
-                              import.meta.env.VITE_TWILIO_SERVICE_SID === "VA00000000000000000000000000000000";
+    const isDevelopmentMode = !import.meta.env.PROD;
     
     if (isDevelopmentMode) {
       // For development purposes, accept any 6-digit code
