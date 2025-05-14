@@ -44,7 +44,9 @@ export const handleChatError = (error: unknown): string => {
   console.error('AI Assistant error details:', error);
   const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
   
-  toast.error(`Failed to communicate with the AI assistant service: ${errorMessage}`);
+  toast.error("AI Assistant Error", {
+    description: `Failed to communicate with the AI assistant service: ${errorMessage}`
+  });
   
   return `Failed to get response. Please try again later. (${errorMessage})`;
 };

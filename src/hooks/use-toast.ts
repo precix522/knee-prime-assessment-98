@@ -1,6 +1,6 @@
 
-// Re-export toast components from the main toast component
-import { useToast } from "@/components/ui/toast";
+// Re-export toast components from the sonner library
 import { toast } from "sonner";
+import { useToast } from "@/components/ui/toast";
 
 export { useToast, toast };

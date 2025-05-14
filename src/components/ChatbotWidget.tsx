@@ -52,7 +52,9 @@ export const ChatbotWidget: React.FC = () => {
       setMessages(prev => [...prev, botMessage]);
       
       // Show success toast
-      toast.success("Message sent", "Your message was successfully processed.");
+      toast.success("Message sent", {
+        description: "Your message was successfully processed."
+      });
       
     } catch (err) {
       const errorMessage = handleChatError(err);

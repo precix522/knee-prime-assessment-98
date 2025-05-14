@@ -77,12 +77,16 @@ const ContactUs = () => {
         throw new Error(result.message || 'Failed to send message');
       }
       
-      toast.success("Message Sent Successfully", "We'll get back to you as soon as possible.");
+      toast.success("Message Sent Successfully", {
+        description: "We'll get back to you as soon as possible."
+      });
       
       form.reset();
     } catch (error: any) {
       console.error("Error submitting form:", error);
-      toast.error("An error occurred", error.message || "Your message could not be sent. Please try again.");
+      toast.error("An error occurred", {
+        description: error.message || "Your message could not be sent. Please try again."
+      });
     } finally {
       setIsSubmitting(false);
     }
