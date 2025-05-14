@@ -35,6 +35,12 @@ export default function AdminDashboard() {
           return;
         }
         
+        // Since we want admins to use dashboard now, redirect there
+        toast.info("Redirecting to dashboard...");
+        navigate("/dashboard", { replace: true });
+        return;
+        
+        // Note: The code below won't execute due to the redirect above
         setIsLoading(false);
       } catch (err) {
         console.error("Session validation error:", err);

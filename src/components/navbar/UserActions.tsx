@@ -68,8 +68,8 @@ export const UserActions: FC<UserActionsProps> = ({ user, isAdmin }) => {
     sessionStorage.removeItem('loginRedirectCount');
     sessionStorage.removeItem('lastRedirect');
     
-    // Navigate to the admin dashboard for admin users
-    navigate('/admin-dashboard', { replace: true });
+    // Navigate to the dashboard for admin users
+    navigate('/dashboard', { replace: true }); // Changed from '/admin-dashboard' to '/dashboard'
   };
 
   const handlePatientDashboard = () => {
@@ -77,7 +77,7 @@ export const UserActions: FC<UserActionsProps> = ({ user, isAdmin }) => {
     sessionStorage.removeItem('loginRedirectCount');
     sessionStorage.removeItem('lastRedirect');
     
-    // Navigate to the report viewer for patient users (changed from patient-dashboard)
+    // Navigate to the report viewer for patient users
     navigate('/report-viewer', { replace: true });
   };
 
@@ -97,7 +97,7 @@ export const UserActions: FC<UserActionsProps> = ({ user, isAdmin }) => {
           size="sm"
           className="whitespace-nowrap"
         >
-          Admin Dashboard
+          Dashboard
         </Button>
       ) : (
         <Button 

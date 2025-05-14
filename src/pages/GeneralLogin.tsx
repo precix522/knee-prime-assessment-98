@@ -44,7 +44,7 @@ export default function GeneralLogin() {
       console.log("Already logged in, redirecting user with profile type:", profileType);
       
       if (profileType === 'admin') {
-        navigate("/admin-dashboard", { replace: true });
+        navigate("/dashboard", { replace: true }); // Changed from '/admin-dashboard' to '/dashboard'
       } else if (profileType === 'patient') {
         navigate("/report-viewer", { replace: true });
       } else {
@@ -93,7 +93,7 @@ export default function GeneralLogin() {
         
         // Redirect based on profile type
         if (profileType === 'admin') {
-          navigate("/admin-dashboard", { replace: true });
+          navigate("/dashboard", { replace: true }); // Changed from '/admin-dashboard' to '/dashboard'
         } else if (profileType === 'patient') {
           navigate("/report-viewer", { replace: true });
         } else {

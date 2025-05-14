@@ -84,11 +84,11 @@ export const useAuthSession = (
         console.log('Profile type being used for redirection:', profileType);
         
         if (profileType === 'admin') {
-          console.log('Redirecting admin to admin-dashboard');
-          navigate('/admin-dashboard', { replace: true });
+          console.log('Redirecting admin to dashboard');
+          navigate('/dashboard', { replace: true }); // Changed from admin-dashboard to dashboard
         } else if (profileType === 'patient') {
           console.log('Redirecting patient to report-viewer');
-          navigate('/report-viewer', { replace: true }); // Changed from 'patient-dashboard' to 'report-viewer'
+          navigate('/report-viewer', { replace: true });
         } else {
           console.log('Profile type not recognized, redirecting to dashboard');
           navigate('/dashboard', { replace: true });

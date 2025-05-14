@@ -76,12 +76,12 @@ export const handleAuthenticatedRedirection = (
   
   if (profileType === 'admin') {
     if (isAuthRoute) toast.success('Welcome back, admin!');
-    const adminDestination = redirectTo || '/admin-dashboard';
+    const adminDestination = redirectTo || '/dashboard'; // Changed from '/admin-dashboard' to '/dashboard'
     console.log('Admin redirecting to:', adminDestination);
     navigate(adminDestination, { replace: true });
   } else if (profileType === 'patient') {
     if (isAuthRoute) toast.success(`Welcome back, patient!`);
-    const patientDestination = redirectTo || '/report-viewer';  // Changed from '/patient-dashboard' back to '/report-viewer'
+    const patientDestination = redirectTo || '/report-viewer';
     console.log('Patient redirecting to:', patientDestination);
     navigate(patientDestination, { replace: true });
   } else {

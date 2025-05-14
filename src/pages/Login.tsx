@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -44,14 +43,24 @@ export default function Login() {
         
         console.log('Initial auth check:', isValid, user);
         
-        // If user is already authenticated, handleOTPSuccess in useAuth will handle redirect
+        // If already authenticated, redirect based on user type
+        if (isValid && user) {
+          const profileType = user.profile_type || localStorage.getItem('userProfileType') || 'patient';
+          if (profileType === 'admin') {
+            navigate('/dashboard', { replace: true }); // Changed from '/admin-dashboard' to '/dashboard'
+          } else if (profileType === 'patient') {
+            navigate('/report-viewer', { replace: true });
+          } else {
+            navigate('/dashboard', { replace: true });
+          }
+        }
       } catch (error) {
         console.error("Error checking auth status:", error);
       }
     };
     
     checkAuthStatus();
-  }, [validateSession, state]);
+  }, [validateSession, state, navigate]);
 
   return (
     <AuthContainer>

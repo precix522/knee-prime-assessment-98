@@ -28,7 +28,7 @@ export default function PatientDashboard() {
         if (profileType !== 'patient') {
           toast.error("Unauthorized. Redirecting to appropriate dashboard.");
           if (profileType === 'admin') {
-            navigate("/admin-dashboard", { replace: true });
+            navigate("/dashboard", { replace: true }); // Changed from '/admin-dashboard' to '/dashboard'
           } else {
             navigate("/dashboard", { replace: true });
           }
