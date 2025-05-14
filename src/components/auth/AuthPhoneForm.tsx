@@ -73,9 +73,6 @@ export function AuthPhoneForm({ state, updateState, onSubmit }: AuthPhoneFormPro
               onExpire={handleCaptchaExpire}
               error={captchaError}
             />
-            <p className="text-sm text-gray-500 mt-2">
-              This verification helps us ensure you're a human and not a bot.
-            </p>
           </div>
         )}
         

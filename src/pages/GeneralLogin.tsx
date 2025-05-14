@@ -6,7 +6,7 @@ import { AuthContainer } from "@/components/auth/AuthContainer";
 import { AuthPhoneForm } from "@/components/auth/AuthPhoneForm";
 import { AuthOTPForm } from "@/components/auth/AuthOTPForm";
 import { DevModeToggle } from "@/components/auth/DevModeToggle";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { InfoIcon } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -41,9 +41,18 @@ export default function GeneralLogin() {
   }, [error, clearError]);
 
   useEffect(() => {
-    // If user is already logged in, redirect to dashboard
+    // If user is already logged in, redirect based on profile type
     if (user) {
-      navigate("/dashboard");
+      const profileType = user.profile_type || localStorage.getItem('userProfileType') || 'patient';
+      console.log("Already logged in, redirecting user with profile type:", profileType);
+      
+      if (profileType === 'admin') {
+        navigate("/manage-patients", { replace: true });
+      } else if (profileType === 'patient') {
+        navigate("/report-viewer", { replace: true });
+      } else {
+        navigate("/dashboard", { replace: true });
+      }
     }
   }, [user, navigate]);
 
@@ -86,12 +95,25 @@ export default function GeneralLogin() {
       const user = await verifyOTP(phoneNumber, otp);
       if (user) {
         setLoginUser(user);
+        
+        // Get profile type with fallback to localStorage
+        const profileType = user.profile_type || localStorage.getItem('userProfileType') || 'patient';
+        console.log("Login successful! Redirecting based on profile type:", profileType);
+        
         toast({
           title: "Success",
           description: "Login successful!",
           variant: "default",
         });
-        navigate("/dashboard");
+        
+        // Redirect based on profile type
+        if (profileType === 'admin') {
+          navigate("/manage-patients", { replace: true });
+        } else if (profileType === 'patient') {
+          navigate("/report-viewer", { replace: true });
+        } else {
+          navigate("/dashboard", { replace: true });
+        }
       } else {
         console.error("OTP verification returned no user");
         toast({
