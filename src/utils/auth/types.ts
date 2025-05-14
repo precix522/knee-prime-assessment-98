@@ -40,6 +40,7 @@ export interface AuthState {
   isLoading: boolean;
   error: string | null;
   
-  // Developer mode state (added)
-  devMode?: boolean;
+  // Developer mode state
+  devMode: boolean;
+  toggleDevMode: () => void;
 }
