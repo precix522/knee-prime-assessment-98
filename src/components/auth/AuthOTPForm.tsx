@@ -56,11 +56,16 @@ export function AuthOTPForm({ state, updateState, onSubmit, onBack }: AuthOTPFor
           </div>
           <p className="text-sm text-gray-500 mt-2">
             A verification code has been sent to your phone number
-            {devMode && ' (In dev mode, no actual SMS is sent)'}
+            {devMode && ' (In dev mode, use code 123456)'}
           </p>
         </div>
         
-        {error && <p className="text-red-500 text-sm">{error}</p>}
+        {error && (
+          <Alert variant="destructive">
+            <InfoIcon className="h-4 w-4" />
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
       </div>
       
       <div className="flex flex-col gap-2 mt-6">
