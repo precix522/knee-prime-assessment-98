@@ -27,11 +27,14 @@ export const createUserState = (set: Function): UserState => ({
       localStorage.setItem('authenticatedPhone', phone);
     }
     
+    console.log('Setting login user with profile type:', user.profile_type);
+    
     set({
       user: {
         id: user.id || '',
         phone: phone,
-        profile_type: user.profile_type || 'user'
+        profile_type: user.profile_type || 'user',
+        ...user // Preserve all other user properties
       },
       isVerifying: false
     });
@@ -51,11 +54,14 @@ export const createUserState = (set: Function): UserState => ({
       localStorage.setItem('authenticatedPhone', phone);
     }
     
+    console.log('Setting auth user with profile type:', user.profile_type);
+    
     set({
       user: {
         id: user.id || '',
         phone: phone,
-        profile_type: user.profile_type || 'user'
+        profile_type: user.profile_type || 'user',
+        ...user // Preserve all other user properties
       },
       isVerifying: false
     });

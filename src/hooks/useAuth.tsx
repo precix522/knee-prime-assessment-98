@@ -1,3 +1,4 @@
+
 import { useState, useCallback } from 'react';
 import { toast } from "sonner";
 import { useTwilioAuthStore } from '@/utils/auth';
@@ -217,13 +218,18 @@ export const useAuth = () => {
   }, [state.loading, state.otp, state.devMode, state.phone, updateState]);
 
   const handleOTPSuccess = useCallback((sessionId: string, userData: any) => {
+    console.log('OTP Success - User data:', userData);
+    console.log('OTP Success - Session ID:', sessionId);
+    
     const user = {
       id: sessionId,
       phone: userData.phone_number,
       name: userData.name || 'User',
+      profile_type: userData.profile_type || 'patient', // Ensure profile_type is set
       ...userData
     };
 
+    console.log('Setting auth user with data:', user);
     authStore.setAuthUser(user);
     
     updateState({
@@ -235,17 +241,21 @@ export const useAuth = () => {
       duration: 5000
     });
 
-    // Redirect based on user profile type
+    // Redirect based on user profile type with a slight delay to ensure state is updated
     setTimeout(() => {
+      // Get fresh user data from store to ensure we have the latest profile_type
       const authenticatedUser = authStore.user;
       console.log('Redirecting based on profile type:', authenticatedUser?.profile_type);
       
       if (authenticatedUser?.profile_type === 'admin') {
+        console.log('Redirecting admin to manage-patients');
         navigate('/manage-patients');
       } else if (authenticatedUser?.profile_type === 'patient') {
+        console.log('Redirecting patient to report-viewer');
         navigate('/report-viewer');
       } else {
         // Default fallback if profile type is not set
+        console.log('Profile type not recognized, redirecting to dashboard');
         navigate('/dashboard');
       }
     }, 500);

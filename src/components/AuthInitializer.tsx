@@ -28,7 +28,7 @@ export function AuthInitializer() {
         if (!isValid && isProtectedRoute) {
           console.log('Not authenticated, redirecting from protected route to login');
           toast.error('Your session has expired. Please log in again.');
-          navigate('/login');
+          navigate('/general-login');
           return;
         }
         

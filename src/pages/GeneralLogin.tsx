@@ -24,15 +24,17 @@ export default function GeneralLogin() {
   const { validateSession } = useTwilioAuthStore();
 
   useEffect(() => {
+    console.log('GeneralLogin component mounted');
+    
     const checkSession = async () => {
       try {
         const isValid = await validateSession();
         const { user } = useTwilioAuthStore.getState();
         
         if (isValid && user) {
-          console.log("Already authenticated:", user);
-          console.log("User profile type:", user.profile_type);
-          // Redirection will be handled by AuthInitializer component
+          console.log("Already authenticated in GeneralLogin:", user);
+          console.log("User profile type in GeneralLogin:", user.profile_type);
+          // AuthInitializer component will handle the redirection based on user type
         }
       } catch (error) {
         console.error("Session check error:", error);
