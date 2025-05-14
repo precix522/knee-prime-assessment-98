@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { useToast } from "@/hooks/use-toast";
+import { useToast, toast } from "@/hooks/use-toast";
 import { ChatWindow } from './chatbot/ChatWindow';
 import { ChatIcon } from './chatbot/ChatIcon';
 import { sendChatMessage, handleChatError } from './chatbot/ChatService';
@@ -14,7 +14,6 @@ export const ChatbotWidget: React.FC = () => {
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { toast } = useToast();
 
   const toggleChat = () => {
     setIsOpen(!isOpen);
@@ -53,10 +52,7 @@ export const ChatbotWidget: React.FC = () => {
       setMessages(prev => [...prev, botMessage]);
       
       // Show success toast
-      toast({
-        title: "Message sent",
-        description: "Your message was successfully processed.",
-      });
+      toast.success("Message sent", "Your message was successfully processed.");
       
     } catch (err) {
       const errorMessage = handleChatError(err);

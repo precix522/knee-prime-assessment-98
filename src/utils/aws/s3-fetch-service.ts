@@ -51,11 +51,7 @@ export const fetchDataFromS3 = async () => {
   } catch (error) {
     console.error("Error in fetchDataFromS3:", error);
     lastFetchError = error instanceof Error ? error.message : "Unknown error";
-    toast({
-      title: "Error fetching data",
-      description: "Failed to fetch data from S3. Please try again later.",
-      variant: "destructive",
-    });
+    toast.error("Error fetching data", "Failed to fetch data from S3. Please try again later.");
     return [];
   } finally {
     currentlyFetching = false;
@@ -65,25 +61,16 @@ export const fetchDataFromS3 = async () => {
 // Function to manually trigger a sync
 export const syncNow = async () => {
   if (currentlyFetching) {
-    toast({
-      title: "Sync in progress",
-      description: "Please wait for the current sync to complete.",
-    });
+    toast.warning("Sync in progress", "Please wait for the current sync to complete.");
     return null;
   }
   
-  toast({
-    title: "Sync started",
-    description: "Fetching data from S3...",
-  });
+  toast.info("Sync started", "Fetching data from S3...");
   
   const results = await fetchDataFromS3();
   
   if (!lastFetchError) {
-    toast({
-      title: "Sync completed",
-      description: `Successfully fetched ${lastFetchObjectCount} objects from S3.`,
-    });
+    toast.success("Sync completed", `Successfully fetched ${lastFetchObjectCount} objects from S3.`);
   }
   
   return results;
