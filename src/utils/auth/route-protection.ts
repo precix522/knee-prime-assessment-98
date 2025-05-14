@@ -1,5 +1,5 @@
 
-import { toast } from "sonner";
+import { toast } from 'sonner';
 
 // Define protected routes configuration - ensuring all routes are properly listed
 export const protectedRoutes = [
@@ -17,7 +17,6 @@ export const authRoutes = ['/login', '/general-login'];
 
 // Improved route matching to handle nested routes properly
 export const isProtectedRoute = (path: string): boolean => {
-  // Check if the path exactly matches or starts with any protected route
   return protectedRoutes.some(route => 
     path === route || 
     path.startsWith(route) ||

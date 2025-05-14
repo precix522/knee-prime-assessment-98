@@ -53,13 +53,14 @@ export const useSessionManager = () => {
         // If successfully authenticated on login page, redirect based on user type
         if (isValid && user && isOnAuthRoute) {
           handleAuthenticatedRedirection(user, navigate, currentPath, true);
+          return;
         }
         
         // For authenticated users on the home page, redirect based on role
         if (isValid && user && currentPath === '/') {
           handleAuthenticatedRedirection(user, navigate, currentPath);
+          return;
         }
-        
       } catch (err) {
         console.error("Session validation error:", err);
         setIsInitialized(true);

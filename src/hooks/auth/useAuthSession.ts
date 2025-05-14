@@ -71,20 +71,19 @@ export const useAuthSession = (
 
       toast.success('You have successfully logged in.');
       
-      // Longer delay to ensure state is updated
+      // Redirect based on profile type
       setTimeout(() => {
         console.log('Current user after login:', authStore.user);
         console.log('Profile type being used for redirection:', profileType);
         
-        // Use replace to prevent back button from returning to login
         if (profileType === 'admin') {
-          console.log('Redirecting admin to manage-patients with replace:true');
+          console.log('Redirecting admin to manage-patients');
           navigate('/manage-patients', { replace: true });
         } else if (profileType === 'patient') {
-          console.log('Redirecting patient to report-viewer with replace:true');
+          console.log('Redirecting patient to report-viewer');
           navigate('/report-viewer', { replace: true });
         } else {
-          console.log('Profile type not recognized, redirecting to dashboard with replace:true');
+          console.log('Profile type not recognized, redirecting to dashboard');
           navigate('/dashboard', { replace: true });
         }
       }, 800);

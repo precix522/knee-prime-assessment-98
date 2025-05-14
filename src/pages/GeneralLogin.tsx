@@ -30,9 +30,7 @@ export default function GeneralLogin() {
 
   useEffect(() => {
     if (error) {
-      toast.error("Error", {
-        description: error,
-      });
+      toast.error(error);
       clearError();
     }
   }, [error, clearError]);
@@ -60,9 +58,7 @@ export default function GeneralLogin() {
       if (devMode) {
         // In dev mode, bypass actual OTP sending
         setIsVerifying(true);
-        toast("Developer Mode", {
-          description: "Use code 123456 to verify",
-        });
+        toast("Developer Mode - Use code 123456 to verify");
         return;
       }
       
@@ -70,9 +66,7 @@ export default function GeneralLogin() {
       setIsVerifying(true);
     } catch (err) {
       console.error("Failed to send OTP:", err);
-      toast.error("Error", {
-        description: "Failed to send OTP. Please try again.",
-      });
+      toast.error("Failed to send OTP. Please try again.");
     }
   };
 
@@ -93,9 +87,7 @@ export default function GeneralLogin() {
         const profileType = user.profile_type || localStorage.getItem('userProfileType') || 'patient';
         console.log("Login successful! Redirecting based on profile type:", profileType);
         
-        toast.success("Success", {
-          description: "Login successful!",
-        });
+        toast.success("Login successful!");
         
         // Redirect based on profile type
         if (profileType === 'admin') {
@@ -107,15 +99,11 @@ export default function GeneralLogin() {
         }
       } else {
         console.error("OTP verification returned no user");
-        toast.error("Error", {
-          description: "Invalid OTP. Please try again.",
-        });
+        toast.error("Invalid OTP. Please try again.");
       }
     } catch (err) {
       console.error("OTP verification failed:", err);
-      toast.error("Error", {
-        description: "OTP verification failed. Please try again.",
-      });
+      toast.error("OTP verification failed. Please try again.");
     }
   };
 
