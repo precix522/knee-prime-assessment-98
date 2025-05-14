@@ -1,0 +1,62 @@
+
+import { supabase } from './client';
+import { UserProfile } from './types/user-types';
+import { getUserProfileByPhone } from './user-profile-fetcher';
+
+/**
+ * Create user profile if it doesn't exist
+ */
+export const createUserProfile = async (phone: string, profile_type: string = 'user', additionalData: any = {}): Promise<UserProfile | null> => {
+  try {
+    // Check if user already exists
+    const existingUser = await getUserProfileByPhone(phone);
+    if (existingUser) {
+      return existingUser;
+    }
+    
+    // Format the date in MM/DD/YYYY, hh:mm:ss AM/PM format
+    const now = new Date();
+    const formattedDate = now.toLocaleDateString('en-US', {
+      month: '2-digit',
+      day: '2-digit',
+      year: 'numeric',
+    }) + ' ' + now.toLocaleTimeString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: true
+    });
+    
+    // Create new user profile with any additional data provided
+    const userData = {
+      Patient_ID: `user_${Date.now()}`, // Generate a unique Patient_ID
+      phone,
+      profile_type,
+      patient_name: additionalData.name || 'User',
+      last_modified_tm: formattedDate
+    };
+    
+    const { data, error } = await supabase
+      .from('patient')
+      .insert([userData])
+      .select()
+      .single();
+    
+    if (error) {
+      console.error('Error creating user profile:', error);
+      return null;
+    }
+    
+    // Map the patient record to UserProfile format
+    return {
+      id: data.Patient_ID,
+      phone: data.phone,
+      profile_type: data.profile_type || 'user',
+      created_at: data.last_modified_tm,
+      name: data.patient_name,
+    } as UserProfile;
+  } catch (error) {
+    console.error('Exception creating user profile:', error);
+    return null;
+  }
+};

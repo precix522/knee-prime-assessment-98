@@ -1,5 +1,5 @@
 
-import { getUserProfileByPhone, createUserProfile } from '../supabase';
+import { getUserProfileByPhone, createUserProfile } from '../supabase/user-db';
 import { User, UserProfile } from './types';
 
 export const fetchUserProfile = async (phone: string): Promise<UserProfile | null> => {
