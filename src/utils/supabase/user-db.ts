@@ -36,11 +36,15 @@ export const getUserProfileByPhone = async (phone: string): Promise<UserProfile 
       return null;
     }
     
+    // Make sure profile_type is correctly identified (admin or user)
+    // If the profile_type in the database is 'admin', ensure it's properly set
+    const profileType = data[0].profile_type === 'admin' ? 'admin' : data[0].profile_type || 'user';
+    
     // Map the patient record to UserProfile format
     return {
       id: data[0].id || data[0].Patient_ID,
       phone: data[0].phone,
-      profile_type: data[0].profile_type || 'user', // Default to user if not specified
+      profile_type: profileType, // Use the determined profile type
       created_at: data[0].created_at || data[0].last_modified_tm,
       name: data[0].patient_name || data[0].name,
       email: data[0].email

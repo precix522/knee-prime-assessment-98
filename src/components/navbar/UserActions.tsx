@@ -3,6 +3,7 @@ import { FC } from "react";
 import { Button } from "../Button";
 import { LogOut, LogIn, User } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 interface UserActionsProps {
   user: any;
@@ -17,6 +18,7 @@ export const UserActions: FC<UserActionsProps> = ({ user, isAdmin }) => {
   };
   
   const handleAdminLogin = () => {
+    // Explicitly navigate to the admin login page
     navigate('/login');
   };
   
@@ -26,6 +28,11 @@ export const UserActions: FC<UserActionsProps> = ({ user, isAdmin }) => {
   
   const handleGeneralLogin = () => {
     navigate('/general-login');
+  };
+  
+  const handleDashboard = () => {
+    // Navigate to main admin dashboard when admin users click on dashboard
+    navigate('/manage-patients');
   };
 
   return user ? (
@@ -37,6 +44,16 @@ export const UserActions: FC<UserActionsProps> = ({ user, isAdmin }) => {
           {isAdmin && <span className="ml-1 text-health-600">(Admin)</span>}
         </span>
       </div>
+      {isAdmin && (
+        <Button 
+          onClick={handleDashboard}
+          variant="health"
+          size="sm"
+          className="whitespace-nowrap"
+        >
+          Admin Dashboard
+        </Button>
+      )}
       <Button 
         onClick={handleSignOut}
         variant="outline"
