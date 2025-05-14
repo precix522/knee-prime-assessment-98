@@ -23,6 +23,7 @@ export const useSessionManager = () => {
         if (isInitialized) return;
 
         console.log('Checking session in SessionManager...');
+        console.log('Current path:', location.pathname);
         
         // Add a small delay to prevent immediate checks that might cause loops
         await new Promise(resolve => setTimeout(resolve, 100));
@@ -39,6 +40,9 @@ export const useSessionManager = () => {
         const currentPath = location.pathname;
         const isOnProtectedRoute = isProtectedRoute(currentPath);
         const isOnAuthRoute = isAuthRoute(currentPath);
+        
+        console.log('Is on protected route?', isOnProtectedRoute);
+        console.log('Is on auth route?', isOnAuthRoute);
         
         // If on a protected page and session is invalid, redirect to login
         if (!isValid && isOnProtectedRoute) {

@@ -1,15 +1,27 @@
 
 import { toast } from "sonner";
 
-// Define protected routes configuration
-export const protectedRoutes = ['/report-viewer', '/patient-id', '/dashboard', '/manage-users', '/reports', '/all-reports', '/manage-patients', '/patient/'];
+// Define protected routes configuration - ensuring all routes are properly listed
+export const protectedRoutes = [
+  '/dashboard', 
+  '/manage-users', 
+  '/manage-patients', 
+  '/patient/', 
+  '/report/', 
+  '/report-viewer', 
+  '/reports', 
+  '/all-reports'
+];
+
 export const authRoutes = ['/login', '/general-login'];
 
-// Check if a route is protected
+// Improved route matching to handle nested routes properly
 export const isProtectedRoute = (path: string): boolean => {
   // Check if the path exactly matches or starts with any protected route
   return protectedRoutes.some(route => 
     path === route || 
+    path.startsWith(route) ||
+    // Special handling for dynamic routes with IDs
     (route.endsWith('/') && path.startsWith(route))
   );
 };
@@ -47,6 +59,7 @@ export const handleAuthenticatedRedirection = (
                       'patient';
   
   console.log(`Authenticated user${isAuthRoute ? ' on auth page' : ''}, redirecting based on role:`, profileType);
+  console.log('Current path:', currentPath);
   
   // Clear any redirect loop detection
   clearRedirectLoopDetection();
@@ -56,18 +69,25 @@ export const handleAuthenticatedRedirection = (
   
   // Clear redirect after retrieving
   if (redirectTo) {
+    console.log('Redirecting to stored path:', redirectTo);
     sessionStorage.removeItem('redirectAfterLogin');
   }
   
   if (profileType === 'admin') {
     if (isAuthRoute) toast.success('Welcome back, admin!');
-    navigate(redirectTo || '/manage-patients', { replace: true });
+    const adminDestination = redirectTo || '/manage-patients';
+    console.log('Admin redirecting to:', adminDestination);
+    navigate(adminDestination, { replace: true });
   } else if (profileType === 'patient') {
     if (isAuthRoute) toast.success(`Welcome back, patient!`);
-    navigate(redirectTo || '/report-viewer', { replace: true });
+    const patientDestination = redirectTo || '/report-viewer';
+    console.log('Patient redirecting to:', patientDestination);
+    navigate(patientDestination, { replace: true });
   } else {
     if (isAuthRoute) toast.success('Welcome back!');
-    navigate(redirectTo || '/dashboard', { replace: true });
+    const defaultDestination = redirectTo || '/dashboard';
+    console.log('Default user redirecting to:', defaultDestination);
+    navigate(defaultDestination, { replace: true });
   }
 };
 
