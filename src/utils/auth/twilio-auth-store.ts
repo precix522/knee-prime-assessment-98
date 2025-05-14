@@ -12,5 +12,8 @@ export const useTwilioAuthStore = create<AuthState>((set, get) => ({
   
   // Common state
   error: null,
-  isLoading: true
+  isLoading: true,
+  
+  // Developer mode state
+  devMode: false
 }));

@@ -39,4 +39,7 @@ export interface AuthState {
   // Common state
   isLoading: boolean;
   error: string | null;
+  
+  // Developer mode state (added)
+  devMode?: boolean;
 }
