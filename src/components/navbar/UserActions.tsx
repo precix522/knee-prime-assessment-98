@@ -17,12 +17,12 @@ export const UserActions: FC<UserActionsProps> = ({ user, isAdmin }) => {
   };
   
   const handleAdminLogin = () => {
-    // Explicitly navigate to the admin login page
-    navigate('/login');
+    // Explicitly navigate to the general login page
+    navigate('/general-login');
   };
   
   const handleAccessReport = () => {
-    navigate('/login');
+    navigate('/general-login');
   };
   
   const handleGeneralLogin = () => {

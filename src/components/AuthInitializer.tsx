@@ -35,16 +35,21 @@ export function AuthInitializer() {
         // If successfully authenticated on login page, redirect based on user type
         if (isValid && user && (currentPath === '/login' || currentPath === '/general-login')) {
           console.log('Already authenticated on login page, redirecting based on role:', user.profile_type);
-          if (user.profile_type === 'admin') {
-            toast.success('Welcome back, admin!');
-            navigate('/manage-patients');
-          } else if (user.profile_type === 'patient') {
-            toast.success(`Welcome back, patient!`);
-            navigate('/report-viewer');
-          } else {
-            toast.success('Welcome back!');
-            navigate('/dashboard');
-          }
+          
+          // Add a small delay to ensure user profile is fully loaded
+          setTimeout(() => {
+            if (user.profile_type === 'admin') {
+              toast.success('Welcome back, admin!');
+              navigate('/manage-patients');
+            } else if (user.profile_type === 'patient') {
+              toast.success(`Welcome back, patient!`);
+              navigate('/report-viewer');
+            } else {
+              toast.success('Welcome back!');
+              navigate('/dashboard');
+            }
+          }, 100);
+          return;
         }
         
         // For authenticated users on the home page, redirect based on role

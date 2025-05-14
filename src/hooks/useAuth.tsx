@@ -1,8 +1,8 @@
-
 import { useState, useCallback } from 'react';
 import { toast } from "sonner";
 import { useTwilioAuthStore } from '@/utils/auth';
 import { useNavigate } from 'react-router-dom';
+import { getUserProfileByPhone } from '@/utils/supabase';
 
 export interface AuthState {
   phone: string;
@@ -146,11 +146,16 @@ export const useAuth = () => {
 
       if (state.devMode) {
         // In dev mode, bypass actual verification
-        handleOTPSuccess('dev-mode-session-id', {
+        const userData = {
           phone_number: state.phone,
           name: 'Developer User',
           profile_type: 'admin' // Default to admin in dev mode for testing
-        });
+        };
+        
+        // Use setTimeout to give the UI time to update before proceeding
+        setTimeout(() => {
+          handleOTPSuccess('dev-mode-session-id', userData);
+        }, 100);
         return;
       }
 
@@ -217,49 +222,77 @@ export const useAuth = () => {
     }
   }, [state.loading, state.otp, state.devMode, state.phone, updateState]);
 
-  const handleOTPSuccess = useCallback((sessionId: string, userData: any) => {
+  const handleOTPSuccess = useCallback(async (sessionId: string, userData: any) => {
     console.log('OTP Success - User data:', userData);
     console.log('OTP Success - Session ID:', sessionId);
     
-    const user = {
-      id: sessionId,
-      phone: userData.phone_number,
-      name: userData.name || 'User',
-      profile_type: userData.profile_type || 'patient', // Ensure profile_type is set
-      ...userData
-    };
-
-    console.log('Setting auth user with data:', user);
-    authStore.setAuthUser(user);
-    
-    updateState({
-      loading: false,
-      error: null,
-    });
-
-    toast.success('You have successfully logged in.', {
-      duration: 5000
-    });
-
-    // Redirect based on user profile type with a slight delay to ensure state is updated
-    setTimeout(() => {
-      // Get fresh user data from store to ensure we have the latest profile_type
-      const authenticatedUser = authStore.user;
-      console.log('Redirecting based on profile type:', authenticatedUser?.profile_type);
+    try {
+      // Get the phone number from userData
+      const phone = userData.phone_number;
       
-      if (authenticatedUser?.profile_type === 'admin') {
-        console.log('Redirecting admin to manage-patients');
-        navigate('/manage-patients');
-      } else if (authenticatedUser?.profile_type === 'patient') {
-        console.log('Redirecting patient to report-viewer');
-        navigate('/report-viewer');
+      // Try to fetch the user profile from the database
+      let profileType = 'patient'; // Default to patient
+      
+      if (!state.devMode) {
+        try {
+          const userProfile = await getUserProfileByPhone(phone);
+          console.log('User profile from database:', userProfile);
+          
+          if (userProfile && userProfile.profile_type) {
+            profileType = userProfile.profile_type;
+            console.log('Found profile type in database:', profileType);
+          }
+        } catch (err) {
+          console.error('Error fetching user profile:', err);
+          // Continue with default profile type
+        }
       } else {
-        // Default fallback if profile type is not set
-        console.log('Profile type not recognized, redirecting to dashboard');
-        navigate('/dashboard');
+        // In dev mode, use the profile type from userData
+        profileType = userData.profile_type || 'admin';
+        console.log('Using dev mode profile type:', profileType);
       }
-    }, 500);
-  }, [authStore, navigate, updateState]);
+      
+      // Create the user object with profile type
+      const user = {
+        id: sessionId,
+        phone: phone,
+        name: userData.name || 'User',
+        profile_type: profileType,
+        ...userData
+      };
+
+      console.log('Setting auth user with data:', user);
+      authStore.setAuthUser(user);
+      
+      updateState({
+        loading: false,
+        error: null,
+      });
+
+      toast.success('You have successfully logged in.', {
+        duration: 5000
+      });
+
+      // Redirect based on user profile type with a delay to ensure state is updated
+      setTimeout(() => {
+        if (profileType === 'admin') {
+          console.log('Redirecting admin to manage-patients');
+          navigate('/manage-patients');
+        } else if (profileType === 'patient') {
+          console.log('Redirecting patient to report-viewer');
+          navigate('/report-viewer');
+        } else {
+          // Default fallback if profile type is not set
+          console.log('Profile type not recognized, redirecting to dashboard');
+          navigate('/dashboard');
+        }
+      }, 500);
+    } catch (error) {
+      console.error('Error in handleOTPSuccess:', error);
+      toast.error('Error setting up user session. Please try again.');
+      updateState({ loading: false });
+    }
+  }, [authStore, navigate, updateState, state.devMode]);
 
   const handleToggleDevMode = useCallback(() => {
     updateState({ 

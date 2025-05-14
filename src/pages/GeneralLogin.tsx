@@ -10,8 +10,10 @@ import { Toaster } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { InfoIcon } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useNavigate } from "react-router-dom";
 
 export default function GeneralLogin() {
+  const navigate = useNavigate();
   const {
     state,
     updateState,
@@ -34,7 +36,21 @@ export default function GeneralLogin() {
         if (isValid && user) {
           console.log("Already authenticated in GeneralLogin:", user);
           console.log("User profile type in GeneralLogin:", user.profile_type);
-          // AuthInitializer component will handle the redirection based on user type
+          
+          // Add a small delay to ensure the session state is fully updated
+          setTimeout(() => {
+            // Redirect based on profile type
+            if (user.profile_type === 'admin') {
+              console.log('GeneralLogin: Redirecting admin to manage-patients');
+              navigate('/manage-patients');
+            } else if (user.profile_type === 'patient') {
+              console.log('GeneralLogin: Redirecting patient to report-viewer');
+              navigate('/report-viewer');
+            } else {
+              console.log('GeneralLogin: Profile type not recognized, redirecting to dashboard');
+              navigate('/dashboard');
+            }
+          }, 100);
         }
       } catch (error) {
         console.error("Session check error:", error);
@@ -42,7 +58,7 @@ export default function GeneralLogin() {
     };
     
     checkSession();
-  }, [validateSession]);
+  }, [validateSession, navigate]);
 
   return (
     <AuthContainer>
