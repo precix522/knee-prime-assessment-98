@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useTwilioAuthStore } from "@/utils/auth";
 import { AuthContainer } from "@/components/auth/AuthContainer";
 import { AuthPhoneForm } from "@/components/auth/AuthPhoneForm";
@@ -64,13 +64,13 @@ export default function GeneralLogin() {
     setDevMode(!devMode);
   };
 
-  // Create state object for AuthPhoneForm and AuthOTPForm
+  // Create state object for AuthPhoneForm and AuthOTPForm with proper defaults
   const authState = {
-    phone: phoneNumber,
-    otp,
+    phone: phoneNumber || '',
+    otp: otp || '',
     otpSent: isVerifying,
     loading: isLoading,
-    error,
+    error: error || null,
     requestId: null,
     rememberMe: true,
     captchaVerified: devMode, // In dev mode, consider captcha verified
@@ -81,9 +81,6 @@ export default function GeneralLogin() {
   const updateAuthState = (updates: any) => {
     if (updates.phone !== undefined) setPhoneNumber(updates.phone);
     if (updates.otp !== undefined) setOtp(updates.otp);
-    if (updates.rememberMe !== undefined) {
-      // Handle remember me if needed
-    }
     // Other state updates can be handled here
   };
 

@@ -4,7 +4,7 @@ import { KeyRound } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "../Button";
-import { AuthState } from "@/hooks/useAuth";
+import { AuthState } from "@/hooks/auth/types";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { InfoIcon } from "lucide-react";
 
@@ -21,10 +21,16 @@ export function AuthOTPForm({ state, updateState, onSubmit, onBack }: AuthOTPFor
     onSubmit();
   };
 
+  // Add null safety checks
+  const otp = state?.otp || '';
+  const devMode = state?.devMode || false;
+  const loading = state?.loading || false;
+  const error = state?.error || null;
+
   return (
     <form onSubmit={handleSubmit}>
       <div className="space-y-4">
-        {state.devMode && (
+        {devMode && (
           <Alert className="bg-blue-50 border-blue-200 text-blue-800">
             <InfoIcon className="h-4 w-4 text-blue-800" />
             <AlertDescription>
@@ -44,26 +50,26 @@ export function AuthOTPForm({ state, updateState, onSubmit, onBack }: AuthOTPFor
               id="otp"
               placeholder="Enter OTP code"
               className="pl-10"
-              value={state.otp}
+              value={otp}
               onChange={(e) => updateState({ otp: e.target.value })}
             />
           </div>
           <p className="text-sm text-gray-500 mt-2">
             A verification code has been sent to your phone number
-            {state.devMode && ' (In dev mode, no actual SMS is sent)'}
+            {devMode && ' (In dev mode, no actual SMS is sent)'}
           </p>
         </div>
         
-        {state.error && <p className="text-red-500 text-sm">{state.error}</p>}
+        {error && <p className="text-red-500 text-sm">{error}</p>}
       </div>
       
       <div className="flex flex-col gap-2 mt-6">
         <Button
           className="w-full"
           type="submit"
-          disabled={state.loading}
+          disabled={loading}
         >
-          {state.loading ? "Verifying OTP..." : "Verify OTP"}
+          {loading ? "Verifying OTP..." : "Verify OTP"}
         </Button>
         
         <Button
@@ -71,13 +77,13 @@ export function AuthOTPForm({ state, updateState, onSubmit, onBack }: AuthOTPFor
           variant="outline"
           type="button"
           onClick={onBack}
-          disabled={state.loading}
+          disabled={loading}
         >
           Back
         </Button>
       </div>
       
-      {state.devMode && (
+      {devMode && (
         <p className="text-sm text-center mt-4 text-green-600">
           Developer mode: Enter code <strong className="font-mono">123456</strong> to log in
         </p>

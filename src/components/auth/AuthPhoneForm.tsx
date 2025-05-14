@@ -38,13 +38,12 @@ export function AuthPhoneForm({ state, updateState, onSubmit }: AuthPhoneFormPro
     onSubmit();
   };
 
-  // Add null check to prevent accessing properties of undefined
+  // Safely access state properties with fallbacks
   const phone = state?.phone || '';
   const devMode = state?.devMode || false;
   const captchaVerified = state?.captchaVerified || false;
   const captchaError = state?.captchaError || null;
   const rememberMe = state?.rememberMe || false;
-  const error = state?.error || null;
   const loading = state?.loading || false;
 
   return (
@@ -81,8 +80,6 @@ export function AuthPhoneForm({ state, updateState, onSubmit }: AuthPhoneFormPro
           checked={rememberMe}
           onCheckedChange={(checked) => updateState({ rememberMe: checked })}
         />
-        
-        {error && <p className="text-red-500 text-sm">{error}</p>}
       </div>
       
       <Button

@@ -1,5 +1,5 @@
 
-// Correct re-export of toast components from the hooks location
+// Re-export toast components from the hooks location
 import { useToast, toast } from "@/hooks/use-toast";
 
 export { useToast, toast };

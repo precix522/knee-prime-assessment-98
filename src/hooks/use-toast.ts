@@ -1,34 +1,44 @@
 
 import * as React from "react"
-import { toast as sonnerToast, type ToastT } from "sonner"
+import { toast as sonnerToast } from "sonner"
 
-export interface ToastProps {
+export type ToastProps = {
   title?: React.ReactNode
   description?: React.ReactNode
   action?: React.ReactNode
+  type?: "default" | "error" | "success"
   variant?: "default" | "destructive"
 }
 
 // Define the toast function
-export const toast = (props: ToastProps) => {
+const toast = (props: ToastProps) => {
   if (props.variant === "destructive") {
     sonnerToast.error(props.title as string, {
-      description: props.description,
+      description: props.description as string,
       action: props.action,
     })
   } else {
-    sonnerToast.success(props.title as string, {
-      description: props.description,
+    sonnerToast(props.title as string, {
+      description: props.description as string,
       action: props.action,
     })
   }
 }
 
-// Simplified useToast for compatibility with existing components
-export const useToast = () => {
+// Add convenience methods
+toast.error = (message: string, options?: any) => sonnerToast.error(message, options)
+toast.success = (message: string, options?: any) => sonnerToast.success(message, options)
+toast.info = (message: string, options?: any) => sonnerToast.info(message, options)
+toast.warning = (message: string, options?: any) => sonnerToast.warning(message, options)
+
+// Hook for accessing toast functionality
+function useToast() {
   return {
     toast,
-    // Provide an empty toasts array for compatibility with shadcn/ui toast
-    toasts: [],
-  };
-};
+    dismiss: sonnerToast.dismiss,
+    toasts: [] as any[],
+  }
+}
+
+// Export functions
+export { toast, useToast }
