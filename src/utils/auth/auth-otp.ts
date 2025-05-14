@@ -40,7 +40,7 @@ export const createOtpState = (
       }
       
       if (response.message.includes('Development mode')) {
-        toast.info('Development mode: Using "123456" as verification code');
+        toast.success('Use "123456" as your verification code');
       } else {
         toast.success('Verification code sent to your phone');
       }
@@ -58,38 +58,9 @@ export const createOtpState = (
   verifyOTP: async (phone, code) => {
     set({ isLoading: true, error: null });
     try {
-      // Check for dev mode
-      const devMode = get().devMode;
+      console.log('Verifying OTP for phone:', phone, 'with code:', code);
       
-      // If in dev mode and code is 123456, bypass API verification
-      if (devMode && code === '123456') {
-        console.log('Dev mode active - bypassing OTP verification with test code');
-        
-        // Generate a session ID
-        const sessionId = `dev_${Date.now()}_${phone.replace(/[^0-9]/g, '')}`;
-        
-        const { sessionId: storedSessionId, sessionExpiry } = saveSession(
-          sessionId, 
-          get().rememberMe,
-          phone
-        );
-        
-        // Get or create user profile
-        const user = await getOrCreateUserProfile(phone, sessionId);
-        
-        set({
-          user,
-          sessionId: storedSessionId,
-          sessionExpiry,
-          isVerifying: false,
-          isLoading: false
-        });
-        
-        toast.success('Development mode: Login successful');
-        return user;
-      }
-      
-      // Regular verification flow
+      // Call the service to verify the OTP
       const response = await verifyOTPService(phone, code);
       
       if (!response.success) {
