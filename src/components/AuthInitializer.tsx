@@ -40,11 +40,20 @@ export function AuthInitializer() {
             navigate('/dashboard');
           } else if (user.profile_type === 'patient') {
             toast.success(`Welcome back, patient!`);
-            // Redirect patients directly to report-viewer instead of dashboard
             navigate('/report-viewer');
           } else {
             toast.success('Welcome back!');
             navigate('/dashboard');
+          }
+        }
+        
+        // For authenticated users on the home page, redirect based on role
+        if (isValid && user && currentPath === '/') {
+          console.log('Authenticated user on home page, redirecting based on role:', user.profile_type);
+          if (user.profile_type === 'admin') {
+            navigate('/dashboard');
+          } else if (user.profile_type === 'patient') {
+            navigate('/report-viewer');
           }
         }
       } catch (err) {
