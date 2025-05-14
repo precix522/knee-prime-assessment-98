@@ -1,5 +1,6 @@
+
 import React, { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useTwilioAuthStore } from "../utils/auth";
 import { AuthContainer } from "@/components/auth/AuthContainer";
@@ -12,6 +13,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { InfoIcon } from "lucide-react";
 
 export default function Login() {
+  const navigate = useNavigate();
   const {
     state,
     updateState,
