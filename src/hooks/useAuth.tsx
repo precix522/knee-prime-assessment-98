@@ -231,14 +231,16 @@ export const useAuth = () => {
       const phone = userData.phone_number;
       
       // Try to fetch the user profile from the database
+      let userProfile = null;
       let profileType = 'patient'; // Default to patient
       
       if (!state.devMode) {
         try {
-          const userProfile = await getUserProfileByPhone(phone);
+          userProfile = await getUserProfileByPhone(phone);
           console.log('User profile from database:', userProfile);
           
           if (userProfile && userProfile.profile_type) {
+            // Use the exact profile type from the database, with no transformation
             profileType = userProfile.profile_type;
             console.log('Found profile type in database:', profileType);
           }
@@ -262,31 +264,32 @@ export const useAuth = () => {
       };
 
       console.log('Setting auth user with data:', user);
-      authStore.setAuthUser(user);
+      
+      // Ensure we're properly setting the auth user
+      await authStore.setAuthUser(user);
       
       updateState({
         loading: false,
         error: null,
       });
 
-      toast.success('You have successfully logged in.', {
-        duration: 5000
-      });
-
-      // Redirect based on user profile type with a delay to ensure state is updated
+      toast.success('You have successfully logged in.');
+      
+      // Longer delay to ensure state is updated
       setTimeout(() => {
+        console.log('Current user after login:', authStore.user);
+        
         if (profileType === 'admin') {
           console.log('Redirecting admin to manage-patients');
-          navigate('/manage-patients');
+          navigate('/manage-patients', { replace: true });
         } else if (profileType === 'patient') {
           console.log('Redirecting patient to report-viewer');
-          navigate('/report-viewer');
+          navigate('/report-viewer', { replace: true });
         } else {
-          // Default fallback if profile type is not set
           console.log('Profile type not recognized, redirecting to dashboard');
-          navigate('/dashboard');
+          navigate('/dashboard', { replace: true });
         }
-      }, 500);
+      }, 800);
     } catch (error) {
       console.error('Error in handleOTPSuccess:', error);
       toast.error('Error setting up user session. Please try again.');

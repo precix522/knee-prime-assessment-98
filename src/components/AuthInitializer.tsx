@@ -14,6 +14,9 @@ export function AuthInitializer() {
     // Check for an existing session on component mount
     async function checkSession() {
       try {
+        // Add a small delay to prevent immediate checks that might cause loops
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
         const isValid = await validateSession();
         console.log('Session validation result:', isValid, 'User:', user);
         
@@ -36,19 +39,17 @@ export function AuthInitializer() {
         if (isValid && user && (currentPath === '/login' || currentPath === '/general-login')) {
           console.log('Already authenticated on login page, redirecting based on role:', user.profile_type);
           
-          // Add a small delay to ensure user profile is fully loaded
-          setTimeout(() => {
-            if (user.profile_type === 'admin') {
-              toast.success('Welcome back, admin!');
-              navigate('/manage-patients');
-            } else if (user.profile_type === 'patient') {
-              toast.success(`Welcome back, patient!`);
-              navigate('/report-viewer');
-            } else {
-              toast.success('Welcome back!');
-              navigate('/dashboard');
-            }
-          }, 100);
+          // Don't add a delay - it might be causing the issue
+          if (user.profile_type === 'admin') {
+            toast.success('Welcome back, admin!');
+            navigate('/manage-patients');
+          } else if (user.profile_type === 'patient') {
+            toast.success(`Welcome back, patient!`);
+            navigate('/report-viewer');
+          } else {
+            toast.success('Welcome back!');
+            navigate('/dashboard');
+          }
           return;
         }
         
@@ -63,8 +64,6 @@ export function AuthInitializer() {
         }
       } catch (err) {
         console.error("Session validation error:", err);
-        // Don't show toast errors for validation failures
-        // This prevents error messages during normal login flow
       }
     }
     

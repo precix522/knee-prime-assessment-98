@@ -10,10 +10,11 @@ import { Toaster } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { InfoIcon } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 export default function GeneralLogin() {
   const navigate = useNavigate();
+  const location = useLocation();
   const {
     state,
     updateState,
@@ -26,7 +27,15 @@ export default function GeneralLogin() {
   const { validateSession } = useTwilioAuthStore();
 
   useEffect(() => {
-    console.log('GeneralLogin component mounted');
+    console.log('GeneralLogin component mounted', location.pathname);
+    
+    // Check if we were redirected from a previous failed redirect attempt
+    const redirectAttempt = sessionStorage.getItem('redirectAttempt');
+    if (redirectAttempt) {
+      console.log('Detected previous redirect attempt, clearing to prevent loops');
+      sessionStorage.removeItem('redirectAttempt');
+      return;
+    }
     
     const checkSession = async () => {
       try {
@@ -37,20 +46,22 @@ export default function GeneralLogin() {
           console.log("Already authenticated in GeneralLogin:", user);
           console.log("User profile type in GeneralLogin:", user.profile_type);
           
-          // Add a small delay to ensure the session state is fully updated
-          setTimeout(() => {
-            // Redirect based on profile type
-            if (user.profile_type === 'admin') {
-              console.log('GeneralLogin: Redirecting admin to manage-patients');
-              navigate('/manage-patients');
-            } else if (user.profile_type === 'patient') {
-              console.log('GeneralLogin: Redirecting patient to report-viewer');
-              navigate('/report-viewer');
-            } else {
-              console.log('GeneralLogin: Profile type not recognized, redirecting to dashboard');
-              navigate('/dashboard');
-            }
-          }, 100);
+          // Store that we're attempting a redirect to detect loops
+          sessionStorage.setItem('redirectAttempt', 'true');
+          
+          // Use replace to prevent back button issues
+          if (user.profile_type === 'admin') {
+            console.log('GeneralLogin: Redirecting admin to manage-patients');
+            navigate('/manage-patients', { replace: true });
+          } else if (user.profile_type === 'patient') {
+            console.log('GeneralLogin: Redirecting patient to report-viewer');
+            navigate('/report-viewer', { replace: true });
+          } else {
+            console.log('GeneralLogin: Profile type not recognized, redirecting to dashboard');
+            navigate('/dashboard', { replace: true });
+          }
+        } else {
+          console.log('User not authenticated or session invalid');
         }
       } catch (error) {
         console.error("Session check error:", error);
@@ -58,7 +69,7 @@ export default function GeneralLogin() {
     };
     
     checkSession();
-  }, [validateSession, navigate]);
+  }, [validateSession, navigate, location.pathname]);
 
   return (
     <AuthContainer>

@@ -1,4 +1,3 @@
-
 import { User } from './types';
 
 export interface UserState {
@@ -27,7 +26,7 @@ export const createUserState = (set: Function): UserState => ({
       localStorage.setItem('authenticatedPhone', phone);
     }
     
-    // Ensure profile_type is set properly and preserved
+    // Keep original profile_type, don't transform it
     const profileType = user.profile_type || 'patient';
     console.log('Setting login user with profile type:', profileType);
     
@@ -54,9 +53,13 @@ export const createUserState = (set: Function): UserState => ({
     // Store the authenticated phone for dev mode
     if (phone) {
       localStorage.setItem('authenticatedPhone', phone);
+      // Also store profile type in localStorage for extra persistence
+      if (user.profile_type) {
+        localStorage.setItem('userProfileType', user.profile_type);
+      }
     }
     
-    // Ensure profile_type is set properly and preserved
+    // Keep original profile_type, don't transform it
     const profileType = user.profile_type || 'patient';
     console.log('Setting auth user with profile type:', profileType);
     
@@ -67,7 +70,8 @@ export const createUserState = (set: Function): UserState => ({
         profile_type: profileType,
         ...user // Preserve all other user properties
       },
-      isVerifying: false
+      isVerifying: false,
+      isLoading: false
     });
   }
 });

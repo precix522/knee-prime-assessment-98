@@ -1,4 +1,3 @@
-
 import { supabase } from './client';
 
 // Interface for user profile data from database
@@ -54,15 +53,11 @@ export const getUserProfileByPhone = async (phone: string): Promise<UserProfile 
     
     console.log('Found user profile data:', data[0]);
     
-    // Extract profile_type from the data, defaulting to 'patient' if not specified
-    // Make sure to preserve 'admin' if it's explicitly set
-    let profileType = 'patient'; // Default
+    // Ensure profile_type is preserved as is from the database
+    // Don't modify it to prevent unwanted transformations
+    const profileType = data[0].profile_type || 'patient';
     
-    if (data[0].profile_type) {
-      profileType = data[0].profile_type.toLowerCase() === 'admin' ? 'admin' : 'patient';
-    }
-    
-    console.log('Determined profile type:', profileType);
+    console.log('Using original profile type from DB:', profileType);
     
     // Map the patient record to UserProfile format
     return {
