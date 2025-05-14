@@ -17,7 +17,7 @@ import AllReports from "./pages/AllReports";
 import Logout from "./pages/Logout";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import GeneralLogin from "./pages/GeneralLogin";
-import { Toaster } from "@/components/ui/toaster";
+import { Toaster } from "sonner";
 import { ChatbotWidget } from "./components/ChatbotWidget";
 
 export default function App() {
@@ -42,7 +42,7 @@ export default function App() {
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>
-        <Toaster />
+        <Toaster position="bottom-left" />
         <ChatbotWidget />
       </div>
     </BrowserRouter>
