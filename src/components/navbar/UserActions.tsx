@@ -2,6 +2,7 @@
 import { FC } from "react";
 import { Button } from "../Button";
 import { LogOut, LogIn, User } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface UserActionsProps {
   user: any;
@@ -9,6 +10,24 @@ interface UserActionsProps {
 }
 
 export const UserActions: FC<UserActionsProps> = ({ user, isAdmin }) => {
+  const navigate = useNavigate();
+  
+  const handleSignOut = () => {
+    navigate('/logout');
+  };
+  
+  const handleAdminLogin = () => {
+    navigate('/login');
+  };
+  
+  const handleAccessReport = () => {
+    navigate('/login');
+  };
+  
+  const handleGeneralLogin = () => {
+    navigate('/general-login');
+  };
+
   return user ? (
     <div className="flex items-center gap-4">
       <div className="flex items-center gap-2">
@@ -19,7 +38,7 @@ export const UserActions: FC<UserActionsProps> = ({ user, isAdmin }) => {
         </span>
       </div>
       <Button 
-        onClick={() => window.location.href = '/logout'}
+        onClick={handleSignOut}
         variant="outline"
         size="sm"
         className="border-health-500 text-health-600 whitespace-nowrap"
@@ -31,7 +50,7 @@ export const UserActions: FC<UserActionsProps> = ({ user, isAdmin }) => {
   ) : (
     <div className="flex items-center gap-2">
       <Button
-        onClick={() => window.location.href = '/login'}
+        onClick={handleAdminLogin}
         variant="health"
         size="sm"
         className="whitespace-nowrap"
@@ -41,7 +60,7 @@ export const UserActions: FC<UserActionsProps> = ({ user, isAdmin }) => {
       </Button>
 
       <Button 
-        onClick={() => window.location.href = '/login'}
+        onClick={handleAccessReport}
         variant="health"
         size="sm"
         className="whitespace-nowrap"
@@ -49,7 +68,7 @@ export const UserActions: FC<UserActionsProps> = ({ user, isAdmin }) => {
         Access Report
       </Button>
       <Button 
-        onClick={() => window.location.href = '/general-login'}
+        onClick={handleGeneralLogin}
         variant="outline"
         size="sm"
         className="border-health-500 text-health-600 whitespace-nowrap"
