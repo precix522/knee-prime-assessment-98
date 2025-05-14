@@ -1,3 +1,4 @@
+
 import { useCallback } from 'react';
 import { toast } from 'sonner';
 import { AuthState } from './types';
@@ -98,9 +99,7 @@ export const useOtp = (
           loading: false,
           error: 'Verification code is required'
         });
-        toast.error("Error", {
-          description: 'Verification code is required'
-        });
+        toast.error("Verification code is required");
         return;
       }
 
@@ -127,9 +126,8 @@ export const useOtp = (
         return { isDevMode: true, userData };
       }
 
-      toast.info("Verifying Code", {
+      toast.info("Verifying your code...", {
         id: 'verifying-otp',
-        description: 'Verifying your code...'
       });
       
       // Clear any previous redirect loop detection
@@ -190,9 +188,7 @@ export const useOtp = (
       });
       
       toast.dismiss('verifying-otp');
-      toast.error("Verification Failed", {
-        description: error.message || 'Failed to verify OTP. Please try again.'
-      });
+      toast.error(error.message || 'Failed to verify OTP. Please try again.');
       
       return null;
     }
