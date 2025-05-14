@@ -77,8 +77,8 @@ export const UserActions: FC<UserActionsProps> = ({ user, isAdmin }) => {
     sessionStorage.removeItem('loginRedirectCount');
     sessionStorage.removeItem('lastRedirect');
     
-    // Navigate to the patient dashboard for patient users
-    navigate('/patient-dashboard', { replace: true });
+    // Navigate to the report viewer for patient users (changed from patient-dashboard)
+    navigate('/report-viewer', { replace: true });
   };
 
   return user ? (
@@ -106,7 +106,7 @@ export const UserActions: FC<UserActionsProps> = ({ user, isAdmin }) => {
           size="sm"
           className="whitespace-nowrap"
         >
-          My Dashboard
+          My Reports
         </Button>
       )}
       <Button 

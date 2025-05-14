@@ -35,6 +35,12 @@ export default function PatientDashboard() {
           return;
         }
         
+        // Since we want patients to use report-viewer now, redirect there
+        toast.info("Redirecting to reports viewer...");
+        navigate("/report-viewer", { replace: true });
+        return;
+        
+        // Note: The code below won't execute due to the redirect above
         setIsLoading(false);
       } catch (err) {
         console.error("Session validation error:", err);

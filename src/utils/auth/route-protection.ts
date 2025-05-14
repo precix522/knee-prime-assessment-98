@@ -81,7 +81,7 @@ export const handleAuthenticatedRedirection = (
     navigate(adminDestination, { replace: true });
   } else if (profileType === 'patient') {
     if (isAuthRoute) toast.success(`Welcome back, patient!`);
-    const patientDestination = redirectTo || '/patient-dashboard';
+    const patientDestination = redirectTo || '/report-viewer';  // Changed from '/patient-dashboard' back to '/report-viewer'
     console.log('Patient redirecting to:', patientDestination);
     navigate(patientDestination, { replace: true });
   } else {
@@ -96,4 +96,5 @@ export const handleAuthenticatedRedirection = (
 export const clearRedirectLoopDetection = (): void => {
   sessionStorage.removeItem('loginRedirectCount');
   sessionStorage.removeItem('lastRedirect');
+  sessionStorage.removeItem('redirectAfterLogin');
 };

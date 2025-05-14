@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTwilioAuthStore } from "@/utils/auth";
@@ -44,7 +45,7 @@ export default function GeneralLogin() {
       if (profileType === 'admin') {
         navigate("/admin-dashboard", { replace: true });
       } else if (profileType === 'patient') {
-        navigate("/patient-dashboard", { replace: true });
+        navigate("/report-viewer", { replace: true }); // Changed from "/patient-dashboard" back to "/report-viewer"
       } else {
         navigate("/dashboard", { replace: true });
       }
@@ -93,7 +94,7 @@ export default function GeneralLogin() {
         if (profileType === 'admin') {
           navigate("/admin-dashboard", { replace: true });
         } else if (profileType === 'patient') {
-          navigate("/patient-dashboard", { replace: true });
+          navigate("/report-viewer", { replace: true }); // Changed from "/patient-dashboard" back to "/report-viewer"
         } else {
           navigate("/dashboard", { replace: true });
         }
