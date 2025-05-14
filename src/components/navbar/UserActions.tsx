@@ -1,3 +1,4 @@
+
 import { FC } from "react";
 import { Button } from "../Button";
 import { LogOut, LogIn, User } from "lucide-react";
@@ -67,8 +68,17 @@ export const UserActions: FC<UserActionsProps> = ({ user, isAdmin }) => {
     sessionStorage.removeItem('loginRedirectCount');
     sessionStorage.removeItem('lastRedirect');
     
-    // Navigate to the manage-patients page for admin users
-    navigate('/manage-patients', { replace: true });
+    // Navigate to the admin dashboard for admin users
+    navigate('/admin-dashboard', { replace: true });
+  };
+
+  const handlePatientDashboard = () => {
+    // Clean up any potential redirect indicators
+    sessionStorage.removeItem('loginRedirectCount');
+    sessionStorage.removeItem('lastRedirect');
+    
+    // Navigate to the patient dashboard for patient users
+    navigate('/patient-dashboard', { replace: true });
   };
 
   return user ? (
@@ -80,7 +90,7 @@ export const UserActions: FC<UserActionsProps> = ({ user, isAdmin }) => {
           {isAdmin && <span className="ml-1 text-health-600">(Admin)</span>}
         </span>
       </div>
-      {isAdmin && (
+      {isAdmin ? (
         <Button 
           onClick={handleAdminDashboard}
           variant="health"
@@ -88,6 +98,15 @@ export const UserActions: FC<UserActionsProps> = ({ user, isAdmin }) => {
           className="whitespace-nowrap"
         >
           Admin Dashboard
+        </Button>
+      ) : (
+        <Button 
+          onClick={handlePatientDashboard}
+          variant="health"
+          size="sm"
+          className="whitespace-nowrap"
+        >
+          My Dashboard
         </Button>
       )}
       <Button 

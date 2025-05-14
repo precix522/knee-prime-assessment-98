@@ -10,7 +10,9 @@ export const protectedRoutes = [
   '/report/', 
   '/report-viewer', 
   '/reports', 
-  '/all-reports'
+  '/all-reports',
+  '/patient-dashboard',
+  '/admin-dashboard'
 ];
 
 export const authRoutes = ['/login', '/general-login'];
@@ -74,12 +76,12 @@ export const handleAuthenticatedRedirection = (
   
   if (profileType === 'admin') {
     if (isAuthRoute) toast.success('Welcome back, admin!');
-    const adminDestination = redirectTo || '/manage-patients';
+    const adminDestination = redirectTo || '/admin-dashboard';
     console.log('Admin redirecting to:', adminDestination);
     navigate(adminDestination, { replace: true });
   } else if (profileType === 'patient') {
     if (isAuthRoute) toast.success(`Welcome back, patient!`);
-    const patientDestination = redirectTo || '/report-viewer';
+    const patientDestination = redirectTo || '/patient-dashboard';
     console.log('Patient redirecting to:', patientDestination);
     navigate(patientDestination, { replace: true });
   } else {

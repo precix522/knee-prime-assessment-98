@@ -19,6 +19,8 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 import GeneralLogin from "./pages/GeneralLogin";
 import { Toaster } from "sonner";
 import { ChatbotWidget } from "./components/ChatbotWidget";
+import PatientDashboard from "./pages/PatientDashboard";
+import AdminDashboard from "./pages/AdminDashboard";
 
 export default function App() {
   return (
@@ -29,6 +31,8 @@ export default function App() {
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/patient-dashboard" element={<PatientDashboard />} />
+            <Route path="/admin-dashboard" element={<AdminDashboard />} />
             <Route path="/manage-users" element={<ManageUsers />} />
             <Route path="/login" element={<Login />} />
             <Route path="/general-login" element={<GeneralLogin />} />

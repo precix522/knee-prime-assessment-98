@@ -42,9 +42,9 @@ export default function GeneralLogin() {
       console.log("Already logged in, redirecting user with profile type:", profileType);
       
       if (profileType === 'admin') {
-        navigate("/manage-patients", { replace: true });
+        navigate("/admin-dashboard", { replace: true });
       } else if (profileType === 'patient') {
-        navigate("/report-viewer", { replace: true });
+        navigate("/patient-dashboard", { replace: true });
       } else {
         navigate("/dashboard", { replace: true });
       }
@@ -91,9 +91,9 @@ export default function GeneralLogin() {
         
         // Redirect based on profile type
         if (profileType === 'admin') {
-          navigate("/manage-patients", { replace: true });
+          navigate("/admin-dashboard", { replace: true });
         } else if (profileType === 'patient') {
-          navigate("/report-viewer", { replace: true });
+          navigate("/patient-dashboard", { replace: true });
         } else {
           navigate("/dashboard", { replace: true });
         }
