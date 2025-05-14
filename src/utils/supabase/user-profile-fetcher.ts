@@ -49,9 +49,9 @@ export const getUserProfileByPhone = async (phone: string): Promise<UserProfile 
     
     console.log('Found user profile data:', data[0]);
     
-    // Ensure profile_type exists on the record
+    // Ensure profile_type exists on the record and is not modified
     const profileType = data[0].profile_type || 'patient';
-    console.log('Extracted profile type from DB:', profileType);
+    console.log('Retrieved profile type from DB:', profileType);
     
     // Store in localStorage for persistence
     localStorage.setItem('userProfileType', profileType);

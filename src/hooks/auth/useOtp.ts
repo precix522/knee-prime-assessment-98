@@ -15,13 +15,15 @@ export const useOtp = (
       // Clear previous errors
       updateState({ loading: true, error: null });
 
-      if (!state.phone.trim()) {
+      if (!phone || phone.trim() === '') {
         updateState({
           loading: false,
           error: 'Phone number is required'
         });
         
-        toast.error('Phone number is required');
+        toast.error("Error", {
+          description: 'Phone number is required'
+        });
         return;
       }
 
@@ -34,15 +36,18 @@ export const useOtp = (
           error: null
         });
         
-        toast.success('Dev Mode: OTP sending bypassed. Enter any code to verify.', {
-          duration: 5000
+        toast.success("Dev Mode", { 
+          description: 'OTP sending bypassed. Enter any code to verify.'
         });
         
         return;
       }
 
       console.log('Sending OTP to:', state.phone);
-      toast.info('Sending verification code...', { id: 'sending-otp' });
+      toast.info("Sending Code", {
+        id: 'sending-otp',
+        description: 'Sending verification code...'
+      });
       
       // Reset any redirect loop detection
       sessionStorage.removeItem('loginRedirectCount');
@@ -57,8 +62,8 @@ export const useOtp = (
             error: null
           });
 
-          toast.success('Verification code has been sent to your phone.', {
-            duration: 5000
+          toast.success("Code Sent", {
+            description: 'Verification code has been sent to your phone.'
           });
           
           // Dismiss the sending toast
@@ -74,8 +79,8 @@ export const useOtp = (
           // Dismiss the sending toast
           toast.dismiss('sending-otp');
           
-          toast.error(error.message || 'Failed to send OTP. Please try again.', {
-            duration: 5000
+          toast.error("Error", {
+            description: error.message || 'Failed to send OTP. Please try again.'
           });
         });
     } catch (error: any) {
@@ -88,8 +93,8 @@ export const useOtp = (
       // Dismiss the sending toast
       toast.dismiss('sending-otp');
       
-      toast.error(error.message || 'Failed to send OTP. Please try again.', {
-        duration: 5000
+      toast.error("Error", {
+        description: error.message || 'Failed to send OTP. Please try again.'
       });
     }
   }, [state.loading, state.phone, state.devMode, updateState, authStore]);
@@ -105,16 +110,26 @@ export const useOtp = (
           loading: false,
           error: 'Verification code is required'
         });
-        toast.error('Verification code is required');
+        toast.error("Error", {
+          description: 'Verification code is required'
+        });
         return;
       }
 
       if (state.devMode) {
         // In dev mode, bypass actual verification
+        // Check if the phone number appears to be an admin number
+        // Phones containing "admin" or starting with "999" are considered admin in dev mode
+        const isAdminPhone = state.phone.toLowerCase().includes('admin') || 
+                            state.phone.startsWith('999');
+        
+        const profileType = isAdminPhone ? 'admin' : 'patient';
+        console.log(`Dev mode: Detected profile type as '${profileType}' based on phone number`);
+        
         const userData = {
           phone_number: state.phone,
-          name: 'Developer User',
-          profile_type: 'admin' // Default to admin in dev mode for testing
+          name: isAdminPhone ? 'Admin User' : 'Patient User',
+          profile_type: profileType
         };
         
         // Reset any redirect loop detection
@@ -124,7 +139,10 @@ export const useOtp = (
         return { isDevMode: true, userData };
       }
 
-      toast.info('Verifying code...', { id: 'verifying-otp' });
+      toast.info("Verifying Code", {
+        id: 'verifying-otp',
+        description: 'Verifying your code...'
+      });
       
       // Clear any previous redirect loop detection
       sessionStorage.removeItem('loginRedirectCount');
@@ -184,8 +202,8 @@ export const useOtp = (
       });
       
       toast.dismiss('verifying-otp');
-      toast.error(error.message || 'Failed to verify OTP. Please try again.', {
-        duration: 5000
+      toast.error("Verification Failed", {
+        description: error.message || 'Failed to verify OTP. Please try again.'
       });
       
       return null;

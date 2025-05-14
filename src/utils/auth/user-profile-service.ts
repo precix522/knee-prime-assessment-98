@@ -30,8 +30,12 @@ export const getOrCreateUserProfile = async (phone: string, sessionId: string): 
   
   console.log('User profile from database:', userProfile);
   
+  // Only create a new profile if none exists
   if (!userProfile) {
     console.log('No existing user profile found, creating new one');
+    
+    // Default to 'patient' profile type for regular users
+    // This will only happen for truly new users
     userProfile = await createUserProfile(phone, 'patient');
     console.log('Created new user profile:', userProfile);
   } else {

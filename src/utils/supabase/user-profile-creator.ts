@@ -6,7 +6,7 @@ import { getUserProfileByPhone } from './user-profile-fetcher';
 /**
  * Create user profile if it doesn't exist
  */
-export const createUserProfile = async (phone: string, profile_type: string = 'user', additionalData: any = {}): Promise<UserProfile | null> => {
+export const createUserProfile = async (phone: string, profile_type: string = 'patient', additionalData: any = {}): Promise<UserProfile | null> => {
   try {
     console.log('Checking if user exists before creating:', phone);
     
@@ -94,7 +94,7 @@ export const createUserProfile = async (phone: string, profile_type: string = 'u
     return {
       id: data.Patient_ID,
       phone: data.phone,
-      profile_type: data.profile_type || 'user',
+      profile_type: data.profile_type || profile_type,
       created_at: data.last_modified_tm,
       created_date: data.created_date,
       name: data.patient_name,

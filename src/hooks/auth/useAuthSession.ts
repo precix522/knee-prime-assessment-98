@@ -20,14 +20,19 @@ export const useAuthSession = (
       // Get the phone number from userData
       const phone = userData.phone_number;
       
-      // Try to fetch the user profile from the database
+      if (!phone || phone.trim() === '') {
+        throw new Error('Invalid phone number in OTP verification response');
+      }
+      
+      // Try to fetch the existing user profile from the database first
       let userProfile = null;
       let profileType = 'patient'; // Default to patient
       
       if (!state.devMode) {
         try {
+          // First check if user already exists in database
           userProfile = await getUserProfileByPhone(phone);
-          console.log('User profile from database:', userProfile);
+          console.log('Existing user profile from database:', userProfile);
           
           if (userProfile && userProfile.profile_type) {
             profileType = userProfile.profile_type;
@@ -69,7 +74,9 @@ export const useAuthSession = (
         error: null,
       });
 
-      toast.success('You have successfully logged in.');
+      toast.success("Login Successful", {
+        description: 'You have successfully logged in.'
+      });
       
       // Redirect based on profile type
       setTimeout(() => {
@@ -89,7 +96,9 @@ export const useAuthSession = (
       }, 800);
     } catch (error) {
       console.error('Error in handleOTPSuccess:', error);
-      toast.error('Error setting up user session. Please try again.');
+      toast.error("Session Error", {
+        description: 'Error setting up user session. Please try again.'
+      });
       updateState({ loading: false });
     }
   }, [authStore, navigate, updateState, state.devMode]);
