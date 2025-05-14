@@ -27,9 +27,19 @@ export const createUserProfile = async (phone: string, profile_type: string = 'u
       hour12: true
     });
     
+    // Create a unique ID based on profile type
+    let uniqueId;
+    if (profile_type === 'admin') {
+      // For admin users, use "A" prefix
+      uniqueId = `A_${Date.now()}`;
+    } else {
+      // For regular users and patients, use "user" prefix
+      uniqueId = `user_${Date.now()}`;
+    }
+    
     // Create new user profile with any additional data provided
     const userData = {
-      Patient_ID: `user_${Date.now()}`, // Generate a unique Patient_ID
+      Patient_ID: uniqueId, // Use the generated unique ID
       phone,
       profile_type,
       patient_name: additionalData.name || 'User',

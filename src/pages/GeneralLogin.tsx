@@ -1,7 +1,6 @@
-
-import React, { useEffect } from "react";
-import { useAuth } from "@/hooks/useAuth";
-import { useTwilioAuthStore } from "../utils/auth";
+import React, { useState, useEffect } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { useTwilioAuthStore } from "@/utils/auth";
 import { AuthContainer } from "@/components/auth/AuthContainer";
 import { AuthPhoneForm } from "@/components/auth/AuthPhoneForm";
 import { AuthOTPForm } from "@/components/auth/AuthOTPForm";
@@ -10,122 +9,96 @@ import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { InfoIcon } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { useNavigate, useLocation } from "react-router-dom";
 
 export default function GeneralLogin() {
-  const navigate = useNavigate();
-  const location = useLocation();
   const {
-    state,
-    updateState,
-    handleSendOTP,
-    handleVerifyOTP,
-    handleToggleDevMode,
-    resetToPhoneInput
-  } = useAuth();
-  
-  const { validateSession } = useTwilioAuthStore();
+    phoneNumber,
+    setPhoneNumber,
+    sendOTP,
+    verifyOTP,
+    isLoading,
+    isVerifying,
+    error,
+    clearError,
+    setLoginUser,
+  } = useTwilioAuthStore();
+  const [otp, setOtp] = useState("");
+  const navigate = useNavigate();
 
   useEffect(() => {
-    console.log('GeneralLogin component mounted', location.pathname);
-    
-    // Clear any potential redirect loop detectors on mount
-    sessionStorage.removeItem('loginRedirectCount');
-    sessionStorage.removeItem('lastRedirect');
-    
-    const checkSession = async () => {
-      try {
-        // Add a small delay before validating session to avoid race conditions
-        await new Promise(resolve => setTimeout(resolve, 300));
-        
-        const isValid = await validateSession();
-        const { user } = useTwilioAuthStore.getState();
-        
-        if (isValid && user) {
-          console.log("Already authenticated in GeneralLogin:", user);
-          console.log("User profile type in GeneralLogin:", user.profile_type);
-          
-          // Force clear any redirect loop counters
-          sessionStorage.removeItem('loginRedirectCount');
-          sessionStorage.removeItem('lastRedirect');
-          sessionStorage.removeItem('redirectAfterLogin');
-          
-          // Get profile type from the user object or localStorage
-          const profileType = user.profile_type || localStorage.getItem('userProfileType') || 'patient';
-          console.log('Using profile type for redirection:', profileType);
-          
-          // Use setTimeout to ensure this runs after other effects
-          setTimeout(() => {
-            // Use replace to prevent back button from returning to login
-            if (profileType === 'admin') {
-              console.log('GeneralLogin: Redirecting admin to manage-patients');
-              navigate('/manage-patients', { replace: true });
-            } else if (profileType === 'patient') {
-              console.log('GeneralLogin: Redirecting patient to report-viewer');
-              navigate('/report-viewer', { replace: true });
-            } else {
-              console.log('GeneralLogin: Profile type not recognized, redirecting to dashboard');
-              navigate('/dashboard', { replace: true });
-            }
-          }, 500);
-        } else {
-          console.log('User not authenticated or session invalid');
-        }
-      } catch (error) {
-        console.error("Session check error:", error);
+    if (error) {
+      toast.error(error);
+      clearError();
+    }
+  }, [error, clearError]);
+
+  const handleSendOTP = async (phone: string) => {
+    try {
+      await sendOTP(phone);
+    } catch (err) {
+      console.error("Failed to send OTP:", err);
+      toast.error("Failed to send OTP. Please try again.");
+    }
+  };
+
+  const handleVerifyOTP = async (phone: string, code: string) => {
+    try {
+      const user = await verifyOTP(phone, code);
+      if (user) {
+        setLoginUser(user);
+        navigate("/dashboard");
+      } else {
+        toast.error("Invalid OTP. Please try again.");
       }
-    };
-    
-    checkSession();
-  }, [validateSession, navigate, location.pathname]);
+    } catch (err) {
+      console.error("OTP verification failed:", err);
+      toast.error("OTP verification failed. Please try again.");
+    }
+  };
 
   return (
     <AuthContainer>
       <Card className="w-full max-w-md space-y-4 p-4">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl text-center">
-            {state.otpSent ? "Verify OTP" : "Login"}
+            {isVerifying ? "Enter verification code" : "Login or Register"}
           </CardTitle>
           <CardDescription className="text-center">
-            {state.otpSent
-              ? "Enter the verification code we sent to your phone."
-              : "Enter your phone number to receive a verification code."}
+            {isVerifying
+              ? "We've sent a code to your phone"
+              : "Enter your phone number to login or register"}
           </CardDescription>
         </CardHeader>
-        
-        <CardContent className="grid gap-4">
-          {state.devMode && (
-            <Alert className="bg-amber-50 border-amber-200 text-amber-800">
-              <InfoIcon className="h-4 w-4 text-amber-800" />
-              <AlertDescription>
-                <strong>Developer Mode Active:</strong> OTP verification is bypassed.
-              </AlertDescription>
+
+        <CardContent>
+          {error && (
+            <Alert variant="destructive">
+              <InfoIcon className="h-4 w-4" />
+              <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
-          
-          {!state.otpSent ? (
-            <AuthPhoneForm
-              state={state}
-              updateState={updateState}
-              onSubmit={handleSendOTP}
+
+          {isVerifying ? (
+            <AuthOTPForm
+              otp={otp}
+              setOtp={setOtp}
+              isLoading={isLoading}
+              onSubmit={() => handleVerifyOTP(phoneNumber, otp)}
             />
           ) : (
-            <AuthOTPForm
-              state={state}
-              updateState={updateState}
-              onSubmit={handleVerifyOTP}
-              onBack={resetToPhoneInput}
-            />
-          )}
-          
-          {!state.otpSent && (
-            <DevModeToggle
-              devMode={state.devMode}
-              onToggle={handleToggleDevMode}
+            <AuthPhoneForm
+              phoneNumber={phoneNumber}
+              setPhoneNumber={setPhoneNumber}
+              isLoading={isLoading}
+              onSubmit={handleSendOTP}
             />
           )}
         </CardContent>
       </Card>
+
+      <div className="mt-6">
+        <DevModeToggle />
+      </div>
     </AuthContainer>
   );
 }
