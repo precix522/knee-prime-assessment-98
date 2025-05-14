@@ -60,9 +60,12 @@ export const createUserProfile = async (phone: string, profile_type: string = 'p
     if (profile_type === 'admin') {
       // For admin users, use "A" prefix
       uniqueId = `A_${Date.now()}`;
+    } else if (profile_type === 'user') {
+      // For regular users, use "U" prefix
+      uniqueId = `U_${Date.now()}`;
     } else {
-      // For regular users and patients, use "user" prefix
-      uniqueId = `user_${Date.now()}`;
+      // For patients, use "P" prefix
+      uniqueId = `P_${Date.now()}`;
     }
     
     // Create new user profile with any additional data provided

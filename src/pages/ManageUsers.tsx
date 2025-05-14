@@ -26,7 +26,7 @@ import {
   TableHeader, 
   TableRow 
 } from "../components/ui/table";
-import { syncNow, getFetchStatus, getAllUserProfiles, updateUserProfile, UserProfile } from "../utils/supabase";
+import { syncNow, getFetchStatus, getAllUserProfiles, updateUserProfile, UserProfile, createUserProfile } from "../utils/supabase";
 import { format, parseISO, isValid } from "date-fns";
 
 type User = {
@@ -137,29 +137,44 @@ export default function ManageUsers() {
       return;
     }
     
-    // In a real implementation, this would create a new user in Supabase
-    // For now, we'll just add it to the local state
-    // In a future implementation, you should add an API call to create the user in Supabase
-    const newUser: UserProfile = {
-      id: `usr${Date.now()}`,
-      phone: newUserData.phone,
-      profile_type: newUserData.profile_type,
-      name: newUserData.name || "",
-      Patient_ID: `usr${Date.now()}`,
-      created_date: new Date().toISOString(),
-      // Other fields would be null or have default values
-    };
-    
-    setUsers([...users, newUser]);
-    setIsAddUserOpen(false);
-    setNewUserData({
-      phone: "",
-      profile_type: "user",
-      name: "",
-      email: ""
-    });
-    
-    toast.success(`User added successfully: ${newUserData.phone}`);
+    try {
+      toast.loading("Creating new user...", { id: "create-user" });
+      
+      // Use the createUserProfile function to create a new user in the database
+      const additionalData = {
+        name: newUserData.name || "User"
+      };
+      
+      const createdUser = await createUserProfile(
+        newUserData.phone, 
+        newUserData.profile_type,
+        additionalData
+      );
+      
+      if (createdUser) {
+        toast.dismiss("create-user");
+        toast.success(`User added successfully: ${newUserData.phone}`);
+        
+        // Refresh the user list to include the new user
+        fetchUsers();
+        
+        // Close the dialog and reset form
+        setIsAddUserOpen(false);
+        setNewUserData({
+          phone: "",
+          profile_type: "user",
+          name: "",
+          email: ""
+        });
+      } else {
+        toast.dismiss("create-user");
+        toast.error("Failed to create user. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error creating user:", error);
+      toast.dismiss("create-user");
+      toast.error("An error occurred while creating the user");
+    }
   };
 
   const handleOpenEditUser = (user: UserProfile) => {
