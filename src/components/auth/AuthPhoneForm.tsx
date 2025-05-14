@@ -7,6 +7,7 @@ import { Button } from "../Button";
 import { RememberMeCheckbox } from "./RememberMeCheckbox";
 import { CaptchaVerification } from "./CaptchaVerification";
 import { AuthState } from "@/hooks/auth/types";
+import { formatPhoneNumber, validatePhoneNumber } from "./AuthUtils";
 
 interface AuthPhoneFormProps {
   state: AuthState;
@@ -33,6 +34,12 @@ export function AuthPhoneForm({ state, updateState, onSubmit }: AuthPhoneFormPro
     });
   };
 
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const rawInput = e.target.value;
+    const formattedPhone = formatPhoneNumber(rawInput);
+    updateState({ phone: formattedPhone });
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSubmit();
@@ -46,6 +53,18 @@ export function AuthPhoneForm({ state, updateState, onSubmit }: AuthPhoneFormPro
   const rememberMe = state?.rememberMe || false;
   const loading = state?.loading || false;
 
+  // Add phone validation
+  const isPhoneValid = phone ? validatePhoneNumber(phone) : false;
+
+  // Debug information
+  console.log("AuthPhoneForm state:", {
+    phone,
+    devMode,
+    captchaVerified,
+    loading,
+    buttonDisabled: loading || (!captchaVerified && !devMode) || !isPhoneValid
+  });
+
   return (
     <form onSubmit={handleSubmit}>
       <div className="space-y-5">
@@ -58,12 +77,17 @@ export function AuthPhoneForm({ state, updateState, onSubmit }: AuthPhoneFormPro
             <Input
               type="tel"
               id="phone"
-              placeholder="Enter your phone number"
+              placeholder="Enter your phone number (e.g., +6512345678)"
               className="pl-10 py-6 text-base"
               value={phone}
-              onChange={(e) => updateState({ phone: e.target.value })}
+              onChange={handlePhoneChange}
             />
           </div>
+          {phone && !isPhoneValid && (
+            <p className="text-xs text-red-500 mt-1">
+              Please enter a valid phone number in international format (e.g., +6512345678)
+            </p>
+          )}
         </div>
         
         {!devMode && (
@@ -86,7 +110,7 @@ export function AuthPhoneForm({ state, updateState, onSubmit }: AuthPhoneFormPro
       <Button
         className="w-full mt-6 py-6 bg-orange-300 hover:bg-orange-400 text-white font-medium text-lg"
         type="submit"
-        disabled={loading || (!captchaVerified && !devMode)}
+        disabled={loading || (!captchaVerified && !devMode) || !isPhoneValid || !phone}
       >
         {loading ? "Sending OTP..." : "Send OTP"}
       </Button>

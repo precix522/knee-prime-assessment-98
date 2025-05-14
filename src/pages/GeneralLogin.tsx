@@ -22,11 +22,12 @@ export default function GeneralLogin() {
     error,
     clearError,
     setLoginUser,
+    devMode,
+    toggleDevMode
   } = useTwilioAuthStore();
   
   const [otp, setOtp] = useState("");
   const [isVerifying, setIsVerifying] = useState(false);
-  const [devMode, setDevMode] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -45,7 +46,7 @@ export default function GeneralLogin() {
       if (profileType === 'admin') {
         navigate("/admin-dashboard", { replace: true });
       } else if (profileType === 'patient') {
-        navigate("/report-viewer", { replace: true }); // Changed from "/patient-dashboard" back to "/report-viewer"
+        navigate("/report-viewer", { replace: true });
       } else {
         navigate("/dashboard", { replace: true });
       }
@@ -94,7 +95,7 @@ export default function GeneralLogin() {
         if (profileType === 'admin') {
           navigate("/admin-dashboard", { replace: true });
         } else if (profileType === 'patient') {
-          navigate("/report-viewer", { replace: true }); // Changed from "/patient-dashboard" back to "/report-viewer"
+          navigate("/report-viewer", { replace: true });
         } else {
           navigate("/dashboard", { replace: true });
         }
@@ -109,10 +110,15 @@ export default function GeneralLogin() {
   };
 
   const handleToggleDevMode = () => {
-    setDevMode(!devMode);
-    // Also update the global state
-    useTwilioAuthStore.setState({ devMode: !devMode });
+    toggleDevMode();
+    
+    // Ensure captchaVerified is set to true when in dev mode for authState
+    const newDevModeState = !devMode;
+    setLocalDevMode(newDevModeState);
   };
+  
+  // Local state for managing dev mode
+  const [localDevMode, setLocalDevMode] = useState(devMode);
 
   // Create state object for AuthPhoneForm and AuthOTPForm with proper defaults
   const authState = {
