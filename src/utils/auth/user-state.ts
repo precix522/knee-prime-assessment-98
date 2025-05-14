@@ -27,8 +27,13 @@ export const createUserState = (set: Function): UserState => ({
     }
     
     // Keep original profile_type, don't transform it
-    const profileType = user.profile_type || 'patient';
+    const profileType = user.profile_type || 
+                        localStorage.getItem('userProfileType') || 
+                        'patient';
     console.log('Setting login user with profile type:', profileType);
+    
+    // Store profile type in localStorage for extra persistence
+    localStorage.setItem('userProfileType', profileType);
     
     set({
       user: {
@@ -53,15 +58,20 @@ export const createUserState = (set: Function): UserState => ({
     // Store the authenticated phone for dev mode
     if (phone) {
       localStorage.setItem('authenticatedPhone', phone);
-      // Also store profile type in localStorage for extra persistence
-      if (user.profile_type) {
-        localStorage.setItem('userProfileType', user.profile_type);
-      }
     }
     
     // Keep original profile_type, don't transform it
-    const profileType = user.profile_type || 'patient';
+    // Check local storage as a backup source if not provided in the user object
+    const profileType = user.profile_type || 
+                        localStorage.getItem('userProfileType') || 
+                        'patient';
     console.log('Setting auth user with profile type:', profileType);
+    
+    // Also store profile type in localStorage for extra persistence
+    localStorage.setItem('userProfileType', profileType);
+    
+    // Clear any redirect loop detection counters
+    sessionStorage.removeItem('loginRedirectCount');
     
     set({
       user: {

@@ -1,3 +1,4 @@
+
 import { useState, useCallback } from 'react';
 import { toast } from "sonner";
 import { useTwilioAuthStore } from '@/utils/auth';
@@ -82,6 +83,9 @@ export const useAuth = () => {
       console.log('Sending OTP to:', state.phone);
       toast.info('Sending verification code...', { id: 'sending-otp' });
       
+      // Reset any redirect loop detection
+      sessionStorage.removeItem('loginRedirectCount');
+      
       // Use direct function call to service for better debugging
       authStore.sendOTP(state.phone)
         .then(() => {
@@ -152,6 +156,9 @@ export const useAuth = () => {
           profile_type: 'admin' // Default to admin in dev mode for testing
         };
         
+        // Reset any redirect loop detection
+        sessionStorage.removeItem('loginRedirectCount');
+        
         // Use setTimeout to give the UI time to update before proceeding
         setTimeout(() => {
           handleOTPSuccess('dev-mode-session-id', userData);
@@ -160,6 +167,9 @@ export const useAuth = () => {
       }
 
       toast.info('Verifying code...', { id: 'verifying-otp' });
+      
+      // Clear any previous redirect loop detection
+      sessionStorage.removeItem('loginRedirectCount');
       
       const response = await fetch('/api/verify-otp', {
         method: 'POST',
@@ -254,16 +264,23 @@ export const useAuth = () => {
         console.log('Using dev mode profile type:', profileType);
       }
       
-      // Create the user object with profile type
+      // Create the user object with profile type and ensure it's properly formatted
       const user = {
         id: sessionId,
         phone: phone,
         name: userData.name || 'User',
-        profile_type: profileType,
+        profile_type: profileType, // Make sure this is preserved exactly
         ...userData
       };
 
       console.log('Setting auth user with data:', user);
+      
+      // Clear any potential loop detection counters
+      sessionStorage.removeItem('loginRedirectCount');
+      sessionStorage.removeItem('lastRedirect');
+      
+      // Store the profile type specifically to enhance persistence
+      localStorage.setItem('userProfileType', profileType);
       
       // Ensure we're properly setting the auth user
       await authStore.setAuthUser(user);
@@ -280,13 +297,13 @@ export const useAuth = () => {
         console.log('Current user after login:', authStore.user);
         
         if (profileType === 'admin') {
-          console.log('Redirecting admin to manage-patients');
+          console.log('Redirecting admin to manage-patients with replace:true');
           navigate('/manage-patients', { replace: true });
         } else if (profileType === 'patient') {
-          console.log('Redirecting patient to report-viewer');
+          console.log('Redirecting patient to report-viewer with replace:true');
           navigate('/report-viewer', { replace: true });
         } else {
-          console.log('Profile type not recognized, redirecting to dashboard');
+          console.log('Profile type not recognized, redirecting to dashboard with replace:true');
           navigate('/dashboard', { replace: true });
         }
       }, 800);

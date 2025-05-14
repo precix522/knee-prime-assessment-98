@@ -24,18 +24,10 @@ export default function GeneralLogin() {
     resetToPhoneInput
   } = useAuth();
   
-  const { validateSession } = useTwilioAuthStore();
+  const { validateSession, user } = useTwilioAuthStore();
 
   useEffect(() => {
     console.log('GeneralLogin component mounted', location.pathname);
-    
-    // Check if we were redirected from a previous failed redirect attempt
-    const redirectAttempt = sessionStorage.getItem('redirectAttempt');
-    if (redirectAttempt) {
-      console.log('Detected previous redirect attempt, clearing to prevent loops');
-      sessionStorage.removeItem('redirectAttempt');
-      return;
-    }
     
     const checkSession = async () => {
       try {
@@ -46,8 +38,21 @@ export default function GeneralLogin() {
           console.log("Already authenticated in GeneralLogin:", user);
           console.log("User profile type in GeneralLogin:", user.profile_type);
           
-          // Store that we're attempting a redirect to detect loops
-          sessionStorage.setItem('redirectAttempt', 'true');
+          // Check for redirect loop detection flag
+          const redirectLoopDetection = sessionStorage.getItem('loginRedirectCount');
+          let redirectCount = redirectLoopDetection ? parseInt(redirectLoopDetection) : 0;
+          
+          // If we've redirected too many times, break the loop
+          if (redirectCount > 2) {
+            console.log('Too many redirects detected, breaking loop');
+            sessionStorage.removeItem('loginRedirectCount');
+            sessionStorage.removeItem('redirectAfterLogin');
+            sessionStorage.removeItem('lastRedirect');
+            return;
+          }
+          
+          // Increment redirect counter
+          sessionStorage.setItem('loginRedirectCount', (redirectCount + 1).toString());
           
           // Use replace to prevent back button issues
           if (user.profile_type === 'admin') {
@@ -60,6 +65,11 @@ export default function GeneralLogin() {
             console.log('GeneralLogin: Profile type not recognized, redirecting to dashboard');
             navigate('/dashboard', { replace: true });
           }
+          
+          // Clear redirection count after successful navigation
+          setTimeout(() => {
+            sessionStorage.removeItem('loginRedirectCount');
+          }, 2000);
         } else {
           console.log('User not authenticated or session invalid');
         }
@@ -68,7 +78,10 @@ export default function GeneralLogin() {
       }
     };
     
-    checkSession();
+    // Add a small delay before checking session to avoid race conditions
+    setTimeout(() => {
+      checkSession();
+    }, 200);
   }, [validateSession, navigate, location.pathname]);
 
   return (

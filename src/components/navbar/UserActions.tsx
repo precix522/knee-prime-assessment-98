@@ -3,6 +3,7 @@ import { FC } from "react";
 import { Button } from "../Button";
 import { LogOut, LogIn, User } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useTwilioAuthStore } from "../../utils/auth";
 
 interface UserActionsProps {
   user: any;
@@ -11,27 +12,43 @@ interface UserActionsProps {
 
 export const UserActions: FC<UserActionsProps> = ({ user, isAdmin }) => {
   const navigate = useNavigate();
+  const { logout } = useTwilioAuthStore();
   
   const handleSignOut = () => {
-    navigate('/logout');
+    // Clear any session storage items that might be causing redirect loops
+    sessionStorage.removeItem('loginRedirectCount');
+    sessionStorage.removeItem('lastRedirect');
+    sessionStorage.removeItem('redirectAfterLogin');
+    
+    // Use the logout function from the auth store
+    logout();
+    
+    // Then navigate to home
+    navigate('/', { replace: true });
   };
   
   const handleAdminLogin = () => {
+    // Clear any potential redirect loop detection
+    sessionStorage.removeItem('loginRedirectCount');
+    sessionStorage.removeItem('lastRedirect');
     // Explicitly navigate to the general login page
-    navigate('/general-login');
+    navigate('/general-login', { replace: true });
   };
   
   const handleAccessReport = () => {
-    navigate('/general-login');
+    navigate('/general-login', { replace: true });
   };
   
   const handleGeneralLogin = () => {
-    navigate('/general-login');
+    // Clear any potential redirect loop detection
+    sessionStorage.removeItem('loginRedirectCount');
+    sessionStorage.removeItem('lastRedirect');
+    navigate('/general-login', { replace: true });
   };
   
   const handleAdminDashboard = () => {
     // Navigate to the manage-patients page for admin users
-    navigate('/manage-patients');
+    navigate('/manage-patients', { replace: true });
   };
 
   return user ? (

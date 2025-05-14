@@ -14,12 +14,16 @@ export const getOrCreateUserProfile = async (phone: string, sessionId: string): 
   
   if (!userProfile) {
     console.log('Creating new user profile for phone:', phone);
-    userProfile = await createUserProfile(phone, 'user');
+    userProfile = await createUserProfile(phone, 'patient');
     console.log('Created new user profile:', userProfile);
   }
   
-  const profile_type = userProfile?.profile_type || 'user';
+  // Ensure we use the exact profile_type from the database
+  const profile_type = userProfile?.profile_type || 'patient';
   console.log('User profile type:', profile_type);
+  
+  // Store the profile type in localStorage for better persistence across sessions
+  localStorage.setItem('userProfileType', profile_type);
   
   return {
     id: userProfile?.id || sessionId,
