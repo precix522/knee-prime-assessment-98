@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTwilioAuthStore } from "@/utils/auth";
@@ -5,7 +6,7 @@ import { AuthContainer } from "@/components/auth/AuthContainer";
 import { AuthPhoneForm } from "@/components/auth/AuthPhoneForm";
 import { AuthOTPForm } from "@/components/auth/AuthOTPForm";
 import { DevModeToggle } from "@/components/auth/DevModeToggle";
-import { toast } from "sonner";
+import { toast } from "@/hooks/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { InfoIcon } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -86,44 +87,44 @@ export default function GeneralLogin() {
 
   return (
     <AuthContainer>
-      <Card className="w-full max-w-md space-y-4 p-4">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl text-center">
-            {isVerifying ? "Enter verification code" : "Login or Register"}
-          </CardTitle>
-          <CardDescription className="text-center">
-            {isVerifying
-              ? "We've sent a code to your phone"
-              : "Enter your phone number to login or register"}
-          </CardDescription>
-        </CardHeader>
+      <div className="w-full max-w-md">
+        <Card className="w-full space-y-4 p-4">
+          <CardHeader className="space-y-1">
+            <CardTitle className="text-2xl text-center">
+              {isVerifying ? "Enter verification code" : "Login or Register"}
+            </CardTitle>
+            <CardDescription className="text-center">
+              {isVerifying
+                ? "We've sent a code to your phone"
+                : "Enter your phone number to login or register"}
+            </CardDescription>
+          </CardHeader>
 
-        <CardContent>
-          {error && (
-            <Alert variant="destructive">
-              <InfoIcon className="h-4 w-4" />
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
+          <CardContent>
+            {error && (
+              <Alert variant="destructive">
+                <InfoIcon className="h-4 w-4" />
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
 
-          {isVerifying ? (
-            <AuthOTPForm
-              state={authState}
-              updateState={updateAuthState}
-              onSubmit={handleVerifyOTP}
-              onBack={() => setIsVerifying(false)}
-            />
-          ) : (
-            <AuthPhoneForm
-              state={authState}
-              updateState={updateAuthState}
-              onSubmit={handleSendOTP}
-            />
-          )}
-        </CardContent>
-      </Card>
+            {isVerifying ? (
+              <AuthOTPForm
+                state={authState}
+                updateState={updateAuthState}
+                onSubmit={handleVerifyOTP}
+                onBack={() => setIsVerifying(false)}
+              />
+            ) : (
+              <AuthPhoneForm
+                state={authState}
+                updateState={updateAuthState}
+                onSubmit={handleSendOTP}
+              />
+            )}
+          </CardContent>
+        </Card>
 
-      <div className="mt-6">
         <DevModeToggle
           devMode={devMode}
           onToggle={handleToggleDevMode}

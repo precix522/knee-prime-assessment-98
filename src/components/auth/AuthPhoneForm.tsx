@@ -48,9 +48,9 @@ export function AuthPhoneForm({ state, updateState, onSubmit }: AuthPhoneFormPro
 
   return (
     <form onSubmit={handleSubmit}>
-      <div className="space-y-4">
+      <div className="space-y-5">
         <div>
-          <Label htmlFor="phone" className="text-gray-700">
+          <Label htmlFor="phone" className="text-gray-700 text-base font-medium mb-2 block">
             Phone Number
           </Label>
           <div className="relative">
@@ -59,7 +59,7 @@ export function AuthPhoneForm({ state, updateState, onSubmit }: AuthPhoneFormPro
               type="tel"
               id="phone"
               placeholder="Enter your phone number"
-              className="pl-10"
+              className="pl-10 py-6 text-base"
               value={phone}
               onChange={(e) => updateState({ phone: e.target.value })}
             />
@@ -73,17 +73,21 @@ export function AuthPhoneForm({ state, updateState, onSubmit }: AuthPhoneFormPro
               onExpire={handleCaptchaExpire}
               error={captchaError}
             />
+            <p className="text-sm text-gray-500 mt-2">
+              This verification helps us ensure you're a human and not a bot.
+            </p>
           </div>
         )}
         
         <RememberMeCheckbox 
           checked={rememberMe}
           onCheckedChange={(checked) => updateState({ rememberMe: checked })}
+          label="Keep me signed in for 30 days"
         />
       </div>
       
       <Button
-        className="w-full mt-6"
+        className="w-full mt-6 py-6 bg-orange-300 hover:bg-orange-400 text-white font-medium text-lg"
         type="submit"
         disabled={loading || (!captchaVerified && !devMode)}
       >
