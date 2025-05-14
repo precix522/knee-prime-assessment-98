@@ -6,7 +6,8 @@ import { useOtp } from './auth/useOtp';
 import { useAuthSession } from './auth/useAuthSession';
 import { UseAuthReturn } from './auth/types';
 
-export { AuthState } from './auth/types';
+// Change this line to use "export type" syntax for TypeScript isolatedModules
+export type { AuthState } from './auth/types';
 
 export const useAuth = (): UseAuthReturn => {
   const authStore = useTwilioAuthStore();
