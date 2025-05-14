@@ -94,6 +94,7 @@ export default function ManageUsers() {
         const fetchUsers = async () => {
           try {
             const userProfiles = await getAllUserProfiles();
+            console.log("Fetched user profiles:", userProfiles);
             setUsers(userProfiles);
             setPageLoading(false);
           } catch (error) {
@@ -116,6 +117,7 @@ export default function ManageUsers() {
   const filteredUsers = users.filter(user => 
     (user.phone && user.phone.includes(searchQuery)) || 
     (user.profile_type && user.profile_type.includes(searchQuery)) ||
+    (user.name && user.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
     (user.patient_name && user.patient_name.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
@@ -130,10 +132,11 @@ export default function ManageUsers() {
     // For now, we'll just add it to the local state
     // In a future implementation, you should add an API call to create the user in Supabase
     const newUser: UserProfile = {
-      Patient_ID: `usr${Date.now()}`,
+      id: `usr${Date.now()}`,
       phone: newUserData.phone,
       profile_type: newUserData.profile_type,
-      patient_name: newUserData.name || null,
+      name: newUserData.name || "",
+      Patient_ID: `usr${Date.now()}`,
       // Other fields would be null or have default values
     };
     
@@ -156,7 +159,7 @@ export default function ManageUsers() {
   const handleDeleteUser = (userId: string) => {
     // In a real implementation, this would delete the user from Supabase
     // For now, we'll just remove it from the local state
-    const filteredUsers = users.filter(user => user.Patient_ID !== userId);
+    const filteredUsers = users.filter(user => user.id !== userId);
     setUsers(filteredUsers);
     toast.success("User deleted successfully");
   };
@@ -389,7 +392,7 @@ export default function ManageUsers() {
                       </TableHeader>
                       <TableBody>
                         {filteredUsers.map((user) => (
-                          <TableRow key={user.Patient_ID} className="hover:bg-gray-50">
+                          <TableRow key={user.id} className="hover:bg-gray-50">
                             <TableCell>
                               <div className="flex items-center gap-3">
                                 <div className="bg-gray-100 rounded-full p-2">
@@ -399,7 +402,7 @@ export default function ManageUsers() {
                                   }
                                 </div>
                                 <div>
-                                  <div className="font-medium">{user.patient_name || "Unknown User"}</div>
+                                  <div className="font-medium">{user.name || user.patient_name || "Unknown User"}</div>
                                 </div>
                               </div>
                             </TableCell>
@@ -411,13 +414,13 @@ export default function ManageUsers() {
                                 {user.profile_type}
                               </span>
                             </TableCell>
-                            <TableCell>{user.last_modified_tm ? new Date(user.last_modified_tm).toLocaleDateString() : "N/A"}</TableCell>
+                            <TableCell>{user.created_at ? new Date(user.created_at).toLocaleDateString() : "N/A"}</TableCell>
                             <TableCell className="text-right">
                               <div className="flex justify-end gap-2">
                                 <Button
                                   variant="outline"
                                   size="sm"
-                                  onClick={() => handleEditUser(user.Patient_ID)}
+                                  onClick={() => handleEditUser(user.id)}
                                 >
                                   <Edit className="h-4 w-4 mr-1" />
                                   Edit
@@ -425,7 +428,7 @@ export default function ManageUsers() {
                                 <Button
                                   variant="destructive"
                                   size="sm"
-                                  onClick={() => handleDeleteUser(user.Patient_ID)}
+                                  onClick={() => handleDeleteUser(user.id)}
                                 >
                                   <Trash className="h-4 w-4 mr-1" />
                                   Delete
