@@ -17,6 +17,7 @@ interface OTPFormProps {
   countdown: number;
   onResendOTP: () => void;
   onBackToPhone: () => void;
+  devMode?: boolean;
 }
 
 export function OTPForm({
@@ -30,6 +31,7 @@ export function OTPForm({
   countdown,
   onResendOTP,
   onBackToPhone,
+  devMode = false,
 }: OTPFormProps) {
   return (
     <form onSubmit={handleVerifyOTP}>
@@ -65,6 +67,12 @@ export function OTPForm({
         <p className="mt-2 text-sm text-center text-gray-500">
           The code was sent to {formattedPhone || phoneNumber}
         </p>
+        
+        {devMode && (
+          <p className="mt-2 text-xs text-center text-amber-600">
+            Developer mode: Enter code <strong>123456</strong> to verify
+          </p>
+        )}
       </div>
       
       <div className="flex flex-col space-y-3">
@@ -73,7 +81,7 @@ export function OTPForm({
           variant="health"
           size="lg"
           className="w-full"
-          disabled={isLoading}
+          disabled={isLoading || !otpCode || otpCode.length < 6}
         >
           {isLoading ? "Verifying..." : "Verify Code"}
         </Button>

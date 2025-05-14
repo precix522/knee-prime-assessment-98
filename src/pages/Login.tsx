@@ -1,5 +1,5 @@
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useTwilioAuthStore } from "../utils/auth";
@@ -22,9 +22,16 @@ export default function Login() {
     resetToPhoneInput
   } = useAuth();
   
-  const { validateSession } = useTwilioAuthStore();
+  const { validateSession, toggleDevMode } = useTwilioAuthStore();
   const [searchParams] = useSearchParams();
   const patientID = searchParams.get("patientId");
+  
+  // Sync devMode between the useAuth hook state and the Twilio auth store
+  useEffect(() => {
+    if (toggleDevMode && state.devMode !== useTwilioAuthStore.getState().devMode) {
+      toggleDevMode();
+    }
+  }, [state.devMode, toggleDevMode]);
 
   useEffect(() => {
     console.log('Login component mounted');
@@ -66,7 +73,7 @@ export default function Login() {
             <Alert className="bg-amber-50 border-amber-200 text-amber-800">
               <InfoIcon className="h-4 w-4 text-amber-800" />
               <AlertDescription>
-                <strong>Developer Mode Active:</strong> OTP verification is bypassed.
+                <strong>Developer Mode Active:</strong> Twilio OTP verification is bypassed.
                 Use code <strong className="font-mono">123456</strong> to login.
               </AlertDescription>
             </Alert>

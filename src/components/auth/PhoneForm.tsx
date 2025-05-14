@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { RememberMeCheckbox } from "./RememberMeCheckbox";
 import { CaptchaVerification } from "./CaptchaVerification";
+import { formatPhoneNumber, validatePhoneNumber } from "./AuthUtils";
 
 interface PhoneFormProps {
   phoneInput: string;
@@ -53,6 +54,15 @@ export const PhoneForm = ({
       setCaptchaError && setCaptchaError("Captcha has expired. Please verify again.");
     }
   };
+  
+  const handlePhoneInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Format phone number as user types
+    const rawInput = e.target.value;
+    const formattedPhone = formatPhoneNumber(rawInput);
+    setPhoneInput(formattedPhone);
+  };
+
+  const isPhoneValid = phoneInput ? validatePhoneNumber(phoneInput) : false;
 
   return (
     <form onSubmit={handleSendOTP} className="space-y-4">
@@ -61,12 +71,19 @@ export const PhoneForm = ({
           <Input
             type="tel"
             value={phoneInput}
-            onChange={(e) => setPhoneInput(e.target.value)}
+            onChange={handlePhoneInputChange}
             placeholder="Enter phone number (e.g., +6512345678)"
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+              phoneInput && !isPhoneValid ? 'border-red-500' : ''
+            }`}
             autoComplete="tel"
             required
           />
+          {phoneInput && !isPhoneValid && (
+            <p className="text-xs text-red-500 mt-1">
+              Please enter a valid phone number in international format (e.g., +6512345678)
+            </p>
+          )}
         </div>
         
         {!devMode && setCaptchaVerified && (
@@ -92,10 +109,16 @@ export const PhoneForm = ({
       <Button
         type="submit"
         className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg transition-colors"
-        disabled={isLoading || (!captchaVerified && !devMode && setCaptchaVerified !== undefined)}
+        disabled={isLoading || (!captchaVerified && !devMode && setCaptchaVerified !== undefined) || (phoneInput && !isPhoneValid)}
       >
         {isLoading ? "Sending..." : "Send Verification Code"}
       </Button>
+      
+      {devMode && (
+        <p className="text-xs text-center mt-2 text-amber-600">
+          Developer mode: Twilio OTP verification is bypassed. Use code <strong>123456</strong> for testing.
+        </p>
+      )}
     </form>
   );
 };
