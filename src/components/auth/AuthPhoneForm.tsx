@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "../Button";
 import { RememberMeCheckbox } from "./RememberMeCheckbox";
 import { CaptchaVerification } from "./CaptchaVerification";
-import { AuthState } from "@/hooks/useAuth";
+import { AuthState } from "@/hooks/auth/types";
 
 interface AuthPhoneFormProps {
   state: AuthState;
@@ -38,6 +38,15 @@ export function AuthPhoneForm({ state, updateState, onSubmit }: AuthPhoneFormPro
     onSubmit();
   };
 
+  // Add null check to prevent accessing properties of undefined
+  const phone = state?.phone || '';
+  const devMode = state?.devMode || false;
+  const captchaVerified = state?.captchaVerified || false;
+  const captchaError = state?.captchaError || null;
+  const rememberMe = state?.rememberMe || false;
+  const error = state?.error || null;
+  const loading = state?.loading || false;
+
   return (
     <form onSubmit={handleSubmit}>
       <div className="space-y-4">
@@ -52,36 +61,36 @@ export function AuthPhoneForm({ state, updateState, onSubmit }: AuthPhoneFormPro
               id="phone"
               placeholder="Enter your phone number"
               className="pl-10"
-              value={state.phone}
+              value={phone}
               onChange={(e) => updateState({ phone: e.target.value })}
             />
           </div>
         </div>
         
-        {!state.devMode && (
+        {!devMode && (
           <div className="mt-4">
             <CaptchaVerification 
               onVerify={handleCaptchaVerify}
               onExpire={handleCaptchaExpire}
-              error={state.captchaError}
+              error={captchaError}
             />
           </div>
         )}
         
         <RememberMeCheckbox 
-          checked={state.rememberMe}
+          checked={rememberMe}
           onCheckedChange={(checked) => updateState({ rememberMe: checked })}
         />
         
-        {state.error && <p className="text-red-500 text-sm">{state.error}</p>}
+        {error && <p className="text-red-500 text-sm">{error}</p>}
       </div>
       
       <Button
         className="w-full mt-6"
         type="submit"
-        disabled={state.loading || (!state.captchaVerified && !state.devMode)}
+        disabled={loading || (!captchaVerified && !devMode)}
       >
-        {state.loading ? "Sending OTP..." : "Send OTP"}
+        {loading ? "Sending OTP..." : "Send OTP"}
       </Button>
     </form>
   );

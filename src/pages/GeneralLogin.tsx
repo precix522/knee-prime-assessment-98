@@ -12,17 +12,20 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 
 export default function GeneralLogin() {
   const {
+    user,
     phoneNumber,
     setPhoneNumber,
     sendOTP,
     verifyOTP,
     isLoading,
-    isVerifying,
     error,
     clearError,
     setLoginUser,
   } = useTwilioAuthStore();
+  
   const [otp, setOtp] = useState("");
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [devMode, setDevMode] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -32,18 +35,19 @@ export default function GeneralLogin() {
     }
   }, [error, clearError]);
 
-  const handleSendOTP = async (phone: string) => {
+  const handleSendOTP = async () => {
     try {
-      await sendOTP(phone);
+      await sendOTP(phoneNumber);
+      setIsVerifying(true);
     } catch (err) {
       console.error("Failed to send OTP:", err);
       toast.error("Failed to send OTP. Please try again.");
     }
   };
 
-  const handleVerifyOTP = async (phone: string, code: string) => {
+  const handleVerifyOTP = async () => {
     try {
-      const user = await verifyOTP(phone, code);
+      const user = await verifyOTP(phoneNumber, otp);
       if (user) {
         setLoginUser(user);
         navigate("/dashboard");
@@ -54,6 +58,33 @@ export default function GeneralLogin() {
       console.error("OTP verification failed:", err);
       toast.error("OTP verification failed. Please try again.");
     }
+  };
+
+  const handleToggleDevMode = () => {
+    setDevMode(!devMode);
+  };
+
+  // Create state object for AuthPhoneForm and AuthOTPForm
+  const authState = {
+    phone: phoneNumber,
+    otp,
+    otpSent: isVerifying,
+    loading: isLoading,
+    error,
+    requestId: null,
+    rememberMe: true,
+    captchaVerified: devMode, // In dev mode, consider captcha verified
+    captchaError: null,
+    devMode
+  };
+
+  const updateAuthState = (updates: any) => {
+    if (updates.phone !== undefined) setPhoneNumber(updates.phone);
+    if (updates.otp !== undefined) setOtp(updates.otp);
+    if (updates.rememberMe !== undefined) {
+      // Handle remember me if needed
+    }
+    // Other state updates can be handled here
   };
 
   return (
@@ -80,16 +111,15 @@ export default function GeneralLogin() {
 
           {isVerifying ? (
             <AuthOTPForm
-              otp={otp}
-              setOtp={setOtp}
-              isLoading={isLoading}
-              onSubmit={() => handleVerifyOTP(phoneNumber, otp)}
+              state={authState}
+              updateState={updateAuthState}
+              onSubmit={handleVerifyOTP}
+              onBack={() => setIsVerifying(false)}
             />
           ) : (
             <AuthPhoneForm
-              phoneNumber={phoneNumber}
-              setPhoneNumber={setPhoneNumber}
-              isLoading={isLoading}
+              state={authState}
+              updateState={updateAuthState}
               onSubmit={handleSendOTP}
             />
           )}
@@ -97,7 +127,10 @@ export default function GeneralLogin() {
       </Card>
 
       <div className="mt-6">
-        <DevModeToggle />
+        <DevModeToggle
+          devMode={devMode}
+          onToggle={handleToggleDevMode}
+        />
       </div>
     </AuthContainer>
   );
