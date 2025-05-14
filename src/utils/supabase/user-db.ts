@@ -36,13 +36,17 @@ export const getUserProfileByPhone = async (phone: string): Promise<UserProfile 
       return null;
     }
     
-    // Make sure profile_type is correctly identified (admin or user)
+    console.log('Found user profile data:', data[0]);
+    
+    // Ensure profile_type is correctly identified 
     // If the profile_type in the database is 'admin', ensure it's properly set
-    const profileType = data[0].profile_type === 'admin' ? 'admin' : data[0].profile_type || 'user';
+    const profileType = data[0].profile_type === 'admin' ? 'admin' : 'patient';
+    
+    console.log('Determined profile type:', profileType);
     
     // Map the patient record to UserProfile format
     return {
-      id: data[0].id || data[0].Patient_ID,
+      id: data[0].Patient_ID || data[0].id,
       phone: data[0].phone,
       profile_type: profileType, // Use the determined profile type
       created_at: data[0].created_at || data[0].last_modified_tm,

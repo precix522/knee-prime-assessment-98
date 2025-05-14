@@ -7,6 +7,9 @@ import { AuthPhoneForm } from "@/components/auth/AuthPhoneForm";
 import { AuthOTPForm } from "@/components/auth/AuthOTPForm";
 import { DevModeToggle } from "@/components/auth/DevModeToggle";
 import { Toaster } from "sonner";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { InfoIcon } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function GeneralLogin() {
   const {
@@ -28,7 +31,8 @@ export default function GeneralLogin() {
         
         if (isValid && user) {
           console.log("Already authenticated:", user);
-          // User is already authenticated, handle redirect in useAuth hook
+          console.log("User profile type:", user.profile_type);
+          // Redirection will be handled by AuthInitializer component
         }
       } catch (error) {
         console.error("Session check error:", error);
@@ -41,32 +45,51 @@ export default function GeneralLogin() {
   return (
     <AuthContainer>
       <Toaster position="bottom-left" />
-      <div className="bg-white shadow-md rounded-md p-8 w-full max-w-md">
-        <h2 className="text-2xl font-bold text-gray-800 text-center mb-6">
-          Login with OTP
-        </h2>
+      <Card className="w-full max-w-md space-y-4 p-4">
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-2xl text-center">
+            {state.otpSent ? "Verify OTP" : "Login"}
+          </CardTitle>
+          <CardDescription className="text-center">
+            {state.otpSent
+              ? "Enter the verification code we sent to your phone."
+              : "Enter your phone number to receive a verification code."}
+          </CardDescription>
+        </CardHeader>
         
-        {!state.otpSent ? (
-          <>
+        <CardContent className="grid gap-4">
+          {state.devMode && (
+            <Alert className="bg-amber-50 border-amber-200 text-amber-800">
+              <InfoIcon className="h-4 w-4 text-amber-800" />
+              <AlertDescription>
+                <strong>Developer Mode Active:</strong> OTP verification is bypassed.
+              </AlertDescription>
+            </Alert>
+          )}
+          
+          {!state.otpSent ? (
             <AuthPhoneForm
               state={state}
               updateState={updateState}
               onSubmit={handleSendOTP}
             />
+          ) : (
+            <AuthOTPForm
+              state={state}
+              updateState={updateState}
+              onSubmit={handleVerifyOTP}
+              onBack={resetToPhoneInput}
+            />
+          )}
+          
+          {!state.otpSent && (
             <DevModeToggle
               devMode={state.devMode}
               onToggle={handleToggleDevMode}
             />
-          </>
-        ) : (
-          <AuthOTPForm
-            state={state}
-            updateState={updateState}
-            onSubmit={handleVerifyOTP}
-            onBack={resetToPhoneInput}
-          />
-        )}
-      </div>
+          )}
+        </CardContent>
+      </Card>
     </AuthContainer>
   );
 }

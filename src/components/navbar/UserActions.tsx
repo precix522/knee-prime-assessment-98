@@ -30,8 +30,8 @@ export const UserActions: FC<UserActionsProps> = ({ user, isAdmin }) => {
     navigate('/general-login');
   };
   
-  const handleDashboard = () => {
-    // Navigate to main admin dashboard when admin users click on dashboard
+  const handleAdminDashboard = () => {
+    // Navigate to the manage-patients page when admin users click on dashboard
     navigate('/manage-patients');
   };
 
@@ -46,7 +46,7 @@ export const UserActions: FC<UserActionsProps> = ({ user, isAdmin }) => {
       </div>
       {isAdmin && (
         <Button 
-          onClick={handleDashboard}
+          onClick={handleAdminDashboard}
           variant="health"
           size="sm"
           className="whitespace-nowrap"

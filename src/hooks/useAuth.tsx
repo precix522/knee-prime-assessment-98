@@ -147,7 +147,8 @@ export const useAuth = () => {
         // In dev mode, bypass actual verification
         handleOTPSuccess('dev-mode-session-id', {
           phone_number: state.phone,
-          name: 'Developer User'
+          name: 'Developer User',
+          profile_type: 'admin' // Default to admin in dev mode for testing
         });
         return;
       }
@@ -234,9 +235,19 @@ export const useAuth = () => {
       duration: 5000
     });
 
-    // Redirect to dashboard or home
+    // Redirect based on user profile type
     setTimeout(() => {
-      navigate('/dashboard');
+      const { user: authenticatedUser } = authStore.getState();
+      console.log('Redirecting based on profile type:', authenticatedUser?.profile_type);
+      
+      if (authenticatedUser?.profile_type === 'admin') {
+        navigate('/manage-patients');
+      } else if (authenticatedUser?.profile_type === 'patient') {
+        navigate('/report-viewer');
+      } else {
+        // Default fallback if profile type is not set
+        navigate('/dashboard');
+      }
     }, 500);
   }, [authStore, updateState, navigate]);
 
