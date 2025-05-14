@@ -1,345 +1,45 @@
 
-import { useState, useCallback } from 'react';
-import { toast } from "sonner";
 import { useTwilioAuthStore } from '@/utils/auth';
-import { useNavigate } from 'react-router-dom';
-import { getUserProfileByPhone } from '@/utils/supabase';
+import { useAuthState } from './auth/useAuthState';
+import { useDevMode } from './auth/useDevMode';
+import { useOtp } from './auth/useOtp';
+import { useAuthSession } from './auth/useAuthSession';
+import { UseAuthReturn } from './auth/types';
 
-export interface AuthState {
-  phone: string;
-  otp: string;
-  otpSent: boolean;
-  loading: boolean;
-  error: string | null;
-  requestId: string | null;
-  rememberMe: boolean;
-  captchaVerified: boolean;
-  captchaError: string | null;
-  devMode: boolean;
-}
+export { AuthState } from './auth/types';
 
-export const useAuth = () => {
-  const navigate = useNavigate();
+export const useAuth = (): UseAuthReturn => {
   const authStore = useTwilioAuthStore();
+  const { state, updateState, resetToPhoneInput } = useAuthState();
+  const { handleToggleDevMode } = useDevMode(state, updateState);
+  const { handleSendOTP, handleVerifyOTP } = useOtp(state, updateState, authStore);
+  const { handleOTPSuccess } = useAuthSession(state, updateState, authStore);
 
-  const [state, setState] = useState<AuthState>({
-    phone: '',
-    otp: '',
-    otpSent: false,
-    loading: false,
-    error: null,
-    requestId: null,
-    rememberMe: true,
-    captchaVerified: false,
-    captchaError: null,
-    devMode: false
-  });
-
-  const updateState = useCallback((updates: Partial<AuthState>) => {
-    setState(prev => ({ ...prev, ...updates }));
-  }, []);
-
-  const resetToPhoneInput = useCallback(() => {
-    updateState({
-      otpSent: false,
-      otp: '',
-      error: null
-    });
-  }, [updateState]);
-
-  const handleSendOTP = useCallback(async () => {
-    try {
-      if (state.loading) return;
-
-      // Clear previous errors
-      updateState({ loading: true, error: null });
-
-      if (!state.phone.trim()) {
-        updateState({
-          loading: false,
-          error: 'Phone number is required'
-        });
-        
-        toast.error('Phone number is required');
-        return;
-      }
-
-      if (state.devMode) {
-        // In dev mode, bypass actual OTP sending
-        updateState({
-          loading: false,
-          otpSent: true,
-          requestId: 'dev-mode-request-id',
-          error: null
-        });
-        
-        toast.success('Dev Mode: OTP sending bypassed. Enter any code to verify.', {
-          duration: 5000
-        });
-        
-        return;
-      }
-
-      console.log('Sending OTP to:', state.phone);
-      toast.info('Sending verification code...', { id: 'sending-otp' });
-      
-      // Reset any redirect loop detection
-      sessionStorage.removeItem('loginRedirectCount');
-      
-      // Use direct function call to service for better debugging
-      authStore.sendOTP(state.phone)
-        .then(() => {
-          // If we get here, the OTP was sent successfully
-          updateState({
-            loading: false,
-            otpSent: true,
-            error: null
-          });
-
-          toast.success('Verification code has been sent to your phone.', {
-            duration: 5000
-          });
-          
-          // Dismiss the sending toast
-          toast.dismiss('sending-otp');
-        })
-        .catch((error) => {
-          console.error('Error sending OTP:', error);
-          updateState({
-            loading: false,
-            error: error.message || 'Failed to send verification code'
-          });
-          
-          // Dismiss the sending toast
-          toast.dismiss('sending-otp');
-          
-          toast.error(error.message || 'Failed to send OTP. Please try again.', {
-            duration: 5000
-          });
-        });
-    } catch (error: any) {
-      console.error('Error in handleSendOTP:', error);
-      updateState({
-        loading: false,
-        error: error.message || 'Failed to send verification code'
-      });
-      
-      // Dismiss the sending toast
-      toast.dismiss('sending-otp');
-      
-      toast.error(error.message || 'Failed to send OTP. Please try again.', {
-        duration: 5000
-      });
-    }
-  }, [state.loading, state.phone, state.devMode, updateState, authStore]);
-
-  const handleVerifyOTP = useCallback(async () => {
-    try {
-      if (state.loading) return;
-
-      updateState({ loading: true, error: null });
-
-      if (!state.otp.trim()) {
-        updateState({
-          loading: false,
-          error: 'Verification code is required'
-        });
-        toast.error('Verification code is required');
-        return;
-      }
-
-      if (state.devMode) {
-        // In dev mode, bypass actual verification
-        const userData = {
-          phone_number: state.phone,
-          name: 'Developer User',
-          profile_type: 'admin' // Default to admin in dev mode for testing
-        };
-        
-        // Reset any redirect loop detection
-        sessionStorage.removeItem('loginRedirectCount');
-        sessionStorage.removeItem('lastRedirect');
-        
-        // Use setTimeout to give the UI time to update before proceeding
-        setTimeout(() => {
-          handleOTPSuccess('dev-mode-session-id', userData);
-        }, 100);
-        return;
-      }
-
-      toast.info('Verifying code...', { id: 'verifying-otp' });
-      
-      // Clear any previous redirect loop detection
-      sessionStorage.removeItem('loginRedirectCount');
-      sessionStorage.removeItem('lastRedirect');
-      
-      const response = await fetch('/api/verify-otp', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          code: state.otp,
-          phone_number: state.phone
-        })
-      });
-
-      console.log('OTP verification response status:', response.status);
-      
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Error verification response text:', errorText);
-        
-        let errorMessage = 'Failed to verify code';
-        try {
-          const errorData = JSON.parse(errorText);
-          errorMessage = errorData.message || errorMessage;
-        } catch (e) {
-          console.error('Failed to parse verification error response:', e);
-        }
-        
-        throw new Error(errorMessage);
-      }
-
-      const responseText = await response.text();
-      console.log('OTP verification response text:', responseText);
-      
-      if (!responseText || responseText.trim() === '') {
-        throw new Error('Empty response from verification server');
-      }
-      
-      const data = JSON.parse(responseText);
-      console.log('OTP verification parsed data:', data);
-
-      if (!data.success) {
-        throw new Error(data.message || 'Failed to verify code');
-      }
-
-      // Authentication successful
-      toast.dismiss('verifying-otp');
+  const handleVerifyOTPWrapper = async () => {
+    const result = await handleVerifyOTP();
+    if (!result) return;
+    
+    const { isDevMode, userData, data } = result as any;
+    
+    if (isDevMode) {
+      // Use setTimeout to give the UI time to update before proceeding
+      setTimeout(() => {
+        handleOTPSuccess('dev-mode-session-id', userData);
+      }, 100);
+    } else {
       handleOTPSuccess(data.session_id, {
         phone_number: state.phone
       });
-    } catch (error: any) {
-      console.error('Error verifying OTP:', error);
-      updateState({
-        loading: false,
-        error: error.message || 'Failed to verify code'
-      });
-      
-      toast.dismiss('verifying-otp');
-      toast.error(error.message || 'Failed to verify OTP. Please try again.', {
-        duration: 5000
-      });
     }
-  }, [state.loading, state.otp, state.devMode, state.phone, updateState]);
-
-  const handleOTPSuccess = useCallback(async (sessionId: string, userData: any) => {
-    console.log('OTP Success - User data:', userData);
-    console.log('OTP Success - Session ID:', sessionId);
-    
-    try {
-      // Get the phone number from userData
-      const phone = userData.phone_number;
-      
-      // Try to fetch the user profile from the database
-      let userProfile = null;
-      let profileType = 'patient'; // Default to patient
-      
-      if (!state.devMode) {
-        try {
-          userProfile = await getUserProfileByPhone(phone);
-          console.log('User profile from database:', userProfile);
-          
-          if (userProfile && userProfile.profile_type) {
-            profileType = userProfile.profile_type;
-            console.log('Found profile type in database:', profileType);
-          }
-        } catch (err) {
-          console.error('Error fetching user profile:', err);
-          // Continue with default profile type
-        }
-      } else {
-        // In dev mode, use the profile type from userData
-        profileType = userData.profile_type || 'admin';
-        console.log('Using dev mode profile type:', profileType);
-      }
-      
-      // Create the user object with profile type and ensure it's properly formatted
-      const user = {
-        id: sessionId,
-        phone: phone,
-        name: userData.name || 'User',
-        profile_type: profileType,
-        ...userData
-      };
-
-      console.log('Setting auth user with data:', user);
-      
-      // Clear any potential loop detection counters
-      sessionStorage.removeItem('loginRedirectCount');
-      sessionStorage.removeItem('lastRedirect');
-      
-      // Store the profile type specifically to enhance persistence
-      localStorage.setItem('userProfileType', profileType);
-      
-      // Ensure we're properly setting the auth user
-      await authStore.setAuthUser(user);
-      
-      updateState({
-        loading: false,
-        error: null,
-      });
-
-      toast.success('You have successfully logged in.');
-      
-      // Longer delay to ensure state is updated
-      setTimeout(() => {
-        console.log('Current user after login:', authStore.user);
-        console.log('Profile type being used for redirection:', profileType);
-        
-        // Use replace to prevent back button from returning to login
-        if (profileType === 'admin') {
-          console.log('Redirecting admin to manage-patients with replace:true');
-          navigate('/manage-patients', { replace: true });
-        } else if (profileType === 'patient') {
-          console.log('Redirecting patient to report-viewer with replace:true');
-          navigate('/report-viewer', { replace: true });
-        } else {
-          console.log('Profile type not recognized, redirecting to dashboard with replace:true');
-          navigate('/dashboard', { replace: true });
-        }
-      }, 800);
-    } catch (error) {
-      console.error('Error in handleOTPSuccess:', error);
-      toast.error('Error setting up user session. Please try again.');
-      updateState({ loading: false });
-    }
-  }, [authStore, navigate, updateState, state.devMode]);
-
-  const handleToggleDevMode = useCallback(() => {
-    updateState({ 
-      devMode: !state.devMode,
-      captchaVerified: !state.devMode, // Auto verify captcha in dev mode
-    });
-    
-    if (!state.devMode) {
-      toast.info('Developer mode activated. OTP verification will be bypassed.', {
-        duration: 5000
-      });
-    } else {
-      toast.info('Developer mode deactivated.', {
-        duration: 5000
-      });
-    }
-  }, [state.devMode, updateState]);
+  };
 
   return {
     state,
     updateState,
     handleSendOTP,
-    handleVerifyOTP,
+    handleVerifyOTP: handleVerifyOTPWrapper,
     handleToggleDevMode,
-    resetToPhoneInput
+    resetToPhoneInput,
+    handleOTPSuccess
   };
 };
