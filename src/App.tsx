@@ -38,6 +38,7 @@ export default function App() {
             <Route path="/manage-patients" element={<ManagePatients />} />
             <Route path="/patient/:id" element={<PatientID />} />
             <Route path="/report/:id" element={<ReportViewer />} />
+            <Route path="/report-viewer" element={<ReportViewer />} />
             <Route path="/reports" element={<AllReports />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
