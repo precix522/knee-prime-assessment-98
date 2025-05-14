@@ -12,15 +12,12 @@ export interface AuthState {
   devMode: boolean;
 }
 
-export interface AuthActions {
-  updateState: (updates: Partial<AuthState>) => void;
-  resetToPhoneInput: () => void;
-  handleSendOTP: () => Promise<void>;
-  handleVerifyOTP: () => Promise<void>;
-  handleToggleDevMode: () => void;
-  handleOTPSuccess: (sessionId: string, userData: any) => Promise<void>;
-}
-
-export type UseAuthReturn = {
+export interface UseAuthReturn {
   state: AuthState;
-} & AuthActions;
+  updateState: (updates: Partial<AuthState>) => void;
+  handleSendOTP: () => Promise<void>;
+  handleVerifyOTP: () => Promise<any>;
+  handleToggleDevMode: () => void;
+  resetToPhoneInput: () => void;
+  handleOTPSuccess: (sessionId: string, userData: any) => void;
+}

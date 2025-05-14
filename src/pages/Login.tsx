@@ -49,7 +49,7 @@ export default function Login() {
         if (isValid && user) {
           const profileType = user.profile_type || localStorage.getItem('userProfileType') || 'patient';
           if (profileType === 'admin') {
-            navigate('/dashboard', { replace: true }); // Changed from '/admin-dashboard' to '/dashboard'
+            navigate('/dashboard', { replace: true });
           } else if (profileType === 'patient') {
             navigate('/report-viewer', { replace: true });
           } else {
