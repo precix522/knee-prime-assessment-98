@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTwilioAuthStore } from "@/utils/auth";
@@ -31,10 +30,8 @@ export default function GeneralLogin() {
 
   useEffect(() => {
     if (error) {
-      toast({
-        title: "Error",
+      toast.error("Error", {
         description: error,
-        variant: "destructive",
       });
       clearError();
     }
@@ -63,10 +60,8 @@ export default function GeneralLogin() {
       if (devMode) {
         // In dev mode, bypass actual OTP sending
         setIsVerifying(true);
-        toast({
-          title: "Developer Mode",
+        toast("Developer Mode", {
           description: "Use code 123456 to verify",
-          variant: "default",
         });
         return;
       }
@@ -75,10 +70,8 @@ export default function GeneralLogin() {
       setIsVerifying(true);
     } catch (err) {
       console.error("Failed to send OTP:", err);
-      toast({
-        title: "Error",
+      toast.error("Error", {
         description: "Failed to send OTP. Please try again.",
-        variant: "destructive",
       });
     }
   };
@@ -100,10 +93,8 @@ export default function GeneralLogin() {
         const profileType = user.profile_type || localStorage.getItem('userProfileType') || 'patient';
         console.log("Login successful! Redirecting based on profile type:", profileType);
         
-        toast({
-          title: "Success",
+        toast.success("Success", {
           description: "Login successful!",
-          variant: "default",
         });
         
         // Redirect based on profile type
@@ -116,18 +107,14 @@ export default function GeneralLogin() {
         }
       } else {
         console.error("OTP verification returned no user");
-        toast({
-          title: "Error",
+        toast.error("Error", {
           description: "Invalid OTP. Please try again.",
-          variant: "destructive",
         });
       }
     } catch (err) {
       console.error("OTP verification failed:", err);
-      toast({
-        title: "Error",
+      toast.error("Error", {
         description: "OTP verification failed. Please try again.",
-        variant: "destructive",
       });
     }
   };
