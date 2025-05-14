@@ -47,16 +47,19 @@ export const createSessionState = (
     
     // If we already have a user in state, consider the session valid
     if (currentUser) {
+      console.log('User already in state, skipping validation:', currentUser);
       set({ isLoading: false });
       return true;
     }
     
     if (!sessionId) {
+      console.log('No session ID found, session invalid');
       set({ user: null, isLoading: false });
       return false;
     }
     
     if (sessionExpiry && isSessionExpired(sessionExpiry)) {
+      console.log('Session expired:', sessionExpiry);
       clearSession();
       set({ 
         user: null, 
@@ -65,7 +68,7 @@ export const createSessionState = (
         isLoading: false, 
         error: 'Your session has expired. Please log in again.' 
       });
-      toast.info('Your session has expired. Please log in again.');
+      toast('Your session has expired. Please log in again.');
       return false;
     }
     
@@ -76,15 +79,18 @@ export const createSessionState = (
       if (process.env.NODE_ENV === 'development' && sessionId) {
         const storedPhone = localStorage.getItem('authenticatedPhone');
         if (storedPhone) {
+          console.log('Dev mode: using stored phone for authentication:', storedPhone);
           const user = await getOrCreateUserProfile(storedPhone, sessionId);
           set({ user, isLoading: false });
           return true;
         }
       }
       
+      console.log('Validating session with ID:', sessionId);
       const response = await validateSessionService(sessionId);
       
       if (!response.valid) {
+        console.log('Session validation failed:', response);
         clearSession();
         set({ user: null, sessionId: null, sessionExpiry: null, isLoading: false });
         return false;
@@ -92,8 +98,11 @@ export const createSessionState = (
         const phone = response.phone_number;
         
         if (!phone) {
+          console.error('Phone number not found in session');
           throw new Error('Phone number not found in session');
         }
+        
+        console.log('Session valid, phone number:', phone);
         
         // Store the authenticated phone for dev mode
         localStorage.setItem('authenticatedPhone', phone);
@@ -118,6 +127,6 @@ export const createSessionState = (
     clearSession();
     // Don't remove the rememberMe preference when logging out
     set({ user: null, sessionId: null, sessionExpiry: null, isVerifying: false });
-    toast.success('Logged out successfully');
+    toast('Logged out successfully');
   }
 });

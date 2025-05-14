@@ -17,17 +17,23 @@ export const useAuth = (): UseAuthReturn => {
   const { handleOTPSuccess } = useAuthSession(state, updateState, authStore);
 
   const handleVerifyOTPWrapper = async () => {
+    console.log('Starting OTP verification process...');
     const result = await handleVerifyOTP();
-    if (!result) return;
+    if (!result) {
+      console.log('OTP verification failed or was cancelled');
+      return;
+    }
     
     const { isDevMode, userData, data } = result as any;
     
     if (isDevMode) {
+      console.log('Dev mode OTP verification success, userData:', userData);
       // Use setTimeout to give the UI time to update before proceeding
       setTimeout(() => {
         handleOTPSuccess('dev-mode-session-id', userData);
       }, 100);
     } else {
+      console.log('Regular OTP verification success, data:', data);
       handleOTPSuccess(data.session_id, {
         phone_number: state.phone
       });
