@@ -1,3 +1,4 @@
+
 import { supabase } from './client';
 
 // Interface for user profile data from database
@@ -17,6 +18,11 @@ export interface UserProfile {
 export const getUserProfileByPhone = async (phone: string): Promise<UserProfile | null> => {
   try {
     console.log('Fetching user profile for phone:', phone);
+    
+    if (!phone || phone.trim() === '') {
+      console.error('Invalid phone number provided to getUserProfileByPhone');
+      return null;
+    }
     
     // First try an exact match
     let { data, error } = await supabase
@@ -53,11 +59,12 @@ export const getUserProfileByPhone = async (phone: string): Promise<UserProfile 
     
     console.log('Found user profile data:', data[0]);
     
-    // Ensure profile_type is preserved as is from the database
-    // Don't modify it to prevent unwanted transformations
+    // Ensure profile_type exists on the record
     const profileType = data[0].profile_type || 'patient';
+    console.log('Extracted profile type from DB:', profileType);
     
-    console.log('Using original profile type from DB:', profileType);
+    // Store in localStorage for persistence
+    localStorage.setItem('userProfileType', profileType);
     
     // Map the patient record to UserProfile format
     return {

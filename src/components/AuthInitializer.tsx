@@ -24,7 +24,12 @@ export function AuthInitializer() {
         await new Promise(resolve => setTimeout(resolve, 100));
         
         const isValid = await validateSession();
-        console.log('Session validation result:', isValid, 'User:', user, 'Profile type:', user?.profile_type);
+        console.log('Session validation result:', isValid, 'User:', user);
+        
+        // Make sure profile_type is correctly logged for debugging
+        const profileType = user?.profile_type || localStorage.getItem('userProfileType');
+        console.log('Profile type from user or localStorage:', profileType);
+        
         setIsInitialized(true);
         
         // Get protected routes
@@ -34,17 +39,17 @@ export function AuthInitializer() {
         const isProtectedRoute = protectedRoutes.includes(currentPath);
         const isAuthRoute = authRoutes.includes(currentPath);
         
-        // Store last location to prevent redirect loops
-        const lastRedirect = sessionStorage.getItem('lastRedirect');
-        const currentFullPath = location.pathname + location.search;
-        
         // If on a protected page and session is invalid, redirect to login
         if (!isValid && isProtectedRoute) {
           console.log('Not authenticated, redirecting from protected route to login');
           toast.error('Your session has expired. Please log in again.');
           
           // Store intended destination to redirect back after login
-          sessionStorage.setItem('redirectAfterLogin', currentFullPath);
+          sessionStorage.setItem('redirectAfterLogin', currentPath);
+          
+          // Clear any redirect loop detection
+          sessionStorage.removeItem('loginRedirectCount');
+          sessionStorage.removeItem('lastRedirect');
           
           // Use replace to avoid adding to history stack
           navigate('/general-login', { replace: true });
@@ -53,18 +58,12 @@ export function AuthInitializer() {
         
         // If successfully authenticated on login page, redirect based on user type
         if (isValid && user && isAuthRoute) {
-          // Check for redirect loop
-          if (lastRedirect && lastRedirect === currentFullPath) {
-            console.log('Detected potential redirect loop, clearing redirect history');
-            sessionStorage.removeItem('lastRedirect');
-            sessionStorage.removeItem('redirectAfterLogin');
-            return;
-          }
+          // Get the profile type with fallback to localStorage (for persistence)
+          const profileType = user.profile_type || 
+                             localStorage.getItem('userProfileType') || 
+                             'patient';
           
-          console.log('Authenticated on auth page, redirecting based on role:', user.profile_type);
-          
-          // Store this redirect to detect loops
-          sessionStorage.setItem('lastRedirect', currentFullPath);
+          console.log('Authenticated on auth page, redirecting based on role:', profileType);
           
           // Use the stored redirect destination if available
           const redirectTo = sessionStorage.getItem('redirectAfterLogin');
@@ -72,10 +71,14 @@ export function AuthInitializer() {
           // Clear redirect after using it
           sessionStorage.removeItem('redirectAfterLogin');
           
-          if (user.profile_type === 'admin') {
+          // Clear any redirect loop detection
+          sessionStorage.removeItem('loginRedirectCount');
+          sessionStorage.removeItem('lastRedirect');
+          
+          if (profileType === 'admin') {
             toast.success('Welcome back, admin!');
             navigate('/manage-patients', { replace: true });
-          } else if (user.profile_type === 'patient') {
+          } else if (profileType === 'patient') {
             toast.success(`Welcome back, patient!`);
             navigate('/report-viewer', { replace: true });
           } else {
@@ -86,20 +89,23 @@ export function AuthInitializer() {
         
         // For authenticated users on the home page, redirect based on role
         if (isValid && user && currentPath === '/') {
-          console.log('Authenticated user on home page, redirecting based on role:', user.profile_type);
+          // Get the profile type with fallback to localStorage
+          const profileType = user.profile_type || 
+                             localStorage.getItem('userProfileType') || 
+                             'patient';
           
-          // Don't redirect if we just redirected to prevent loops
-          if (lastRedirect && lastRedirect === currentFullPath) {
-            console.log('Already redirected to home, not redirecting again');
-            return;
-          }
+          console.log('Authenticated user on home page, redirecting based on role:', profileType);
           
-          sessionStorage.setItem('lastRedirect', currentFullPath);
+          // Clear any potential redirect loop detection
+          sessionStorage.removeItem('loginRedirectCount');
+          sessionStorage.removeItem('lastRedirect');
           
-          if (user.profile_type === 'admin') {
+          if (profileType === 'admin') {
             navigate('/manage-patients', { replace: true });
-          } else if (user.profile_type === 'patient') {
+          } else if (profileType === 'patient') {
             navigate('/report-viewer', { replace: true });
+          } else {
+            navigate('/dashboard', { replace: true });
           }
         }
       } catch (err) {

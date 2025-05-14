@@ -158,6 +158,7 @@ export const useAuth = () => {
         
         // Reset any redirect loop detection
         sessionStorage.removeItem('loginRedirectCount');
+        sessionStorage.removeItem('lastRedirect');
         
         // Use setTimeout to give the UI time to update before proceeding
         setTimeout(() => {
@@ -170,6 +171,7 @@ export const useAuth = () => {
       
       // Clear any previous redirect loop detection
       sessionStorage.removeItem('loginRedirectCount');
+      sessionStorage.removeItem('lastRedirect');
       
       const response = await fetch('/api/verify-otp', {
         method: 'POST',
@@ -250,7 +252,6 @@ export const useAuth = () => {
           console.log('User profile from database:', userProfile);
           
           if (userProfile && userProfile.profile_type) {
-            // Use the exact profile type from the database, with no transformation
             profileType = userProfile.profile_type;
             console.log('Found profile type in database:', profileType);
           }
@@ -269,7 +270,7 @@ export const useAuth = () => {
         id: sessionId,
         phone: phone,
         name: userData.name || 'User',
-        profile_type: profileType, // Make sure this is preserved exactly
+        profile_type: profileType,
         ...userData
       };
 
@@ -295,7 +296,9 @@ export const useAuth = () => {
       // Longer delay to ensure state is updated
       setTimeout(() => {
         console.log('Current user after login:', authStore.user);
+        console.log('Profile type being used for redirection:', profileType);
         
+        // Use replace to prevent back button from returning to login
         if (profileType === 'admin') {
           console.log('Redirecting admin to manage-patients with replace:true');
           navigate('/manage-patients', { replace: true });

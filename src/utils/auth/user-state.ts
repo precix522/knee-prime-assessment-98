@@ -26,14 +26,19 @@ export const createUserState = (set: Function): UserState => ({
       localStorage.setItem('authenticatedPhone', phone);
     }
     
-    // Keep original profile_type, don't transform it
+    // Keep original profile_type exactly as provided
     const profileType = user.profile_type || 
                         localStorage.getItem('userProfileType') || 
                         'patient';
-    console.log('Setting login user with profile type:', profileType);
+    
+    console.log('Setting login user with exact profile type:', profileType);
     
     // Store profile type in localStorage for extra persistence
     localStorage.setItem('userProfileType', profileType);
+    
+    // Clean existing session storage items that might cause loops
+    sessionStorage.removeItem('loginRedirectCount');
+    sessionStorage.removeItem('lastRedirect');
     
     set({
       user: {
@@ -42,7 +47,8 @@ export const createUserState = (set: Function): UserState => ({
         profile_type: profileType,
         ...user // Preserve all other user properties
       },
-      isVerifying: false
+      isVerifying: false,
+      isLoading: false
     });
   },
   
@@ -60,18 +66,19 @@ export const createUserState = (set: Function): UserState => ({
       localStorage.setItem('authenticatedPhone', phone);
     }
     
-    // Keep original profile_type, don't transform it
-    // Check local storage as a backup source if not provided in the user object
+    // Keep original profile_type exactly as provided
     const profileType = user.profile_type || 
                         localStorage.getItem('userProfileType') || 
                         'patient';
-    console.log('Setting auth user with profile type:', profileType);
+    
+    console.log('Setting auth user with exact profile type:', profileType);
     
     // Also store profile type in localStorage for extra persistence
     localStorage.setItem('userProfileType', profileType);
     
     // Clear any redirect loop detection counters
     sessionStorage.removeItem('loginRedirectCount');
+    sessionStorage.removeItem('lastRedirect');
     
     set({
       user: {

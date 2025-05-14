@@ -1,4 +1,3 @@
-
 import { FC } from "react";
 import { Button } from "../Button";
 import { LogOut, LogIn, User } from "lucide-react";
@@ -20,6 +19,9 @@ export const UserActions: FC<UserActionsProps> = ({ user, isAdmin }) => {
     sessionStorage.removeItem('lastRedirect');
     sessionStorage.removeItem('redirectAfterLogin');
     
+    // Also clear localStorage items related to user profiles
+    localStorage.removeItem('userProfileType');
+    
     // Use the logout function from the auth store
     logout();
     
@@ -31,11 +33,20 @@ export const UserActions: FC<UserActionsProps> = ({ user, isAdmin }) => {
     // Clear any potential redirect loop detection
     sessionStorage.removeItem('loginRedirectCount');
     sessionStorage.removeItem('lastRedirect');
+    
+    // Clear any stored user profile data
+    localStorage.removeItem('userProfileType');
+    
     // Explicitly navigate to the general login page
     navigate('/general-login', { replace: true });
   };
   
   const handleAccessReport = () => {
+    // Clean up any potential redirect indicators
+    sessionStorage.removeItem('loginRedirectCount');
+    sessionStorage.removeItem('lastRedirect');
+    
+    // Navigate to login
     navigate('/general-login', { replace: true });
   };
   
@@ -43,10 +54,19 @@ export const UserActions: FC<UserActionsProps> = ({ user, isAdmin }) => {
     // Clear any potential redirect loop detection
     sessionStorage.removeItem('loginRedirectCount');
     sessionStorage.removeItem('lastRedirect');
+    
+    // Clear any stored user profile data
+    localStorage.removeItem('userProfileType');
+    
+    // Navigate to login
     navigate('/general-login', { replace: true });
   };
   
   const handleAdminDashboard = () => {
+    // Clean up any potential redirect indicators
+    sessionStorage.removeItem('loginRedirectCount');
+    sessionStorage.removeItem('lastRedirect');
+    
     // Navigate to the manage-patients page for admin users
     navigate('/manage-patients', { replace: true });
   };

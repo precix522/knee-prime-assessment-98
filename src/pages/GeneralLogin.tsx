@@ -24,13 +24,20 @@ export default function GeneralLogin() {
     resetToPhoneInput
   } = useAuth();
   
-  const { validateSession, user } = useTwilioAuthStore();
+  const { validateSession } = useTwilioAuthStore();
 
   useEffect(() => {
     console.log('GeneralLogin component mounted', location.pathname);
     
+    // Clear any potential redirect loop detectors on mount
+    sessionStorage.removeItem('loginRedirectCount');
+    sessionStorage.removeItem('lastRedirect');
+    
     const checkSession = async () => {
       try {
+        // Add a small delay before validating session to avoid race conditions
+        await new Promise(resolve => setTimeout(resolve, 300));
+        
         const isValid = await validateSession();
         const { user } = useTwilioAuthStore.getState();
         
@@ -38,38 +45,29 @@ export default function GeneralLogin() {
           console.log("Already authenticated in GeneralLogin:", user);
           console.log("User profile type in GeneralLogin:", user.profile_type);
           
-          // Check for redirect loop detection flag
-          const redirectLoopDetection = sessionStorage.getItem('loginRedirectCount');
-          let redirectCount = redirectLoopDetection ? parseInt(redirectLoopDetection) : 0;
+          // Force clear any redirect loop counters
+          sessionStorage.removeItem('loginRedirectCount');
+          sessionStorage.removeItem('lastRedirect');
+          sessionStorage.removeItem('redirectAfterLogin');
           
-          // If we've redirected too many times, break the loop
-          if (redirectCount > 2) {
-            console.log('Too many redirects detected, breaking loop');
-            sessionStorage.removeItem('loginRedirectCount');
-            sessionStorage.removeItem('redirectAfterLogin');
-            sessionStorage.removeItem('lastRedirect');
-            return;
-          }
+          // Get profile type from the user object or localStorage
+          const profileType = user.profile_type || localStorage.getItem('userProfileType') || 'patient';
+          console.log('Using profile type for redirection:', profileType);
           
-          // Increment redirect counter
-          sessionStorage.setItem('loginRedirectCount', (redirectCount + 1).toString());
-          
-          // Use replace to prevent back button issues
-          if (user.profile_type === 'admin') {
-            console.log('GeneralLogin: Redirecting admin to manage-patients');
-            navigate('/manage-patients', { replace: true });
-          } else if (user.profile_type === 'patient') {
-            console.log('GeneralLogin: Redirecting patient to report-viewer');
-            navigate('/report-viewer', { replace: true });
-          } else {
-            console.log('GeneralLogin: Profile type not recognized, redirecting to dashboard');
-            navigate('/dashboard', { replace: true });
-          }
-          
-          // Clear redirection count after successful navigation
+          // Use setTimeout to ensure this runs after other effects
           setTimeout(() => {
-            sessionStorage.removeItem('loginRedirectCount');
-          }, 2000);
+            // Use replace to prevent back button from returning to login
+            if (profileType === 'admin') {
+              console.log('GeneralLogin: Redirecting admin to manage-patients');
+              navigate('/manage-patients', { replace: true });
+            } else if (profileType === 'patient') {
+              console.log('GeneralLogin: Redirecting patient to report-viewer');
+              navigate('/report-viewer', { replace: true });
+            } else {
+              console.log('GeneralLogin: Profile type not recognized, redirecting to dashboard');
+              navigate('/dashboard', { replace: true });
+            }
+          }, 500);
         } else {
           console.log('User not authenticated or session invalid');
         }
@@ -78,10 +76,7 @@ export default function GeneralLogin() {
       }
     };
     
-    // Add a small delay before checking session to avoid race conditions
-    setTimeout(() => {
-      checkSession();
-    }, 200);
+    checkSession();
   }, [validateSession, navigate, location.pathname]);
 
   return (
