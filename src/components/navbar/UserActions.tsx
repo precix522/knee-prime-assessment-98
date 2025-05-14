@@ -3,7 +3,6 @@ import { FC } from "react";
 import { Button } from "../Button";
 import { LogOut, LogIn, User } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { toast } from "sonner";
 
 interface UserActionsProps {
   user: any;
@@ -31,7 +30,7 @@ export const UserActions: FC<UserActionsProps> = ({ user, isAdmin }) => {
   };
   
   const handleAdminDashboard = () => {
-    // Navigate to the manage-patients page when admin users click on dashboard
+    // Navigate to the manage-patients page for admin users
     navigate('/manage-patients');
   };
 

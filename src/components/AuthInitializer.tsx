@@ -18,8 +18,8 @@ export function AuthInitializer() {
         console.log('Session validation result:', isValid, 'User:', user);
         
         // Get protected routes
-        const protectedRoutes = ['/report-viewer', '/patient-id', '/dashboard', '/manage-users', '/all-reports'];
-        const publicRoutes = ['/', '/login', '/general-login', '/contactus', '/privacy-policy', '/manage-patients'];
+        const protectedRoutes = ['/report-viewer', '/patient-id', '/dashboard', '/manage-users', '/all-reports', '/manage-patients'];
+        const publicRoutes = ['/', '/login', '/general-login', '/contactus', '/privacy-policy'];
         const currentPath = location.pathname;
         const isProtectedRoute = protectedRoutes.includes(currentPath);
         const isPublicRoute = publicRoutes.includes(currentPath);
@@ -37,7 +37,7 @@ export function AuthInitializer() {
           console.log('Already authenticated on login page, redirecting based on role:', user.profile_type);
           if (user.profile_type === 'admin') {
             toast.success('Welcome back, admin!');
-            navigate('/manage-patients');  // Direct admins to manage-patients instead of dashboard
+            navigate('/manage-patients');
           } else if (user.profile_type === 'patient') {
             toast.success(`Welcome back, patient!`);
             navigate('/report-viewer');
@@ -51,7 +51,7 @@ export function AuthInitializer() {
         if (isValid && user && currentPath === '/') {
           console.log('Authenticated user on home page, redirecting based on role:', user.profile_type);
           if (user.profile_type === 'admin') {
-            navigate('/manage-patients');  // Direct admins to manage-patients instead of dashboard
+            navigate('/manage-patients');
           } else if (user.profile_type === 'patient') {
             navigate('/report-viewer');
           }

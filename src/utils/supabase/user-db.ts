@@ -38,8 +38,8 @@ export const getUserProfileByPhone = async (phone: string): Promise<UserProfile 
     
     console.log('Found user profile data:', data[0]);
     
-    // Ensure profile_type is correctly identified 
-    // If the profile_type in the database is 'admin', ensure it's properly set
+    // Extract profile_type from the data, defaulting to 'patient' if not specified
+    // Make sure to preserve 'admin' if it's explicitly set
     const profileType = data[0].profile_type === 'admin' ? 'admin' : 'patient';
     
     console.log('Determined profile type:', profileType);

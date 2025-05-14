@@ -237,7 +237,7 @@ export const useAuth = () => {
 
     // Redirect based on user profile type
     setTimeout(() => {
-      const { user: authenticatedUser } = authStore.getState();
+      const authenticatedUser = authStore.user;
       console.log('Redirecting based on profile type:', authenticatedUser?.profile_type);
       
       if (authenticatedUser?.profile_type === 'admin') {
@@ -249,7 +249,7 @@ export const useAuth = () => {
         navigate('/dashboard');
       }
     }, 500);
-  }, [authStore, updateState, navigate]);
+  }, [authStore, navigate, updateState]);
 
   const handleToggleDevMode = useCallback(() => {
     updateState({ 
