@@ -9,7 +9,7 @@ export interface ToastProps {
   variant?: "default" | "destructive"
 }
 
-// Export toast function
+// Define the toast function
 export const toast = (props: ToastProps) => {
   if (props.variant === "destructive") {
     sonnerToast.error(props.title as string, {
