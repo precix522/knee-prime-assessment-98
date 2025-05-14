@@ -1,4 +1,3 @@
-
 import { useCallback } from 'react';
 import { toast } from 'sonner';
 import { AuthState } from './types';
@@ -15,15 +14,13 @@ export const useOtp = (
       // Clear previous errors
       updateState({ loading: true, error: null });
 
-      if (!phone || phone.trim() === '') {
+      if (!state.phone || state.phone.trim() === '') {
         updateState({
           loading: false,
           error: 'Phone number is required'
         });
         
-        toast.error("Error", {
-          description: 'Phone number is required'
-        });
+        toast.error("Phone number is required");
         return;
       }
 
@@ -36,17 +33,14 @@ export const useOtp = (
           error: null
         });
         
-        toast.success("Dev Mode", { 
-          description: 'OTP sending bypassed. Enter any code to verify.'
-        });
+        toast.success("Dev Mode - OTP sending bypassed. Enter any code to verify.");
         
         return;
       }
 
       console.log('Sending OTP to:', state.phone);
-      toast.info("Sending Code", {
+      toast.loading("Sending verification code...", {
         id: 'sending-otp',
-        description: 'Sending verification code...'
       });
       
       // Reset any redirect loop detection
@@ -62,9 +56,7 @@ export const useOtp = (
             error: null
           });
 
-          toast.success("Code Sent", {
-            description: 'Verification code has been sent to your phone.'
-          });
+          toast.success("Verification code has been sent to your phone.");
           
           // Dismiss the sending toast
           toast.dismiss('sending-otp');
@@ -79,9 +71,7 @@ export const useOtp = (
           // Dismiss the sending toast
           toast.dismiss('sending-otp');
           
-          toast.error("Error", {
-            description: error.message || 'Failed to send OTP. Please try again.'
-          });
+          toast.error(error.message || 'Failed to send OTP. Please try again.');
         });
     } catch (error: any) {
       console.error('Error in handleSendOTP:', error);
@@ -93,9 +83,7 @@ export const useOtp = (
       // Dismiss the sending toast
       toast.dismiss('sending-otp');
       
-      toast.error("Error", {
-        description: error.message || 'Failed to send OTP. Please try again.'
-      });
+      toast.error(error.message || 'Failed to send OTP. Please try again.');
     }
   }, [state.loading, state.phone, state.devMode, updateState, authStore]);
 
