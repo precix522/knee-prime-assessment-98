@@ -25,7 +25,6 @@ export default function App() {
     <BrowserRouter>
       <AuthInitializer />
       <div className="flex flex-col min-h-screen">
-        <Navbar />
         <main className="flex-1">
           <Routes>
             <Route path="/" element={<Index />} />
@@ -43,7 +42,6 @@ export default function App() {
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>
-        <Footer />
         <Toaster />
         <ChatbotWidget />
       </div>

@@ -37,7 +37,7 @@ export function AuthInitializer() {
           console.log('Already authenticated on login page, redirecting based on role:', user.profile_type);
           if (user.profile_type === 'admin') {
             toast.success('Welcome back, admin!');
-            navigate('/dashboard');
+            navigate('/manage-patients');  // Direct admins to manage-patients instead of dashboard
           } else if (user.profile_type === 'patient') {
             toast.success(`Welcome back, patient!`);
             navigate('/report-viewer');
@@ -51,7 +51,7 @@ export function AuthInitializer() {
         if (isValid && user && currentPath === '/') {
           console.log('Authenticated user on home page, redirecting based on role:', user.profile_type);
           if (user.profile_type === 'admin') {
-            navigate('/dashboard');
+            navigate('/manage-patients');  // Direct admins to manage-patients instead of dashboard
           } else if (user.profile_type === 'patient') {
             navigate('/report-viewer');
           }
