@@ -1,3 +1,4 @@
+
 import { supabase } from './client';
 
 // Helper to sanitize patientId (remove casts, quotes, etc.)
@@ -82,6 +83,7 @@ export const createPatientRecord = async (patientData: {
       patient_xray_report_url: patientData.xrayReportUrl || null,
       patient_mri_report_url: patientData.mriReportUrl || null,
       last_modified_tm: formattedDate,
+      created_date: new Date().toISOString(), // Add created_date field
       profile_type: 'patient'  // explicitly set to 'patient'
     };
 

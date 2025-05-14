@@ -10,7 +10,7 @@ export const updateUserProfile = async (id: string, updateData: Partial<UserProf
     const { data, error } = await supabase
       .from('patient')
       .update(updateData)
-      .eq('id', id)
+      .eq('Patient_ID', id)
       .select()
       .single();
     
@@ -34,7 +34,7 @@ export const deleteUserProfile = async (id: string): Promise<boolean> => {
     const { error } = await supabase
       .from('patient')
       .delete()
-      .eq('id', id);
+      .eq('Patient_ID', id);
     
     if (error) {
       console.error('Error deleting user profile:', error);
@@ -56,7 +56,7 @@ export const updateUserLastLogin = async (id: string): Promise<boolean> => {
     const { error } = await supabase
       .from('patient')
       .update({ last_modified_tm: new Date().toISOString() })
-      .eq('id', id);
+      .eq('Patient_ID', id);
     
     if (error) {
       console.error('Error updating last login time:', error);

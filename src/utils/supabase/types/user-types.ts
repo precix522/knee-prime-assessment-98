@@ -7,6 +7,7 @@ export interface UserProfile {
   phone: string;
   profile_type: string;
   created_at?: string;
+  created_date?: string;
   name?: string;
   email?: string;
   last_login?: string;

@@ -34,6 +34,7 @@ export type Database = {
         Row: {
           assessment_id: number
           created_by: string | null
+          created_date: string | null
           last_modified_tm: string | null
           Patient_ID: string
           patient_mri_report_url: string | null
@@ -46,6 +47,7 @@ export type Database = {
         Insert: {
           assessment_id?: number
           created_by?: string | null
+          created_date?: string | null
           last_modified_tm?: string | null
           Patient_ID: string
           patient_mri_report_url?: string | null
@@ -58,6 +60,7 @@ export type Database = {
         Update: {
           assessment_id?: number
           created_by?: string | null
+          created_date?: string | null
           last_modified_tm?: string | null
           Patient_ID?: string
           patient_mri_report_url?: string | null

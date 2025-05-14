@@ -26,7 +26,8 @@ import {
   TableHeader, 
   TableRow 
 } from "../components/ui/table";
-import { syncNow, getFetchStatus, getAllUserProfiles, UserProfile } from "../utils/supabase";
+import { syncNow, getFetchStatus, getAllUserProfiles, updateUserProfile, UserProfile } from "../utils/supabase";
+import { format, parseISO, isValid } from "date-fns";
 
 type User = {
   id: string;
@@ -43,7 +44,15 @@ export default function ManageUsers() {
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isAddUserOpen, setIsAddUserOpen] = useState(false);
+  const [isEditUserOpen, setIsEditUserOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
   const [newUserData, setNewUserData] = useState({
+    phone: "",
+    profile_type: "user",
+    name: "",
+    email: ""
+  });
+  const [editUserData, setEditUserData] = useState({
     phone: "",
     profile_type: "user",
     name: "",
@@ -91,19 +100,6 @@ export default function ManageUsers() {
         }
         
         // Fetch real user profiles from Supabase
-        const fetchUsers = async () => {
-          try {
-            const userProfiles = await getAllUserProfiles();
-            console.log("Fetched user profiles:", userProfiles);
-            setUsers(userProfiles);
-            setPageLoading(false);
-          } catch (error) {
-            console.error("Error fetching user profiles:", error);
-            toast.error("Failed to load user profiles");
-            setPageLoading(false);
-          }
-        };
-        
         fetchUsers();
       } catch (error) {
         console.error("Error checking authentication:", error);
@@ -113,6 +109,19 @@ export default function ManageUsers() {
 
     checkAuth();
   }, [user, navigate]);
+
+  const fetchUsers = async () => {
+    try {
+      const userProfiles = await getAllUserProfiles();
+      console.log("Fetched user profiles:", userProfiles);
+      setUsers(userProfiles);
+      setPageLoading(false);
+    } catch (error) {
+      console.error("Error fetching user profiles:", error);
+      toast.error("Failed to load user profiles");
+      setPageLoading(false);
+    }
+  };
 
   const filteredUsers = users.filter(user => 
     (user.phone && user.phone.includes(searchQuery)) || 
@@ -137,6 +146,7 @@ export default function ManageUsers() {
       profile_type: newUserData.profile_type,
       name: newUserData.name || "",
       Patient_ID: `usr${Date.now()}`,
+      created_date: new Date().toISOString(),
       // Other fields would be null or have default values
     };
     
@@ -152,8 +162,56 @@ export default function ManageUsers() {
     toast.success(`User added successfully: ${newUserData.phone}`);
   };
 
-  const handleEditUser = (userId: string) => {
-    toast.info(`Edit user ${userId} feature will be implemented in the future`);
+  const handleOpenEditUser = (user: UserProfile) => {
+    setSelectedUser(user);
+    setEditUserData({
+      phone: user.phone || "",
+      profile_type: user.profile_type || "user",
+      name: user.name || user.patient_name || "",
+      email: user.email || ""
+    });
+    setIsEditUserOpen(true);
+  };
+
+  const handleEditUser = async () => {
+    if (!selectedUser) {
+      toast.error("No user selected for editing");
+      return;
+    }
+
+    // Validate form
+    if (!editUserData.phone || !editUserData.profile_type) {
+      toast.error("Phone number and user type are required");
+      return;
+    }
+
+    try {
+      // Prepare update data
+      const updateData = {
+        phone: editUserData.phone,
+        profile_type: editUserData.profile_type,
+        patient_name: editUserData.name, // Update patient_name field
+      };
+
+      // Update the user in Supabase
+      const updatedUser = await updateUserProfile(selectedUser.id, updateData);
+      
+      if (updatedUser) {
+        // Update the user in the local state
+        const updatedUsers = users.map(u => 
+          u.id === selectedUser.id ? { ...u, ...updatedUser } : u
+        );
+        setUsers(updatedUsers);
+        
+        toast.success("User updated successfully");
+        setIsEditUserOpen(false);
+      } else {
+        toast.error("Failed to update user");
+      }
+    } catch (error) {
+      console.error("Error updating user:", error);
+      toast.error("An error occurred while updating the user");
+    }
   };
 
   const handleDeleteUser = (userId: string) => {
@@ -175,6 +233,9 @@ export default function ManageUsers() {
       await syncNow();
       const status = getFetchStatus();
       setFetchStatus(status);
+      
+      // Refresh the user list after sync
+      fetchUsers();
     } catch (error) {
       console.error("Error syncing data:", error);
     } finally {
@@ -185,6 +246,21 @@ export default function ManageUsers() {
   const formatDate = (date: Date | null) => {
     if (!date) return "Never";
     return date.toLocaleString();
+  };
+
+  const formatDateString = (dateString: string | undefined) => {
+    if (!dateString) return "N/A";
+    
+    // Try parsing as ISO date first
+    if (dateString.includes("T") && dateString.includes("Z")) {
+      const parsedDate = parseISO(dateString);
+      if (isValid(parsedDate)) {
+        return format(parsedDate, 'MM/dd/yyyy hh:mm a');
+      }
+    }
+    
+    // If not ISO format, return as is
+    return dateString;
   };
 
   if (pageLoading || isLoading) {
@@ -298,6 +374,86 @@ export default function ManageUsers() {
                       </DialogFooter>
                     </DialogContent>
                   </Dialog>
+
+                  {/* Edit User Dialog */}
+                  <Dialog open={isEditUserOpen} onOpenChange={setIsEditUserOpen}>
+                    <DialogContent className="sm:max-w-md">
+                      <DialogHeader>
+                        <DialogTitle>Edit User</DialogTitle>
+                        <DialogDescription>
+                          Update user account information.
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="space-y-4 py-4">
+                        <div className="grid grid-cols-1 gap-4">
+                          <div className="space-y-2">
+                            <label htmlFor="editPhone" className="text-sm font-medium text-gray-700">
+                              Phone Number
+                            </label>
+                            <Input 
+                              id="editPhone" 
+                              placeholder="+1234567890" 
+                              value={editUserData.phone}
+                              onChange={(e) => setEditUserData({...editUserData, phone: e.target.value})}
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <label htmlFor="editName" className="text-sm font-medium text-gray-700">
+                              Name
+                            </label>
+                            <Input 
+                              id="editName" 
+                              placeholder="User Name" 
+                              value={editUserData.name}
+                              onChange={(e) => setEditUserData({...editUserData, name: e.target.value})}
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <label htmlFor="editEmail" className="text-sm font-medium text-gray-700">
+                              Email (Optional)
+                            </label>
+                            <Input 
+                              id="editEmail" 
+                              type="email"
+                              placeholder="user@example.com" 
+                              value={editUserData.email}
+                              onChange={(e) => setEditUserData({...editUserData, email: e.target.value})}
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <label htmlFor="editUserType" className="text-sm font-medium text-gray-700">
+                              User Type
+                            </label>
+                            <select
+                              id="editUserType"
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-health-500"
+                              value={editUserData.profile_type}
+                              onChange={(e) => setEditUserData({...editUserData, profile_type: e.target.value})}
+                            >
+                              <option value="patient">Patient</option>
+                              <option value="user">Regular User</option>
+                              <option value="admin">Administrator</option>
+                            </select>
+                          </div>
+                        </div>
+                      </div>
+                      <DialogFooter>
+                        <Button 
+                          variant="outline" 
+                          onClick={() => setIsEditUserOpen(false)}
+                        >
+                          Cancel
+                        </Button>
+                        <Button 
+                          variant="health"
+                          onClick={handleEditUser}
+                        >
+                          Save Changes
+                        </Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
+
                   <Button 
                     variant="secondary"
                     onClick={() => navigate('/dashboard')}
@@ -409,18 +565,26 @@ export default function ManageUsers() {
                             <TableCell className="font-medium">{user.phone}</TableCell>
                             <TableCell>
                               <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                                user.profile_type === 'admin' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'
+                                user.profile_type === 'admin' ? 'bg-purple-100 text-purple-800' : 
+                                user.profile_type === 'patient' ? 'bg-green-100 text-green-800' : 
+                                'bg-blue-100 text-blue-800'
                               }`}>
                                 {user.profile_type}
                               </span>
                             </TableCell>
-                            <TableCell>{user.created_at ? new Date(user.created_at).toLocaleDateString() : "N/A"}</TableCell>
+                            <TableCell>
+                              {user.created_date ? 
+                                formatDateString(user.created_date) : 
+                                user.created_at ? 
+                                formatDateString(user.created_at) : 
+                                "N/A"}
+                            </TableCell>
                             <TableCell className="text-right">
                               <div className="flex justify-end gap-2">
                                 <Button
                                   variant="outline"
                                   size="sm"
-                                  onClick={() => handleEditUser(user.id)}
+                                  onClick={() => handleOpenEditUser(user)}
                                 >
                                   <Edit className="h-4 w-4 mr-1" />
                                   Edit

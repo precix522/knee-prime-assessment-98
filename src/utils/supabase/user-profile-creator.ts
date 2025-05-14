@@ -33,7 +33,8 @@ export const createUserProfile = async (phone: string, profile_type: string = 'u
       phone,
       profile_type,
       patient_name: additionalData.name || 'User',
-      last_modified_tm: formattedDate
+      last_modified_tm: formattedDate,
+      created_date: new Date().toISOString() // Add the created_date field
     };
     
     const { data, error } = await supabase
@@ -53,6 +54,7 @@ export const createUserProfile = async (phone: string, profile_type: string = 'u
       phone: data.phone,
       profile_type: data.profile_type || 'user',
       created_at: data.last_modified_tm,
+      created_date: data.created_date,
       name: data.patient_name,
     } as UserProfile;
   } catch (error) {

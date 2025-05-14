@@ -23,6 +23,7 @@ export const getAllUserProfiles = async (): Promise<UserProfile[]> => {
       phone: patient.phone,
       profile_type: patient.profile_type || 'patient',
       created_at: patient.last_modified_tm,
+      created_date: patient.created_date,
       name: patient.patient_name,
       Patient_ID: patient.Patient_ID,
       patient_name: patient.patient_name,
