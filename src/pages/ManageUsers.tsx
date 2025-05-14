@@ -26,7 +26,7 @@ import {
   TableHeader, 
   TableRow 
 } from "../components/ui/table";
-import { syncNow, getFetchStatus } from "../utils/supabase";
+import { syncNow, getFetchStatus, getAllUserProfiles, UserProfile } from "../utils/supabase";
 
 type User = {
   id: string;
@@ -40,7 +40,7 @@ type User = {
 export default function ManageUsers() {
   const { user, isLoading } = useTwilioAuthStore();
   const [pageLoading, setPageLoading] = useState(true);
-  const [users, setUsers] = useState<User[]>([]);
+  const [users, setUsers] = useState<UserProfile[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isAddUserOpen, setIsAddUserOpen] = useState(false);
   const [newUserData, setNewUserData] = useState({
@@ -90,53 +90,20 @@ export default function ManageUsers() {
           return;
         }
         
-        // In a real implementation, we would fetch users from Supabase here
-        // For now, let's use expanded dummy data
-        const dummyUsers: User[] = [
-          {
-            id: "usr1",
-            phone: "+1234567890",
-            profile_type: "admin",
-            created_at: "2023-04-01",
-            name: "Admin User",
-            email: "admin@example.com"
-          },
-          {
-            id: "usr2",
-            phone: "+9876543210",
-            profile_type: "user",
-            created_at: "2023-04-02",
-            name: "John Smith",
-            email: "john@example.com"
-          },
-          {
-            id: "usr3",
-            phone: "+1122334455",
-            profile_type: "user",
-            created_at: "2023-04-03",
-            name: "Sarah Johnson",
-            email: "sarah@example.com"
-          },
-          {
-            id: "usr4",
-            phone: "+5566778899",
-            profile_type: "user",
-            created_at: "2023-04-04",
-            name: "Robert Chen",
-            email: "robert@example.com"
-          },
-          {
-            id: "usr5",
-            phone: "+1231231234",
-            profile_type: "admin",
-            created_at: "2023-04-05",
-            name: "Manager Admin",
-            email: "manager@example.com"
+        // Fetch real user profiles from Supabase
+        const fetchUsers = async () => {
+          try {
+            const userProfiles = await getAllUserProfiles();
+            setUsers(userProfiles);
+            setPageLoading(false);
+          } catch (error) {
+            console.error("Error fetching user profiles:", error);
+            toast.error("Failed to load user profiles");
+            setPageLoading(false);
           }
-        ];
+        };
         
-        setUsers(dummyUsers);
-        setPageLoading(false);
+        fetchUsers();
       } catch (error) {
         console.error("Error checking authentication:", error);
         navigate("/login");
@@ -147,13 +114,12 @@ export default function ManageUsers() {
   }, [user, navigate]);
 
   const filteredUsers = users.filter(user => 
-    user.phone.includes(searchQuery) || 
-    user.profile_type.includes(searchQuery) ||
-    (user.name?.toLowerCase().includes(searchQuery.toLowerCase()) || "") ||
-    (user.email?.toLowerCase().includes(searchQuery.toLowerCase()) || "")
+    (user.phone && user.phone.includes(searchQuery)) || 
+    (user.profile_type && user.profile_type.includes(searchQuery)) ||
+    (user.patient_name && user.patient_name.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
-  const handleAddUser = () => {
+  const handleAddUser = async () => {
     // Validate form
     if (!newUserData.phone || !newUserData.profile_type) {
       toast.error("Phone number and user type are required");
@@ -161,13 +127,14 @@ export default function ManageUsers() {
     }
     
     // In a real implementation, this would create a new user in Supabase
-    const newUser: User = {
-      id: `usr${users.length + 1}`,
+    // For now, we'll just add it to the local state
+    // In a future implementation, you should add an API call to create the user in Supabase
+    const newUser: UserProfile = {
+      Patient_ID: `usr${Date.now()}`,
       phone: newUserData.phone,
       profile_type: newUserData.profile_type,
-      created_at: new Date().toISOString().split('T')[0],
-      name: newUserData.name,
-      email: newUserData.email
+      patient_name: newUserData.name || null,
+      // Other fields would be null or have default values
     };
     
     setUsers([...users, newUser]);
@@ -188,7 +155,8 @@ export default function ManageUsers() {
 
   const handleDeleteUser = (userId: string) => {
     // In a real implementation, this would delete the user from Supabase
-    const filteredUsers = users.filter(user => user.id !== userId);
+    // For now, we'll just remove it from the local state
+    const filteredUsers = users.filter(user => user.Patient_ID !== userId);
     setUsers(filteredUsers);
     toast.success("User deleted successfully");
   };
@@ -421,7 +389,7 @@ export default function ManageUsers() {
                       </TableHeader>
                       <TableBody>
                         {filteredUsers.map((user) => (
-                          <TableRow key={user.id} className="hover:bg-gray-50">
+                          <TableRow key={user.Patient_ID} className="hover:bg-gray-50">
                             <TableCell>
                               <div className="flex items-center gap-3">
                                 <div className="bg-gray-100 rounded-full p-2">
@@ -431,8 +399,7 @@ export default function ManageUsers() {
                                   }
                                 </div>
                                 <div>
-                                  <div className="font-medium">{user.name || "Unknown User"}</div>
-                                  {user.email && <div className="text-xs text-gray-500">{user.email}</div>}
+                                  <div className="font-medium">{user.patient_name || "Unknown User"}</div>
                                 </div>
                               </div>
                             </TableCell>
@@ -444,13 +411,13 @@ export default function ManageUsers() {
                                 {user.profile_type}
                               </span>
                             </TableCell>
-                            <TableCell>{user.created_at}</TableCell>
+                            <TableCell>{user.last_modified_tm ? new Date(user.last_modified_tm).toLocaleDateString() : "N/A"}</TableCell>
                             <TableCell className="text-right">
                               <div className="flex justify-end gap-2">
                                 <Button
                                   variant="outline"
                                   size="sm"
-                                  onClick={() => handleEditUser(user.id)}
+                                  onClick={() => handleEditUser(user.Patient_ID)}
                                 >
                                   <Edit className="h-4 w-4 mr-1" />
                                   Edit
@@ -458,7 +425,7 @@ export default function ManageUsers() {
                                 <Button
                                   variant="destructive"
                                   size="sm"
-                                  onClick={() => handleDeleteUser(user.id)}
+                                  onClick={() => handleDeleteUser(user.Patient_ID)}
                                 >
                                   <Trash className="h-4 w-4 mr-1" />
                                   Delete
