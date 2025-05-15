@@ -1,9 +1,7 @@
 
 // API route for verifying OTP
 import { verifyOTP as twilioVerifyOTP } from '../../api/twilio-service';
-import { verifyOTP as vonageVerifyOTP } from '../../api/vonage-service';
 
-// Always use Twilio for verification
 export default async function handleVerifyOTP(request: Request): Promise<Response> {
   try {
     console.log('Processing OTP verification request');
@@ -55,7 +53,7 @@ export default async function handleVerifyOTP(request: Request): Promise<Respons
       );
     }
     
-    // Always use Twilio
+    // Use Twilio service for verification
     console.log('Using Twilio service for verification');
     const result = await twilioVerifyOTP(phone_number, code);
     
